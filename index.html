@@ -1257,6 +1257,112 @@
     toast('user created');
   });
 
+  // ===================== BATCH OPERATIONS =====================
+  // 3D Materials - batch add
+  $('#batchAddMaterialBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    const type = $('#mType').value;
+    const diameter = $('#mDia').value;
+    const note = $('#mNote').value.trim();
+    const countStr = prompt('批量添加数量:');
+    const count = parseInt(countStr);
+    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
+    const items = getMaterials();
+    for (let i = 0; i < count; i++) {
+      items.push({ id: Date.now() + i, type, color: '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'), diameter, weight: parseInt($('#mWeight').value) || 1000, remain: parseInt($('#mRemain').value) || 100, note: note || 'batch', created: Date.now() });
+    }
+    saveMaterials(items);
+    renderMaterials();
+    toast(`batch added ${count} materials`);
+  });
+  // 3D Materials - batch delete & check all
+  $('#batchDelMaterialBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const checks = $$('.mat-check:checked');
+    if (checks.length === 0) { toast('请至少勾选一项'); return; }
+    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
+    let items = getMaterials();
+    items = items.filter(x => !ids.has(x.id));
+    saveMaterials(items);
+    renderMaterials();
+    toast(`batch deleted ${ids.size} materials`);
+  });
+  $('#matCheckAll').addEventListener('change', e => {
+    $$('.mat-check').forEach(c => c.checked = e.target.checked);
+  });
+
+  // Components - batch add
+  $('#batchAddCompBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    const category = $('#cCat').value;
+    const spec = $('#cSpec').value.trim();
+    const customName = $('#cCustomName').value.trim() || (category + ' batch');
+    const qty = parseInt($('#cQty').value) || 0;
+    const location = $('#cLoc').value.trim();
+    const note = $('#cNote').value.trim();
+    const countStr = prompt('批量添加数量:');
+    const count = parseInt(countStr);
+    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
+    const items = getComponents();
+    for (let i = 0; i < count; i++) {
+      items.push({ id: Date.now() + i, category, customName: customName + '#' + (i+1), spec, qty, location, note: note || 'batch', created: Date.now() });
+    }
+    saveComponents(items);
+    renderComponents();
+    toast(`batch added ${count} components`);
+  });
+  // Components - batch delete & check all
+  $('#batchDelCompBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const checks = $$('.comp-check:checked');
+    if (checks.length === 0) { toast('请至少勾选一项'); return; }
+    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
+    let items = getComponents();
+    items = items.filter(x => !ids.has(x.id));
+    saveComponents(items);
+    renderComponents();
+    toast(`batch deleted ${ids.size} components`);
+  });
+  $('#compCheckAll').addEventListener('change', e => {
+    $$('.comp-check').forEach(c => c.checked = e.target.checked);
+  });
+
+  // Boards - batch add
+  $('#batchAddBoardBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    const type = $('#bType').value;
+    const model = $('#bModel').value.trim() || (type + ' batch');
+    const qty = parseInt($('#bQty').value) || 0;
+    const location = $('#bLoc').value.trim();
+    const status = $('#bStatus').value;
+    const note = $('#bNote').value.trim();
+    const countStr = prompt('批量添加数量:');
+    const count = parseInt(countStr);
+    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
+    const items = getBoards();
+    for (let i = 0; i < count; i++) {
+      items.push({ id: Date.now() + i, type, model: model + '#' + (i+1), qty, location, status, note: note || 'batch', created: Date.now() });
+    }
+    saveBoards(items);
+    renderBoards();
+    toast(`batch added ${count} boards`);
+  });
+  // Boards - batch delete & check all
+  $('#batchDelBoardBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const checks = $$('.board-check:checked');
+    if (checks.length === 0) { toast('请至少勾选一项'); return; }
+    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
+    let items = getBoards();
+    items = items.filter(x => !ids.has(x.id));
+    saveBoards(items);
+    renderBoards();
+    toast(`batch deleted ${ids.size} boards`);
+  });
+  $('#boardCheckAll').addEventListener('change', e => {
+    $$('.board-check').forEach(c => c.checked = e.target.checked);
+  });
+
   // ===================== INIT =====================
   initLogin();
 })();
