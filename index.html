@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v1.0]</title>
+<title>SparkMinds Lab [v1.2]</title>
 <style>
   :root{
     --bg:#f0f4f8;
@@ -98,6 +98,7 @@
   .light-btn-term{background:#fff;border:1px solid var(--border);color:var(--fg-dim);font-family:var(--font);font-size:11px;padding:5px 12px;cursor:pointer;transition:all .2s;border-radius:20px}
   .light-btn-term:hover{border-color:var(--accent);color:var(--accent)}
   .light-btn-term.on{border-color:var(--success);color:var(--success);background:rgba(72,187,120,0.1)}
+  .light-readonly{font-size:11px;padding:4px 10px;border:1px dashed var(--border);color:var(--muted);border-radius:20px;background:#fff;font-style:italic;white-space:nowrap}
 
   /* tables -> modern clean table */
   .term-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
@@ -202,7 +203,7 @@
 <!-- ========== MAIN SCREEN ========== -->
 <div id="mainScreen" class="screen">
   <header class="term-header">
-    <span class="brand glow">SparkMinds Lab v1.0</span>
+    <span class="brand glow">SparkMinds Lab v1.2</span>
     <nav class="term-nav">
       <button class="nav-btn active" data-panel="lab">[LAB_MONITOR]</button>
       <button class="nav-btn" data-panel="print3d">[3D_MATERIALS]</button>
@@ -442,7 +443,7 @@
     renderCompCards();
     renderBoardCards();
     renderUsers();
-    toast(`welcome, ${currentUser.name} [${currentUser.role}]`);
+    toast(`welcome, ${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
   }
 
   $('#logoutBtn').addEventListener('click', () => {
@@ -523,6 +524,7 @@
     const bar = $(`#lb-${r.id}`);
     bar.innerHTML = '';
     const count = r.lights;
+    const isAdmin = currentUser.role === 'admin';
     for (let i = 1; i <= count; i++) {
       const tag = document.createElement('span');
       tag.className = 'light-tag off';
@@ -530,20 +532,29 @@
       tag.textContent = count === 1 ? 'LIGHT:OFF' : `L${i}:OFF`;
       bar.appendChild(tag);
 
-      const btn = document.createElement('button');
-      btn.className = 'light-btn-term';
-      btn.dataset.room = r.id;
-      if (count > 1) btn.dataset.light = i;
-      btn.textContent = count === 1 ? '[TOGGLE]' : `[L${i}]`;
-      btn.addEventListener('click', () => sendLightCmd(r.id, count > 1 ? i : 1));
-      bar.appendChild(btn);
+      if (isAdmin) {
+        const btn = document.createElement('button');
+        btn.className = 'light-btn-term';
+        btn.dataset.room = r.id;
+        if (count > 1) btn.dataset.light = i;
+        btn.textContent = count === 1 ? '[TOGGLE]' : `[L${i}]`;
+        btn.addEventListener('click', () => sendLightCmd(r.id, count > 1 ? i : 1));
+        bar.appendChild(btn);
+      }
+    }
+    if (!isAdmin) {
+      const ro = document.createElement('span');
+      ro.className = 'light-readonly';
+      ro.textContent = '🔒 只读';
+      bar.appendChild(ro);
     }
   }
 
   function sendLightCmd(roomId, lightIdx) {
+    if (currentUser.role !== 'admin') { toast('权限不足：仅管理员可控制灯光'); return; }
     const key = lightIdx === 1 && ROOMS.find(r=>r.id===roomId).lights===1 ? roomId : roomId+'_'+lightIdx;
     const isOn = !!lightState[key];
-    const cmd = { room: roomId, light: lightIdx, cmd: isOn ? 'off' : 'on' };
+    const cmd = { room: roomId, light: lightIdx, cmd: isOn ? 'off' : 'on', user: currentUser.name, role: currentUser.role };
     if (client && client.connected) {
       client.publish(TOPIC_OUT, JSON.stringify(cmd));
     }
@@ -864,14 +875,16 @@
     });
   });
 
-  // Components card stack view
+  // Components card stack view — 数量融合：卡片显示 qty 总和，与详情表格联动
+  function compSumQty(list) { return list.reduce((s, x) => s + (parseInt(x.qty) || 0), 0); }
   function renderCompCards() {
     const container = $('#compCards');
     const items = getComponents();
     const groups = {};
     items.forEach(c => {
-      if (!groups[c.category]) groups[c.category] = { count: 0, items: [] };
+      if (!groups[c.category]) groups[c.category] = { count: 0, totalQty: 0, items: [] };
       groups[c.category].count++;
+      groups[c.category].totalQty += (parseInt(c.qty) || 0);
       groups[c.category].items.push(c);
     });
     container.innerHTML = '';
@@ -882,13 +895,13 @@
       card.innerHTML = `
         <button class="card-del-btn" data-cat="${category}" title="删除该类别所有">&times;</button>
         <div class="card-name">${category}</div>
-        <div class="card-count">${g.count} <span>件</span></div>
+        <div class="card-count">${g.totalQty} <span>件</span></div>
         <div class="card-actions">
           <button class="qty-btn minus" data-cat="${category}">-</button>
-          <input type="number" class="qty-display" value="${g.count}" min="0" data-cat="${category}">
+          <input type="number" class="qty-display" value="${g.totalQty}" min="0" data-cat="${category}">
           <button class="qty-btn plus" data-cat="${category}">+</button>
         </div>
-        <div class="card-detail-hint">点击查看详情</div>
+        <div class="card-detail-hint">${g.count} 条记录 · 点击查看详情</div>
       `;
       card.addEventListener('click', (e) => {
         if (e.target.closest('.qty-btn') || e.target.closest('.card-del-btn')) return;
@@ -896,15 +909,19 @@
       });
       container.appendChild(card);
     }
+    // +/- 与输入框均联动 qty 总和（与详情表格同一数量口径）
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const cat = btn.dataset.cat;
         let items = getComponents();
         const catItems = items.filter(x => x.category === cat);
         if (catItems.length === 0) return;
         const lastItem = catItems[catItems.length - 1];
-        items = items.filter(x => x.id !== lastItem.id);
+        const target = items.find(x => x.id === lastItem.id);
+        target.qty = Math.max(0, (parseInt(target.qty) || 0) - 1);
+        if (target.qty === 0 && catItems.length > 1) items = items.filter(x => x.id !== target.id);
         saveComponents(items);
         renderCompCards();
         if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
@@ -916,9 +933,16 @@
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const cat = btn.dataset.cat;
-        const items = getComponents();
-        items.push({ id: Date.now(), category: cat, customName: '新增', spec: '-', qty: 1, location: '-', note: '快速添加', created: Date.now() });
+        let items = getComponents();
+        const catItems = items.filter(x => x.category === cat);
+        if (catItems.length > 0) {
+          const target = items.find(x => x.id === catItems[catItems.length - 1].id);
+          target.qty = (parseInt(target.qty) || 0) + 1;
+        } else {
+          items.push({ id: Date.now(), category: cat, customName: '新增', spec: '-', qty: 1, location: '-', note: '快速添加', created: Date.now() });
+        }
         saveComponents(items);
         renderCompCards();
         if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
@@ -944,26 +968,28 @@
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const cat = inp.dataset.cat;
-        const newCount = parseInt(inp.value) || 0;
+        const newTotal = parseInt(inp.value) || 0;
         let items = getComponents();
-        const currentItems = items.filter(x => x.category === cat);
-        const currentCount = currentItems.length;
-        if (newCount > currentCount) {
-          for (let i = 0; i < newCount - currentCount; i++) {
-            items.push({ id: Date.now() + i, category: cat, customName: '新增', spec: '-', qty: 1, location: '-', note: '批量修改', created: Date.now() });
+        const catItems = items.filter(x => x.category === cat);
+        const currentTotal = compSumQty(catItems);
+        if (catItems.length === 0) {
+          if (newTotal > 0) items.push({ id: Date.now(), category: cat, customName: '新增', spec: '-', qty: newTotal, location: '-', note: '批量修改', created: Date.now() });
+        } else {
+          const diff = newTotal - currentTotal;
+          if (diff !== 0) {
+            const target = items.find(x => x.id === catItems[catItems.length - 1].id);
+            target.qty = Math.max(0, (parseInt(target.qty) || 0) + diff);
+            if (target.qty === 0 && catItems.length > 1) items = items.filter(x => x.id !== target.id);
           }
-        } else if (newCount < currentCount) {
-          const toRemove = currentCount - newCount;
-          const catIds = currentItems.slice(-toRemove).map(x => x.id);
-          items = items.filter(x => !catIds.includes(x.id));
         }
         saveComponents(items);
         renderCompCards();
         if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
           openCompDetail(cat);
         }
-        toast(`${cat} 数量调整为 ${newCount}`);
+        toast(`${cat} 总数调整为 ${newTotal}`);
       });
     });
   }
@@ -1032,14 +1058,15 @@
     toast('component added');
   });
 
-  // Boards card stack view
+  // Boards card stack view — 数量融合：卡片显示 qty 总和，与详情表格联动
   function renderBoardCards() {
     const container = $('#boardCards');
     const items = getBoards();
     const groups = {};
     items.forEach(b => {
-      if (!groups[b.type]) groups[b.type] = { count: 0, items: [] };
+      if (!groups[b.type]) groups[b.type] = { count: 0, totalQty: 0, items: [] };
       groups[b.type].count++;
+      groups[b.type].totalQty += (parseInt(b.qty) || 0);
       groups[b.type].items.push(b);
     });
     container.innerHTML = '';
@@ -1050,13 +1077,13 @@
       card.innerHTML = `
         <button class="card-del-btn" data-type="${type}" title="删除该类型所有">&times;</button>
         <div class="card-name">${type}</div>
-        <div class="card-count">${g.count} <span>件</span></div>
+        <div class="card-count">${g.totalQty} <span>件</span></div>
         <div class="card-actions">
           <button class="qty-btn minus" data-type="${type}">-</button>
-          <input type="number" class="qty-display" value="${g.count}" min="0" data-type="${type}">
+          <input type="number" class="qty-display" value="${g.totalQty}" min="0" data-type="${type}">
           <button class="qty-btn plus" data-type="${type}">+</button>
         </div>
-        <div class="card-detail-hint">点击查看详情</div>
+        <div class="card-detail-hint">${g.count} 条记录 · 点击查看详情</div>
       `;
       card.addEventListener('click', (e) => {
         if (e.target.closest('.qty-btn') || e.target.closest('.card-del-btn')) return;
@@ -1064,15 +1091,19 @@
       });
       container.appendChild(card);
     }
+    // +/- 与输入框均联动 qty 总和（与详情表格同一数量口径）
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const type = btn.dataset.type;
         let items = getBoards();
         const typeItems = items.filter(x => x.type === type);
         if (typeItems.length === 0) return;
         const lastItem = typeItems[typeItems.length - 1];
-        items = items.filter(x => x.id !== lastItem.id);
+        const target = items.find(x => x.id === lastItem.id);
+        target.qty = Math.max(0, (parseInt(target.qty) || 0) - 1);
+        if (target.qty === 0 && typeItems.length > 1) items = items.filter(x => x.id !== target.id);
         saveBoards(items);
         renderBoardCards();
         if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
@@ -1084,9 +1115,16 @@
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const type = btn.dataset.type;
-        const items = getBoards();
-        items.push({ id: Date.now(), type, model: '新增', qty: 1, location: '-', status: '待测试', note: '快速添加', created: Date.now() });
+        let items = getBoards();
+        const typeItems = items.filter(x => x.type === type);
+        if (typeItems.length > 0) {
+          const target = items.find(x => x.id === typeItems[typeItems.length - 1].id);
+          target.qty = (parseInt(target.qty) || 0) + 1;
+        } else {
+          items.push({ id: Date.now(), type, model: '新增', qty: 1, location: '-', status: '待测试', note: '快速添加', created: Date.now() });
+        }
         saveBoards(items);
         renderBoardCards();
         if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
@@ -1112,26 +1150,28 @@
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
         const type = inp.dataset.type;
-        const newCount = parseInt(inp.value) || 0;
+        const newTotal = parseInt(inp.value) || 0;
         let items = getBoards();
-        const currentItems = items.filter(x => x.type === type);
-        const currentCount = currentItems.length;
-        if (newCount > currentCount) {
-          for (let i = 0; i < newCount - currentCount; i++) {
-            items.push({ id: Date.now() + i, type, model: '新增', qty: 1, location: '-', status: '待测试', note: '批量修改', created: Date.now() });
+        const typeItems = items.filter(x => x.type === type);
+        const currentTotal = compSumQty(typeItems);
+        if (typeItems.length === 0) {
+          if (newTotal > 0) items.push({ id: Date.now(), type, model: '新增', qty: newTotal, location: '-', status: '待测试', note: '批量修改', created: Date.now() });
+        } else {
+          const diff = newTotal - currentTotal;
+          if (diff !== 0) {
+            const target = items.find(x => x.id === typeItems[typeItems.length - 1].id);
+            target.qty = Math.max(0, (parseInt(target.qty) || 0) + diff);
+            if (target.qty === 0 && typeItems.length > 1) items = items.filter(x => x.id !== target.id);
           }
-        } else if (newCount < currentCount) {
-          const toRemove = currentCount - newCount;
-          const typeIds = currentItems.slice(-toRemove).map(x => x.id);
-          items = items.filter(x => !typeIds.includes(x.id));
         }
         saveBoards(items);
         renderBoardCards();
         if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
           openBoardDetail(type);
         }
-        toast(`${type} 数量调整为 ${newCount}`);
+        toast(`${type} 总数调整为 ${newTotal}`);
       });
     });
   }
@@ -1255,112 +1295,6 @@
     $('#uName').value = '';
     $('#uPass').value = '';
     toast('user created');
-  });
-
-  // ===================== BATCH OPERATIONS =====================
-  // 3D Materials - batch add
-  $('#batchAddMaterialBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
-    const type = $('#mType').value;
-    const diameter = $('#mDia').value;
-    const note = $('#mNote').value.trim();
-    const countStr = prompt('批量添加数量:');
-    const count = parseInt(countStr);
-    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
-    const items = getMaterials();
-    for (let i = 0; i < count; i++) {
-      items.push({ id: Date.now() + i, type, color: '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'), diameter, weight: parseInt($('#mWeight').value) || 1000, remain: parseInt($('#mRemain').value) || 100, note: note || 'batch', created: Date.now() });
-    }
-    saveMaterials(items);
-    renderMaterials();
-    toast(`batch added ${count} materials`);
-  });
-  // 3D Materials - batch delete & check all
-  $('#batchDelMaterialBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
-    const checks = $$('.mat-check:checked');
-    if (checks.length === 0) { toast('请至少勾选一项'); return; }
-    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
-    let items = getMaterials();
-    items = items.filter(x => !ids.has(x.id));
-    saveMaterials(items);
-    renderMaterials();
-    toast(`batch deleted ${ids.size} materials`);
-  });
-  $('#matCheckAll').addEventListener('change', e => {
-    $$('.mat-check').forEach(c => c.checked = e.target.checked);
-  });
-
-  // Components - batch add
-  $('#batchAddCompBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
-    const category = $('#cCat').value;
-    const spec = $('#cSpec').value.trim();
-    const customName = $('#cCustomName').value.trim() || (category + ' batch');
-    const qty = parseInt($('#cQty').value) || 0;
-    const location = $('#cLoc').value.trim();
-    const note = $('#cNote').value.trim();
-    const countStr = prompt('批量添加数量:');
-    const count = parseInt(countStr);
-    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
-    const items = getComponents();
-    for (let i = 0; i < count; i++) {
-      items.push({ id: Date.now() + i, category, customName: customName + '#' + (i+1), spec, qty, location, note: note || 'batch', created: Date.now() });
-    }
-    saveComponents(items);
-    renderComponents();
-    toast(`batch added ${count} components`);
-  });
-  // Components - batch delete & check all
-  $('#batchDelCompBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
-    const checks = $$('.comp-check:checked');
-    if (checks.length === 0) { toast('请至少勾选一项'); return; }
-    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
-    let items = getComponents();
-    items = items.filter(x => !ids.has(x.id));
-    saveComponents(items);
-    renderComponents();
-    toast(`batch deleted ${ids.size} components`);
-  });
-  $('#compCheckAll').addEventListener('change', e => {
-    $$('.comp-check').forEach(c => c.checked = e.target.checked);
-  });
-
-  // Boards - batch add
-  $('#batchAddBoardBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
-    const type = $('#bType').value;
-    const model = $('#bModel').value.trim() || (type + ' batch');
-    const qty = parseInt($('#bQty').value) || 0;
-    const location = $('#bLoc').value.trim();
-    const status = $('#bStatus').value;
-    const note = $('#bNote').value.trim();
-    const countStr = prompt('批量添加数量:');
-    const count = parseInt(countStr);
-    if (!count || count < 1 || count > 100) { toast('请输入1~100之间的数量'); return; }
-    const items = getBoards();
-    for (let i = 0; i < count; i++) {
-      items.push({ id: Date.now() + i, type, model: model + '#' + (i+1), qty, location, status, note: note || 'batch', created: Date.now() });
-    }
-    saveBoards(items);
-    renderBoards();
-    toast(`batch added ${count} boards`);
-  });
-  // Boards - batch delete & check all
-  $('#batchDelBoardBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
-    const checks = $$('.board-check:checked');
-    if (checks.length === 0) { toast('请至少勾选一项'); return; }
-    const ids = new Set(checks.map(c => parseInt(c.dataset.id)));
-    let items = getBoards();
-    items = items.filter(x => !ids.has(x.id));
-    saveBoards(items);
-    renderBoards();
-    toast(`batch deleted ${ids.size} boards`);
-  });
-  $('#boardCheckAll').addEventListener('change', e => {
-    $$('.board-check').forEach(c => c.checked = e.target.checked);
   });
 
   // ===================== INIT =====================
