@@ -16,19 +16,18 @@
 
 ## Cloudflare Pages Git 部署配置
 
-在 Cloudflare Dashboard 中连接此 GitHub 仓库后，按以下配置设置：
-
 | 配置项 | 值 |
 |--------|-----|
 | Framework preset | None |
-| Build command | 留空（无需构建） |
+| Build command | 留空 |
 | Deploy command | `npx wrangler deploy` |
 | Root directory | `/` |
 
-部署前需要：
-1. 在 Cloudflare 创建 KV 命名空间，名称 `USERS`
-2. 将返回的 namespace ID 填入 `wrangler.toml` 的 `id = "你的KV_NAMESPACE_ID"` 处
-3. push 代码到 GitHub，Cloudflare 自动部署
+## 部署前必做
+
+1. 在 Cloudflare Dashboard 创建 KV 命名空间，名称 `USERS`
+2. 把返回的 namespace ID 填入 `wrangler.toml`：`id = "你的真实ID"`
+3. push 代码到 GitHub
 
 ## 默认账号
 
