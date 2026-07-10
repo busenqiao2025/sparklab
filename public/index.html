@@ -259,12 +259,12 @@
     <div class="panel-title">3D 打印材料管理</div>
     <div class="term-box" data-title="添加材料">
       <div class="term-form" id="materialForm">
-        <div><label>type</label><select id="mType"><option>PLA</option><option>ABS</option><option>PETG</option><option>TPU</option><option>树脂</option><option>尼龙</option><option>其他</option></select></div>
-        <div><label>color</label><input type="text" id="mColor" placeholder="white"></div>
-        <div><label>diameter</label><select id="mDia"><option>1.75mm</option><option>2.85mm</option></select></div>
-        <div><label>weight_g</label><input type="number" id="mWeight" placeholder="1000"></div>
-        <div><label>remaining_%</label><input type="number" id="mRemain" placeholder="100" min="0" max="100"></div>
-        <div><label>note</label><input type="text" id="mNote" placeholder="brand"></div>
+        <div><label>类型</label><select id="mType"><option>PLA</option><option>ABS</option><option>PETG</option><option>TPU</option><option>树脂</option><option>尼龙</option><option>其他</option></select></div>
+        <div><label>颜色</label><input type="text" id="mColor" placeholder="白色"></div>
+        <div><label>直径</label><select id="mDia"><option>1.75mm</option><option>2.85mm</option></select></div>
+        <div><label>重量(g)</label><input type="number" id="mWeight" placeholder="1000"></div>
+        <div><label>剩余(%)</label><input type="number" id="mRemain" placeholder="100" min="0" max="100"></div>
+        <div><label>备注</label><input type="text" id="mNote" placeholder="品牌"></div>
       </div>
       <button class="term-btn-sm" id="addMaterialBtn">添加</button>
       <button class="term-btn-sm info" id="resetMaterialBtn">重置</button>
@@ -274,7 +274,7 @@
       <div class="detail-header"><h3 id="materialDetailTitle">材料详情</h3><button class="detail-close" id="materialDetailClose">&times;</button></div>
       <div class="detail-body">
         <table class="term-table" id="materialTable">
-          <thead><tr><th>ID</th><th>TYPE</th><th>COLOR</th><th>DIAMETER</th><th>WEIGHT</th><th>REMAIN</th><th>STATUS</th><th>NOTE</th><th>ACTION</th></tr></thead>
+          <thead><tr><th>#</th><th>类型</th><th>颜色</th><th>直径</th><th>重量</th><th>剩余</th><th>状态</th><th>备注</th><th>操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -307,7 +307,7 @@
         <div class="detail-header"><h3 id="compDetailTitle">元器件详情</h3><button class="detail-close" id="compDetailClose">&times;</button></div>
         <div class="detail-body">
           <table class="term-table" id="compTable">
-            <thead><tr><th>ID</th><th>种类</th><th>名称</th><th>型号</th><th>数量</th><th>位置</th><th>备注</th><th>ACTION</th></tr></thead>
+            <thead><tr><th>#</th><th>种类</th><th>名称</th><th>型号</th><th>数量</th><th>位置</th><th>备注</th><th>操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -318,12 +318,12 @@
     <div id="wh-boards" class="wh-panel" style="display:none">
       <div class="term-box" data-title="添加主板">
         <div class="term-form" id="boardForm">
-          <div><label>type</label><select id="bType"><option>ESP32</option><option>ESP32-C3</option><option>ESP32-S3</option><option>Arduino Uno</option><option>Arduino Mega</option><option>Arduino Nano</option><option>树莓派 Pico</option><option>树莓派 4B</option><option>树莓派 5</option><option>STM32</option><option>其他</option></select></div>
-          <div><label>model</label><input type="text" id="bModel" placeholder="NodeMCU-32S"></div>
-          <div><label>qty</label><input type="number" id="bQty" placeholder="5" min="0"></div>
-          <div><label>location</label><input type="text" id="bLoc" placeholder="B-05-1"></div>
-          <div><label>status</label><select id="bStatus"><option>全新</option><option>良好</option><option>待测试</option><option>故障</option></select></div>
-          <div><label>note</label><input type="text" id="bNote" placeholder=""></div>
+          <div><label>类型</label><select id="bType"><option>ESP32</option><option>ESP32-C3</option><option>ESP32-S3</option><option>Arduino Uno</option><option>Arduino Mega</option><option>Arduino Nano</option><option>树莓派 Pico</option><option>树莓派 4B</option><option>树莓派 5</option><option>STM32</option><option>其他</option></select></div>
+          <div><label>型号</label><input type="text" id="bModel" placeholder="NodeMCU-32S"></div>
+          <div><label>数量</label><input type="number" id="bQty" placeholder="5" min="0"></div>
+          <div><label>位置</label><input type="text" id="bLoc" placeholder="B-05-1"></div>
+          <div><label>状态</label><select id="bStatus"><option>全新</option><option>良好</option><option>待测试</option><option>故障</option></select></div>
+          <div><label>备注</label><input type="text" id="bNote" placeholder=""></div>
         </div>
         <button class="term-btn-sm" id="addBoardBtn">添加</button>
       </div>
@@ -332,7 +332,7 @@
         <div class="detail-header"><h3 id="boardDetailTitle">主板详情</h3><button class="detail-close" id="boardDetailClose">&times;</button></div>
         <div class="detail-body">
           <table class="term-table" id="boardTable">
-            <thead><tr><th>ID</th><th>TYPE</th><th>MODEL</th><th>QTY</th><th>LOCATION</th><th>STATUS</th><th>NOTE</th><th>ACTION</th></tr></thead>
+            <thead><tr><th>#</th><th>类型</th><th>型号</th><th>数量</th><th>位置</th><th>状态</th><th>备注</th><th>操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -345,15 +345,15 @@
     <div class="panel-title">用户管理</div>
     <div class="term-box" data-title="添加用户">
       <div class="term-form" id="userForm">
-        <div><label>username</label><input type="text" id="uName" placeholder="newuser"></div>
-        <div><label>password</label><input type="password" id="uPass" placeholder="********"></div>
-        <div><label>role</label><select id="uRole"><option value="admin">admin</option><option value="user">user</option></select></div>
+        <div><label>用户名</label><input type="text" id="uName" placeholder="新用户"></div>
+        <div><label>密码</label><input type="password" id="uPass" placeholder="********"></div>
+        <div><label>角色</label><select id="uRole"><option value="admin">管理员</option><option value="user">普通用户</option></select></div>
       </div>
       <button class="term-btn-sm" id="addUserBtn">添加用户</button>
     </div>
     <div class="term-box" data-title="用户列表">
       <table class="term-table" id="userTable">
-        <thead><tr><th>USERNAME</th><th>PASSWORD</th><th>ROLE</th><th>CREATED</th><th>ACTION</th></tr></thead>
+        <thead><tr><th>用户名</th><th>密码</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -426,7 +426,6 @@
     { id: 'xiuxi', name: '休息区', chip: 'ESP32C3', lights: 4 },
     { id: 'bangong', name: '办公区', chip: 'ESP32C3', lights: 1 },
     { id: '3d', name: '3D打印·操作·仓库区', chip: 'ESP32', lights: 1 },
-    { id: 'damen', name: '大门入口', chip: 'ESP32C3', lights: 1 },
   ];
 
   const AQI_LABELS = ['优', '良', '一般', '差', '很差', '严重污染'];
@@ -438,10 +437,13 @@
   const lightState = {};
   const lightRawCache = {};
   const sensorCache = {};
+  let editingMaterialId = null;
+  let editingComponentId = null;
+  let editingBoardId = null;
 
   // ===================== SIMULATION (替代服务端 MQTT 模拟器) =====================
   let simInterval = null;
-  const SIM_ROOMS = ['chuangzao', 'chuangxin', 'chuangzhi', 'chuangyi', 'xiuxi', 'bangong', '3d', 'damen'];
+  const SIM_ROOMS = ['chuangzao', 'chuangxin', 'chuangzhi', 'chuangyi', 'xiuxi', 'bangong', '3d'];
   function simRand(min, max) { return Math.random() * (max - min) + min; }
   function simRandInt(min, max) { return Math.floor(simRand(min, max + 1)); }
 
@@ -643,7 +645,7 @@
     renderBoardCards();
     await renderUsers();
     startPolling();
-    toast(`welcome, ${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
+    toast(`欢迎，${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
   }
 
   $('#logoutBtn').addEventListener('click', () => {
@@ -681,12 +683,12 @@
         <span class="rt-name">${r.name}</span>
         <span class="rt-chip">${r.chip}</span>
       </div>
-      <div class="sensor-line"><span class="s-label">temp</span><span class="s-val" data-k="temp">-- °C</span></div>
-      <div class="sensor-line"><span class="s-label">humi</span><span class="s-val" data-k="humi">-- %</span></div>
-      <div class="sensor-line"><span class="s-label">light</span><span class="s-val" data-k="light" title="raw: --">-- %</span></div>
-      <div class="sensor-line"><span class="s-label">aqi_uba</span><span class="s-val" data-k="aqi">--</span></div>
-      <div class="sensor-line"><span class="s-label">tvoc</span><span class="s-val" data-k="tvoc">-- ppb</span></div>
-      <div class="sensor-line"><span class="s-label">eco2</span><span class="s-val" data-k="eco2">-- ppm</span></div>
+      <div class="sensor-line"><span class="s-label">温度</span><span class="s-val" data-k="temp">-- °C</span></div>
+      <div class="sensor-line"><span class="s-label">湿度</span><span class="s-val" data-k="humi">-- %</span></div>
+      <div class="sensor-line"><span class="s-label">光照</span><span class="s-val" data-k="light" title="raw: --">-- %</span></div>
+      <div class="sensor-line"><span class="s-label">空气质量</span><span class="s-val" data-k="aqi">--</span></div>
+      <div class="sensor-line"><span class="s-label">TVOC</span><span class="s-val" data-k="tvoc">-- ppb</span></div>
+      <div class="sensor-line"><span class="s-label">eCO2</span><span class="s-val" data-k="eco2">-- ppm</span></div>
       <div class="light-bar" id="lb-${r.id}"></div>
     `;
     return div;
@@ -711,15 +713,14 @@
       const div = createRoomElement(r);
       // 3D打印区 spans 2 columns
       if (idx === 2) div.style.gridColumn = 'span 2';
-      // 休息区 gets a door marker at top-left
-      if (idx === 0) {
-        const marker = document.createElement('div');
-        marker.className = 'room-door-marker';
-        marker.textContent = '\uD83D\uDEAA\u5927\u95E8\u5165\u53E3';
-        div.appendChild(marker);
-      }
       grid.appendChild(div);
     });
+
+    // 大门入口标签（底部独立行）
+    const doorLabel = document.createElement('div');
+    doorLabel.style.cssText = 'grid-column:1/-1;text-align:center;padding:8px 16px;background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-sm);color:var(--warning);font-size:13px;font-weight:600;letter-spacing:2px;box-shadow:var(--shadow-xs)';
+    doorLabel.textContent = '🚪 大门入口';
+    grid.appendChild(doorLabel);
 
     // Build light bars for all rooms
     ROOMS.forEach(r => buildLightBar(r));
@@ -734,7 +735,7 @@
       const tag = document.createElement('span');
       tag.className = 'light-tag off';
       tag.id = `tag-${r.id}${count===1?'':'-'+i}`;
-      tag.textContent = count === 1 ? 'LIGHT:OFF' : `L${i}:OFF`;
+      tag.textContent = count === 1 ? '灯光:关' : `灯${i}:关`;
       bar.appendChild(tag);
 
       if (isAdmin) {
@@ -742,7 +743,7 @@
         btn.className = 'light-btn-term';
         btn.dataset.room = r.id;
         if (count > 1) btn.dataset.light = i;
-        btn.textContent = count === 1 ? '开关' : `灯${i+1}`;
+        btn.textContent = count === 1 ? '开关' : `灯${i}`;
         btn.addEventListener('click', () => sendLightCmd(r.id, count > 1 ? i : 1));
         bar.appendChild(btn);
       }
@@ -763,7 +764,7 @@
     if (client && client.connected) {
       client.publish(TOPIC_OUT, JSON.stringify(cmd));
     }
-    toast(`${roomId} L${lightIdx} -> ${isOn?'OFF':'ON'}`);
+    toast(`${rm ? rm.name : roomId} 灯${lightIdx} -> ${isOn?'关':'开'}`);
     // optimistic toggle
     updateLightUI(roomId, lightIdx, !isOn);
   }
@@ -776,7 +777,7 @@
     const tag = document.getElementById(tagId);
     if (tag) {
       tag.className = 'light-tag ' + (isOn ? 'on' : 'off');
-      tag.textContent = count === 1 ? (isOn ? 'LIGHT:ON' : 'LIGHT:OFF') : `L${lightIdx}:${isOn?'ON':'OFF'}`;
+      tag.textContent = count === 1 ? (isOn ? '灯光:开' : '灯光:关') : `灯${lightIdx}:${isOn?'开':'关'}`;
     }
     const key = count === 1 ? roomId : roomId + '_' + lightIdx;
     lightState[key] = isOn;
@@ -854,7 +855,7 @@
       $('#connStatus').textContent = '● 在线';
       $('#connStatus').classList.add('online');
       client.subscribe(TOPIC_IN, { qos: 0 }, err => {
-        if (!err) toast('mqtt subscribed: ' + TOPIC_IN);
+        if (!err) toast('MQTT 已订阅: ' + TOPIC_IN);
       });
     });
 
@@ -1026,7 +1027,8 @@
     $('#mWeight').value = m.weight;
     $('#mRemain').value = m.remain;
     $('#mNote').value = m.note;
-    deleteMaterial(id);
+    editingMaterialId = id;
+    toast('已加载材料数据，修改后点击「添加」保存');
   };
 
   window.deleteMaterial = function(id) {
@@ -1043,7 +1045,7 @@
     } else {
       $('#materialDetail').classList.remove('open');
     }
-    toast('material deleted');
+    toast('材料已删除');
   };
 
   $('#addMaterialBtn').addEventListener('click', () => {
@@ -1055,10 +1057,17 @@
     const remain = parseInt($('#mRemain').value) || 0;
     const note = $('#mNote').value.trim();
     const items = getMaterials();
-    items.push({ id: Date.now(), type, color, diameter, weight, remain, note, created: Date.now() });
+    if (editingMaterialId) {
+      const m = items.find(x => x.id === editingMaterialId);
+      if (m) { Object.assign(m, { type, color, diameter, weight, remain, note }); }
+      editingMaterialId = null;
+      toast('材料已更新');
+    } else {
+      items.push({ id: Date.now(), type, color, diameter, weight, remain, note, created: Date.now() });
+      toast('材料已添加');
+    }
     saveMaterials(items);
     renderMaterialCards();
-    toast('material added');
   });
 
   $('#resetMaterialBtn').addEventListener('click', () => {
@@ -1066,6 +1075,7 @@
     $('#mWeight').value = '';
     $('#mRemain').value = '';
     $('#mNote').value = '';
+    editingMaterialId = null;
   });
 
   // ===================== WAREHOUSE =====================
@@ -1228,7 +1238,8 @@
     $('#cQty').value = c.qty;
     $('#cLoc').value = c.location;
     $('#cNote').value = c.note;
-    deleteComponent(id);
+    editingComponentId = id;
+    toast('已加载元器件数据，修改后点击「添加」保存');
   };
 
   window.deleteComponent = function(id) {
@@ -1244,7 +1255,7 @@
     } else {
       $('#compDetail').classList.remove('open');
     }
-    toast('component deleted');
+    toast('元器件已删除');
   };
 
   $('#addCompBtn').addEventListener('click', () => {
@@ -1257,10 +1268,17 @@
     const location = $('#cLoc').value.trim();
     const note = $('#cNote').value.trim();
     const items = getComponents();
-    items.push({ id: Date.now(), category, customName, spec, qty, location, note, created: Date.now() });
+    if (editingComponentId) {
+      const c = items.find(x => x.id === editingComponentId);
+      if (c) { Object.assign(c, { category, customName, spec, qty, location, note }); }
+      editingComponentId = null;
+      toast('元器件已更新');
+    } else {
+      items.push({ id: Date.now(), category, customName, spec, qty, location, note, created: Date.now() });
+      toast('元器件已添加');
+    }
     saveComponents(items);
     renderCompCards();
-    toast('component added');
   });
 
   // Boards card stack view — 数量融合：卡片显示 qty 总和，与详情表格联动
@@ -1411,7 +1429,8 @@
     $('#bLoc').value = b.location;
     $('#bStatus').value = b.status;
     $('#bNote').value = b.note;
-    deleteBoard(id);
+    editingBoardId = id;
+    toast('已加载主板数据，修改后点击「添加」保存');
   };
 
   window.deleteBoard = function(id) {
@@ -1427,7 +1446,7 @@
     } else {
       $('#boardDetail').classList.remove('open');
     }
-    toast('board deleted');
+    toast('主板已删除');
   };
 
   window.updateItemQty = function(el) {
@@ -1457,10 +1476,17 @@
     const status = $('#bStatus').value;
     const note = $('#bNote').value.trim();
     const items = getBoards();
-    items.push({ id: Date.now(), type, model, qty, location, status, note, created: Date.now() });
+    if (editingBoardId) {
+      const b = items.find(x => x.id === editingBoardId);
+      if (b) { Object.assign(b, { type, model, qty, location, status, note }); }
+      editingBoardId = null;
+      toast('主板已更新');
+    } else {
+      items.push({ id: Date.now(), type, model, qty, location, status, note, created: Date.now() });
+      toast('主板已添加');
+    }
     saveBoards(items);
     renderBoardCards();
-    toast('board added');
   });
 
   // ===================== USER MANAGEMENT =====================
@@ -1482,16 +1508,16 @@
   }
 
   window.deleteUser = async function(name) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
-    if (name === 'admin') { toast('cannot delete admin'); return; }
+    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
+    if (name === 'admin') { toast('不能删除 admin 账号'); return; }
     const res = await apiDeleteUser(name);
     if (!res.ok) { toast('删除失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
-    toast('user deleted');
+    toast('用户已删除');
   };
 
   window.editPass = async function(name) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
     const newPass = prompt(`修改 ${name} 的密码：`, '');
     if (!newPass || newPass.trim() === '') return;
     const res = await apiUpdatePass(name, newPass.trim());
@@ -1501,17 +1527,17 @@
   };
 
   $('#addUserBtn').addEventListener('click', async () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
     const name = $('#uName').value.trim();
     const pass = $('#uPass').value.trim();
     const role = $('#uRole').value;
-    if (!name || !pass) { toast('username and password required'); return; }
+    if (!name || !pass) { toast('用户名和密码不能为空'); return; }
     const res = await apiAddUser(name, pass, role);
     if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
     $('#uName').value = '';
     $('#uPass').value = '';
-    toast('user created');
+    toast('用户已创建');
   });
 
   // ===================== 申请授权系统 =====================
