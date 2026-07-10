@@ -1,0 +1,13 @@
+name = "sparkminds-lab"
+main = "src/worker.js"
+compatibility_date = "2026-07-08"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+[[kv_namespaces]]
+binding = "USERS"
+id = "7c9d913316cd47a68fa583b77a6921ab"
