@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SparkMinds Lab [v1.5]</title>
+<style>
+  :root{
+    --bg:#f0f4f8;
+    --bg2:#ffffff;
+    --fg:#2d3748;
+    --fg-dim:#4a5568;
+    --accent:#4299e1;
+    --danger:#f56565;
+    --success:#48bb78;
+    --warning:#ed8936;
+    --info:#38b2ac;
+    --muted:#a0aec0;
+    --border:#e2e8f0;
+    --shadow:0 2px 8px rgba(0,0,0,0.06);
+    --shadow-lg:0 4px 16px rgba(0,0,0,0.08);
+    --radius:12px;
+    --radius-sm:8px;
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:var(--font);font-size:14px;background:var(--bg);color:var(--fg);overflow:hidden}
+
+  /* scanline overlay - disabled for modern theme */
+  .scanline{display:none}
+
+  /* subtle text lift instead of glow */
+  .glow{text-shadow:0 1px 2px rgba(0,0,0,0.06)}
+
+  /* screens */
+  .screen{display:none;flex-direction:column;height:100vh;width:100vw;padding:16px}
+  .screen.active{display:flex}
+
+  /* terminal box -> modern card */
+  .term-box{background:var(--bg2);border:none;border-radius:var(--radius);padding:16px;margin-bottom:12px;position:relative;box-shadow:var(--shadow)}
+  .term-box::before{content:attr(data-title);position:absolute;top:-10px;left:12px;background:var(--accent);color:#fff;padding:2px 8px;font-size:10px;border-radius:4px;letter-spacing:1px;font-weight:600}
+
+  /* ascii header -> modern accent logo */
+  .ascii-art{color:var(--accent);text-align:center;line-height:1.2;font-size:10px;letter-spacing:0;margin-bottom:16px;opacity:0.85}
+  @media(min-width:600px){.ascii-art{font-size:12px}}
+
+  /* login */
+  #loginScreen{align-items:center;justify-content:center}
+  .login-wrap{max-width:420px;width:100%;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:24px}
+  .prompt-line{margin:10px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .prompt{color:var(--accent);white-space:nowrap;font-weight:600}
+  .prompt-line input{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:var(--font);font-size:14px;padding:8px 12px;outline:none;flex:1;min-width:120px;transition:border-color .2s,box-shadow .2s}
+  .prompt-line input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(66,153,225,0.15)}
+  .prompt-line input::placeholder{color:var(--muted)}
+  .login-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;padding:8px 20px;cursor:pointer;margin-top:8px;transition:all .2s;font-weight:500}
+  .login-btn:hover{background:#3182ce}
+  .error-msg{color:var(--danger);font-size:12px;margin-top:6px;min-height:16px}
+  .hint{color:var(--muted);font-size:11px;margin-top:10px}
+
+  /* main header */
+  .term-header{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px;flex-wrap:wrap}
+  .brand{font-size:16px;font-weight:bold;color:var(--accent);letter-spacing:0}
+  .term-nav{display:flex;gap:8px;flex-wrap:wrap}
+  .nav-btn{background:#fff;border:1px solid var(--border);color:var(--fg-dim);font-family:var(--font);font-size:12px;padding:5px 14px;cursor:pointer;transition:all .2s;border-radius:20px}
+  .nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .conn-status{font-size:11px;color:var(--danger);font-weight:500}
+  .conn-status.online{color:var(--success)}
+
+  /* panels */
+  .panel{display:none;flex:1;overflow-y:auto;gap:12px;flex-direction:column}
+  .panel.active{display:flex}
+  .panel-title{color:var(--fg-dim);font-size:13px;margin-bottom:8px;font-weight:500}
+
+  /* lab map layout */
+  .lab-map{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto 28px auto;gap:10px}
+  .lab-corridor{grid-column:1/-1;background:var(--bg2);border:none;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);letter-spacing:8px;box-shadow:var(--shadow)}
+
+  /* room card */
+  .room-term{background:#fff;border:none;border-radius:var(--radius);position:relative;padding:16px;box-shadow:var(--shadow)}
+  .room-term .rt-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px}
+  .room-term .rt-name{font-size:13px;font-weight:bold;color:var(--accent)}
+  .room-term .rt-chip{font-size:10px;color:var(--muted);background:var(--bg);border:1px solid var(--border);padding:2px 6px;border-radius:4px}
+
+  /* door marker */
+  .room-door-marker{position:absolute;top:-8px;left:12px;background:var(--warning);color:#fff;font-size:10px;padding:3px 8px;z-index:2;letter-spacing:1px;white-space:nowrap;border-radius:4px;border:none;font-weight:600;box-shadow:0 2px 4px rgba(0,0,0,0.1)}
+
+  .sensor-line{font-size:12px;padding:3px 0;display:flex;justify-content:space-between;gap:8px}
+  .sensor-line .s-label{color:var(--muted);white-space:nowrap}
+  .sensor-line .s-val{color:var(--fg);font-weight:600;text-align:right;white-space:nowrap}
+  .sensor-line .s-val.warn{color:var(--warning)}
+  .sensor-line .s-val.danger{color:var(--danger)}
+
+  /* light control -> modern tag buttons */
+  .light-bar{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .light-tag{font-size:11px;padding:4px 10px;border:1px solid var(--border);color:var(--muted);border-radius:20px;background:#fff}
+  .light-tag.on{border-color:var(--success);color:var(--success);background:rgba(72,187,120,0.1);font-weight:600}
+  .light-btn-term{background:#fff;border:1px solid var(--border);color:var(--fg-dim);font-family:var(--font);font-size:11px;padding:5px 12px;cursor:pointer;transition:all .2s;border-radius:20px}
+  .light-btn-term:hover{border-color:var(--accent);color:var(--accent)}
+  .light-btn-term.on{border-color:var(--success);color:var(--success);background:rgba(72,187,120,0.1)}
+  .light-readonly{font-size:11px;padding:4px 10px;border:1px dashed var(--border);color:var(--muted);border-radius:20px;background:#fff;font-style:italic;white-space:nowrap}
+
+  /* tables -> modern clean table */
+  .term-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
+  .term-table th,.term-table td{border:none;border-bottom:1px solid var(--border);padding:8px 12px;text-align:left}
+  .term-table th{background:#ebf8ff;color:var(--accent);font-weight:600;white-space:nowrap}
+  .term-table tr:last-child td{border-bottom:none}
+  .term-table tr:hover td{background:#f7fafc}
+  .term-btn-sm{background:#fff;border:1px solid var(--border);color:var(--fg);font-family:var(--font);font-size:11px;padding:5px 12px;cursor:pointer;margin-right:4px;border-radius:var(--radius-sm);transition:all .2s}
+  .term-btn-sm:hover{border-color:var(--accent);color:var(--accent);background:#ebf8ff}
+  .term-btn-sm.danger{color:var(--danger);border-color:var(--danger)}
+  .term-btn-sm.danger:hover{background:#fff5f5;color:var(--danger);border-color:var(--danger)}
+  .term-btn-sm.info{color:var(--info);border-color:var(--info)}
+  .term-btn-sm.info:hover{background:#e6fffa;color:var(--info);border-color:var(--info)}
+
+  /* forms inside modern card */
+  .term-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:10px 0;padding:16px;background:#f8fafc;border-radius:var(--radius-sm);border:1px solid var(--border)}
+  .term-form label{font-size:11px;color:var(--fg-dim);display:block;margin-bottom:4px;font-weight:500}
+  .term-form input,.term-form select{background:#fff;border:1px solid var(--border);color:var(--fg);font-family:var(--font);font-size:12px;padding:8px 12px;outline:none;width:100%;border-radius:var(--radius-sm);transition:border-color .2s,box-shadow .2s}
+  .term-form input:focus,.term-form select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(66,153,225,0.15)}
+
+  /* tabs -> accent underline */
+  .term-tabs{display:flex;gap:8px;margin-bottom:12px;border-bottom:2px solid var(--border);padding-bottom:0}
+  .term-tab{background:transparent;border:none;color:var(--muted);font-family:var(--font);font-size:12px;padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+  .term-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+  /* toast -> modern rounded shadow */
+  .term-toast{position:fixed;bottom:20px;right:20px;background:#fff;border:none;color:var(--fg);padding:12px 20px;font-size:12px;transform:translateX(150%);transition:transform .3s;z-index:10000;border-radius:var(--radius);box-shadow:var(--shadow-lg);font-weight:500}
+  .term-toast.show{transform:translateX(0)}
+
+  /* admin hide/show */
+  .admin-only{display:none}
+  body.is-admin .admin-only{display:inline-flex}
+  body.is-admin .admin-only.block{display:block}
+  body.is-admin .admin-only.flex{display:flex}
+
+  /* responsive */
+  @media(max-width:600px){
+    .term-header{flex-direction:column;align-items:flex-start}
+    .term-form{grid-template-columns:1fr}
+    .lab-map{grid-template-columns:1fr}
+  }
+/* Card stack view for inventory */
+.card-stack{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:12px}
+.inv-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);position:relative}
+.inv-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px)}
+.inv-card .card-icon{font-size:24px;margin-bottom:8px}
+.inv-card .card-name{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.inv-card .card-count{font-size:28px;font-weight:800;color:var(--accent);margin-bottom:8px}
+.inv-card .card-count span{font-size:12px;font-weight:400;color:var(--muted)}
+.inv-card .card-actions{display:flex;gap:6px;align-items:center}
+.inv-card .qty-btn{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--fg);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.inv-card .qty-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.inv-card .qty-btn.minus:hover{background:var(--danger);border-color:var(--danger)}
+.inv-card .qty-display{font-size:14px;font-weight:600;color:var(--fg);min-width:36px;max-width:60px;text-align:center;background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px 2px;outline:none;font-family:var(--font)}
+.inv-card .qty-display:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(66,153,225,0.15)}
+.inv-card .card-detail-hint{font-size:10px;color:var(--muted);margin-top:8px}
+.inv-card .card-del-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;line-height:1}
+.inv-card .card-del-btn:hover{color:var(--danger)}
+
+/* Expandable detail panel */
+.detail-panel{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:max-height .3s ease;max-height:0;opacity:0;margin-bottom:0}
+.detail-panel.open{max-height:2000px;opacity:1;margin-bottom:12px}
+.detail-panel .detail-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#ebf8ff;cursor:pointer}
+.detail-panel .detail-header h3{font-size:13px;color:var(--accent);font-weight:600;margin:0}
+.detail-panel .detail-close{background:none;border:none;color:var(--fg-dim);font-size:18px;cursor:pointer}
+.detail-panel .detail-body{padding:0}
+.detail-panel .detail-body table{margin:0}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="loginScreen" class="screen active">
+  <div class="login-wrap">
+    <div class="term-box" data-title="AUTHENTICATION">
+<pre class="ascii-art">
+   _____                  _       _      _         _   
+  / ____|                | |     | |    | |       | |  
+ | (___  _ __   __ _ _ __| |_ ___| |    | | ___ __| |_
+  \___ \| '_ \ / _` | '__| __/ _ \ |    | |/ / '__| __|
+  ____) | |_) | (_| | |  | ||  __/ |____|   <| |  | |_ 
+ |_____/| .__/ \__, |_|   \__\___|______|_|\_\_|   \__|
+        | |     __/ |                                  
+        |_|    |___/                                   
+</pre>
+      <div class="prompt-line"><span class="prompt">user:</span><input type="text" id="loginUser" placeholder="admin / user" autocomplete="off"></div>
+      <div class="prompt-line"><span class="prompt">pass:</span><input type="password" id="loginPass" placeholder="********" autocomplete="off"></div>
+      <div class="prompt-line"><button class="login-btn" id="loginBtn">[ EXECUTE LOGIN ]</button></div>
+      <div class="error-msg" id="loginError"></div>
+      <div class="hint">default credentials: admin/admin123 | user/user123</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN SCREEN ========== -->
+<div id="mainScreen" class="screen">
+  <header class="term-header">
+    <span class="brand glow">SparkMinds Lab v1.5</span>
+    <nav class="term-nav">
+      <button class="nav-btn active" data-panel="lab">[LAB_MONITOR]</button>
+      <button class="nav-btn" data-panel="print3d">[3D_MATERIALS]</button>
+      <button class="nav-btn" data-panel="warehouse">[WAREHOUSE]</button>
+      <button class="nav-btn admin-only" data-panel="users">[USER_MGMT]</button>
+      <button class="nav-btn" id="logoutBtn">[LOGOUT]</button>
+    </nav>
+    <span class="conn-status" id="connStatus">● OFFLINE</span>
+    <button class="nav-btn" id="simBtn" style="border-color:var(--warning);color:var(--warning)">[SIM:OFF]</button>
+  </header>
+
+  <!-- LAB MONITOR -->
+  <div id="panel-lab" class="panel active">
+    <div class="panel-title">>> sensor_monitor.exe --rooms=all --realtime --sensors=6</div>
+    <div class="lab-map" id="roomGrid"></div>
+  </div>
+
+  <!-- 3D PRINT MATERIALS -->
+  <div id="panel-print3d" class="panel">
+    <div class="panel-title">3D 打印材料管理</div>
+    <div class="term-box" data-title="ADD_MATERIAL">
+      <div class="term-form" id="materialForm">
+        <div><label>type</label><select id="mType"><option>PLA</option><option>ABS</option><option>PETG</option><option>TPU</option><option>树脂</option><option>尼龙</option><option>其他</option></select></div>
+        <div><label>color</label><input type="text" id="mColor" placeholder="white"></div>
+        <div><label>diameter</label><select id="mDia"><option>1.75mm</option><option>2.85mm</option></select></div>
+        <div><label>weight_g</label><input type="number" id="mWeight" placeholder="1000"></div>
+        <div><label>remaining_%</label><input type="number" id="mRemain" placeholder="100" min="0" max="100"></div>
+        <div><label>note</label><input type="text" id="mNote" placeholder="brand"></div>
+      </div>
+      <button class="term-btn-sm" id="addMaterialBtn">[ADD]</button>
+      <button class="term-btn-sm info" id="resetMaterialBtn">[RESET]</button>
+    </div>
+    <div class="card-stack" id="materialCards"></div>
+    <div class="detail-panel" id="materialDetail">
+      <div class="detail-header"><h3 id="materialDetailTitle">材料详情</h3><button class="detail-close" id="materialDetailClose">&times;</button></div>
+      <div class="detail-body">
+        <table class="term-table" id="materialTable">
+          <thead><tr><th>ID</th><th>TYPE</th><th>COLOR</th><th>DIAMETER</th><th>WEIGHT</th><th>REMAIN</th><th>STATUS</th><th>NOTE</th><th>ACTION</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAREHOUSE -->
+  <div id="panel-warehouse" class="panel">
+    <div class="panel-title">>> warehouse_manager.exe --stock</div>
+    <div class="term-tabs">
+      <button class="term-tab active" data-wh="components">[COMPONENTS]</button>
+      <button class="term-tab" data-wh="boards">[MAINBOARDS]</button>
+    </div>
+
+    <!-- Components -->
+    <div id="wh-components" class="wh-panel">
+      <div class="term-box" data-title="ADD_COMPONENT">
+        <div class="term-form" id="componentForm">
+          <div><label>种类</label><select id="cCat"><option>电阻</option><option>电容</option><option>电感</option><option>二极管</option><option>三极管/MOS</option><option>芯片/IC</option><option>传感器模块</option><option>连接器</option><option>杜邦线</option><option>电源模块</option><option>其他</option></select></div>
+          <div><label>名称</label><input type="text" id="cCustomName" placeholder="10k 电阻 1/4W"></div>
+          <div><label>型号</label><input type="text" id="cSpec" placeholder="0603 / 1%"></div>
+          <div><label>数量</label><input type="number" id="cQty" placeholder="100" min="0"></div>
+          <div><label>位置</label><input type="text" id="cLoc" placeholder="A-12-3"></div>
+          <div><label>备注</label><input type="text" id="cNote" placeholder=""></div>
+        </div>
+        <button class="term-btn-sm" id="addCompBtn">[ADD]</button>
+      </div>
+      <div class="card-stack" id="compCards"></div>
+      <div class="detail-panel" id="compDetail">
+        <div class="detail-header"><h3 id="compDetailTitle">元器件详情</h3><button class="detail-close" id="compDetailClose">&times;</button></div>
+        <div class="detail-body">
+          <table class="term-table" id="compTable">
+            <thead><tr><th>ID</th><th>种类</th><th>名称</th><th>型号</th><th>数量</th><th>位置</th><th>备注</th><th>ACTION</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mainboards -->
+    <div id="wh-boards" class="wh-panel" style="display:none">
+      <div class="term-box" data-title="ADD_BOARD">
+        <div class="term-form" id="boardForm">
+          <div><label>type</label><select id="bType"><option>ESP32</option><option>ESP32-C3</option><option>ESP32-S3</option><option>Arduino Uno</option><option>Arduino Mega</option><option>Arduino Nano</option><option>树莓派 Pico</option><option>树莓派 4B</option><option>树莓派 5</option><option>STM32</option><option>其他</option></select></div>
+          <div><label>model</label><input type="text" id="bModel" placeholder="NodeMCU-32S"></div>
+          <div><label>qty</label><input type="number" id="bQty" placeholder="5" min="0"></div>
+          <div><label>location</label><input type="text" id="bLoc" placeholder="B-05-1"></div>
+          <div><label>status</label><select id="bStatus"><option>全新</option><option>良好</option><option>待测试</option><option>故障</option></select></div>
+          <div><label>note</label><input type="text" id="bNote" placeholder=""></div>
+        </div>
+        <button class="term-btn-sm" id="addBoardBtn">[ADD]</button>
+      </div>
+      <div class="card-stack" id="boardCards"></div>
+      <div class="detail-panel" id="boardDetail">
+        <div class="detail-header"><h3 id="boardDetailTitle">主板详情</h3><button class="detail-close" id="boardDetailClose">&times;</button></div>
+        <div class="detail-body">
+          <table class="term-table" id="boardTable">
+            <thead><tr><th>ID</th><th>TYPE</th><th>MODEL</th><th>QTY</th><th>LOCATION</th><th>STATUS</th><th>NOTE</th><th>ACTION</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER MANAGEMENT -->
+  <div id="panel-users" class="panel">
+    <div class="panel-title">>> user_manager.exe --admin</div>
+    <div class="term-box" data-title="ADD_USER">
+      <div class="term-form" id="userForm">
+        <div><label>username</label><input type="text" id="uName" placeholder="newuser"></div>
+        <div><label>password</label><input type="password" id="uPass" placeholder="********"></div>
+        <div><label>role</label><select id="uRole"><option value="admin">admin</option><option value="user">user</option></select></div>
+      </div>
+      <button class="term-btn-sm" id="addUserBtn">[ADD_USER]</button>
+    </div>
+    <div class="term-box" data-title="USER_LIST">
+      <table class="term-table" id="userTable">
+        <thead><tr><th>USERNAME</th><th>ROLE</th><th>CREATED</th><th>ACTION</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="term-toast" id="toast"></div>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+(() => {
+  // ===================== CONFIG =====================
+  const BROKER = 'wss://broker.emqx.io:8084/mqtt';
+  const TOPIC_IN = 'SparkMinds_Lab';
+  const TOPIC_OUT = 'SparkMinds_Lab/Cmd';
+  const CLIENT_ID = 'web_term_' + Math.random().toString(36).slice(2, 8);
+  const LIGHT_OFF_THRESHOLD = 4000;
+
+  const ROOMS = [
+    { id: 'chuangzao', name: '创造课室', chip: 'ESP32C3', lights: 1 },
+    { id: 'chuangxin', name: '创新课室', chip: 'ESP32C3', lights: 2 },
+    { id: 'chuangzhi', name: '创智课室', chip: 'ESP32C3', lights: 1 },
+    { id: 'chuangyi', name: '创意课室', chip: 'ESP32C3', lights: 1 },
+    { id: 'xiuxi', name: '休息区', chip: 'ESP32C3', lights: 4 },
+    { id: 'bangong', name: '办公区', chip: 'ESP32C3', lights: 1 },
+    { id: '3d', name: '3D打印·操作·仓库区', chip: 'ESP32', lights: 1 },
+  ];
+
+  const AQI_LABELS = ['优', '良', '一般', '差', '很差', '严重污染'];
+  const AQI_COLORS = ['#00ff41', '#88ff00', '#ffb000', '#ff8800', '#ff3333', '#ff00ff'];
+
+  // ===================== STATE =====================
+  let currentUser = null;
+  let client = null;
+  const lightState = {};
+  const lightRawCache = {};
+  const sensorCache = {};
+
+  // ===================== SIMULATION (替代服务端 MQTT 模拟器) =====================
+  let simInterval = null;
+  const SIM_ROOMS = ['chuangzao', 'chuangxin', 'chuangzhi', 'chuangyi', 'xiuxi', 'bangong', '3d'];
+  function simRand(min, max) { return Math.random() * (max - min) + min; }
+  function simRandInt(min, max) { return Math.floor(simRand(min, max + 1)); }
+
+  function toggleSimulation() {
+    if (simInterval) {
+      clearInterval(simInterval);
+      simInterval = null;
+      const btn = $('#simBtn');
+      btn.textContent = '[SIM:OFF]';
+      btn.style.borderColor = 'var(--warning)';
+      btn.style.color = 'var(--warning)';
+      toast('模拟数据已关闭');
+    } else {
+      const btn = $('#simBtn');
+      btn.textContent = '[SIM:ON]';
+      btn.style.borderColor = 'var(--success)';
+      btn.style.color = 'var(--success)';
+      toast('模拟数据已开启（无真实设备时用于测试）');
+      simInterval = setInterval(() => {
+        const room = SIM_ROOMS[Math.floor(Math.random() * SIM_ROOMS.length)];
+        updateSensor(room, 'temp', simRand(22, 32).toFixed(1));
+        updateSensor(room, 'humi', simRand(40, 75).toFixed(1));
+        updateSensor(room, 'light', simRandInt(100, 4095));
+        updateSensor(room, 'aqi', simRandInt(0, 3));
+        updateSensor(room, 'tvoc', simRandInt(50, 800));
+        updateSensor(room, 'eco2', simRandInt(420, 900));
+      }, 4000);
+    }
+  }
+
+  // ===================== STORAGE =====================
+  // 用户数据存服务端（跨设备同步），库存数据仍存浏览器 localStorage
+  const API = '/api';
+
+  async function apiGetUsers() {
+    try {
+      const r = await fetch(`${API}/users`);
+      const j = await r.json();
+      return j.ok ? j.users : [];
+    } catch (e) { toast('无法连接服务器获取用户列表'); return []; }
+  }
+
+  async function apiLogin(name, pass) {
+    try {
+      const r = await fetch(`${API}/login`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, pass })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiAddUser(name, pass, role) {
+    try {
+      const r = await fetch(`${API}/users`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, pass, role })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiDeleteUser(name) {
+    try {
+      const r = await fetch(`${API}/users?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  function getMaterials() {
+    const raw = localStorage.getItem('lab_materials');
+    return raw ? JSON.parse(raw) : [];
+  }
+  function saveMaterials(m) { localStorage.setItem('lab_materials', JSON.stringify(m)); }
+
+  function getComponents() {
+    const raw = localStorage.getItem('lab_components');
+    return raw ? JSON.parse(raw) : [];
+  }
+  function saveComponents(c) { localStorage.setItem('lab_components', JSON.stringify(c)); }
+
+  function getBoards() {
+    const raw = localStorage.getItem('lab_boards');
+    return raw ? JSON.parse(raw) : [];
+  }
+  function saveBoards(b) { localStorage.setItem('lab_boards', JSON.stringify(b)); }
+
+  // ===================== DOM UTILS =====================
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function fmtDate(ts) {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  // ===================== LOGIN =====================
+  function initLogin() {
+    $('#loginBtn').addEventListener('click', doLogin);
+    $('#loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    const sess = sessionStorage.getItem('lab_session');
+    if (sess) {
+      const u = JSON.parse(sess);
+      currentUser = u;
+      enterApp();
+    }
+  }
+
+  async function doLogin() {
+    const name = $('#loginUser').value.trim();
+    const pass = $('#loginPass').value.trim();
+    if (!name || !pass) { $('#loginError').textContent = '请输入用户名和密码'; return; }
+    $('#loginError').textContent = '验证中...';
+    const res = await apiLogin(name, pass);
+    if (!res.ok) {
+      $('#loginError').textContent = '登录失败: ' + (res.msg || '无效凭证');
+      return;
+    }
+    currentUser = res.user;
+    sessionStorage.setItem('lab_session', JSON.stringify(res.user));
+    $('#loginError').textContent = '';
+    await enterApp();
+  }
+
+  async function enterApp() {
+    $('#loginScreen').classList.remove('active');
+    $('#mainScreen').classList.add('active');
+    if (currentUser.role === 'admin') document.body.classList.add('is-admin');
+    initRooms();
+    initMQTT();
+    renderMaterialCards();
+    renderCompCards();
+    renderBoardCards();
+    await renderUsers();
+    toast(`welcome, ${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
+  }
+
+  $('#logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('lab_session');
+    currentUser = null;
+    document.body.classList.remove('is-admin');
+    $('#mainScreen').classList.remove('active');
+    $('#loginScreen').classList.add('active');
+    if (client) { client.end(); client = null; }
+    if (simInterval) { clearInterval(simInterval); simInterval = null; }
+  });
+
+  // 模拟数据开关
+  $('#simBtn').addEventListener('click', toggleSimulation);
+
+  // ===================== NAVIGATION =====================
+  $$('.nav-btn[data-panel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.panel;
+      $$('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      $$('.panel').forEach(pa => pa.classList.remove('active'));
+      $('#panel-' + p).classList.add('active');
+    });
+  });
+
+  // ===================== ROOMS & SENSORS =====================
+  function createRoomElement(r) {
+    const div = document.createElement('div');
+    div.className = 'room-term';
+    div.id = 'room-' + r.id;
+    div.innerHTML = `
+      <div class="rt-header">
+        <span class="rt-name">${r.name}</span>
+        <span class="rt-chip">${r.chip}</span>
+      </div>
+      <div class="sensor-line"><span class="s-label">temp</span><span class="s-val" data-k="temp">-- °C</span></div>
+      <div class="sensor-line"><span class="s-label">humi</span><span class="s-val" data-k="humi">-- %</span></div>
+      <div class="sensor-line"><span class="s-label">light</span><span class="s-val" data-k="light" title="raw: --">-- %</span></div>
+      <div class="sensor-line"><span class="s-label">aqi_uba</span><span class="s-val" data-k="aqi">--</span></div>
+      <div class="sensor-line"><span class="s-label">tvoc</span><span class="s-val" data-k="tvoc">-- ppb</span></div>
+      <div class="sensor-line"><span class="s-label">eco2</span><span class="s-val" data-k="eco2">-- ppm</span></div>
+      <div class="light-bar" id="lb-${r.id}"></div>
+    `;
+    return div;
+  }
+
+  function initRooms() {
+    const grid = $('#roomGrid');
+    grid.innerHTML = '';
+
+    // Row 1: 4 classrooms (创造课室, 创新课室, 创智课室, 创意课室)
+    ROOMS.slice(0, 4).forEach(r => grid.appendChild(createRoomElement(r)));
+
+    // Row 2: corridor spanning 4 columns
+    const corridor = document.createElement('div');
+    corridor.className = 'lab-corridor';
+    corridor.textContent = '走 廊';
+    grid.appendChild(corridor);
+
+    // Row 3: bottom areas (休息区, 办公区, 3D打印·操作·仓库区)
+    const bottomRooms = ROOMS.slice(4);
+    bottomRooms.forEach((r, idx) => {
+      const div = createRoomElement(r);
+      // 3D打印区 spans 2 columns
+      if (idx === 2) div.style.gridColumn = 'span 2';
+      // 休息区 gets a door marker at top-left
+      if (idx === 0) {
+        const marker = document.createElement('div');
+        marker.className = 'room-door-marker';
+        marker.textContent = '\uD83D\uDEAA\u5927\u95E8\u5165\u53E3';
+        div.appendChild(marker);
+      }
+      grid.appendChild(div);
+    });
+
+    // Build light bars for all rooms
+    ROOMS.forEach(r => buildLightBar(r));
+  }
+
+  function buildLightBar(r) {
+    const bar = $(`#lb-${r.id}`);
+    bar.innerHTML = '';
+    const count = r.lights;
+    const isAdmin = currentUser.role === 'admin';
+    for (let i = 1; i <= count; i++) {
+      const tag = document.createElement('span');
+      tag.className = 'light-tag off';
+      tag.id = `tag-${r.id}${count===1?'':'-'+i}`;
+      tag.textContent = count === 1 ? 'LIGHT:OFF' : `L${i}:OFF`;
+      bar.appendChild(tag);
+
+      if (isAdmin) {
+        const btn = document.createElement('button');
+        btn.className = 'light-btn-term';
+        btn.dataset.room = r.id;
+        if (count > 1) btn.dataset.light = i;
+        btn.textContent = count === 1 ? '[TOGGLE]' : `[L${i}]`;
+        btn.addEventListener('click', () => sendLightCmd(r.id, count > 1 ? i : 1));
+        bar.appendChild(btn);
+      }
+    }
+    if (!isAdmin) {
+      const ro = document.createElement('span');
+      ro.className = 'light-readonly';
+      ro.textContent = '🔒 只读';
+      bar.appendChild(ro);
+    }
+  }
+
+  function sendLightCmd(roomId, lightIdx) {
+    if (currentUser.role !== 'admin') { toast('权限不足：仅管理员可控制灯光'); return; }
+    const key = lightIdx === 1 && ROOMS.find(r=>r.id===roomId).lights===1 ? roomId : roomId+'_'+lightIdx;
+    const isOn = !!lightState[key];
+    const cmd = { room: roomId, light: lightIdx, cmd: isOn ? 'off' : 'on', user: currentUser.name, role: currentUser.role };
+    if (client && client.connected) {
+      client.publish(TOPIC_OUT, JSON.stringify(cmd));
+    }
+    toast(`${roomId} L${lightIdx} -> ${isOn?'OFF':'ON'}`);
+    // optimistic toggle
+    updateLightUI(roomId, lightIdx, !isOn);
+  }
+
+  function updateLightUI(roomId, lightIdx, isOn) {
+    const r = ROOMS.find(x => x.id === roomId);
+    if (!r) return;
+    const count = r.lights;
+    const tagId = count === 1 ? `tag-${roomId}` : `tag-${roomId}-${lightIdx}`;
+    const tag = document.getElementById(tagId);
+    if (tag) {
+      tag.className = 'light-tag ' + (isOn ? 'on' : 'off');
+      tag.textContent = count === 1 ? (isOn ? 'LIGHT:ON' : 'LIGHT:OFF') : `L${lightIdx}:${isOn?'ON':'OFF'}`;
+    }
+    const key = count === 1 ? roomId : roomId + '_' + lightIdx;
+    lightState[key] = isOn;
+  }
+
+  function updateSensor(roomId, key, value) {
+    const roomEl = document.getElementById('room-' + roomId);
+    if (!roomEl) return;
+    const el = roomEl.querySelector(`[data-k="${key}"]`);
+    if (!el) return;
+
+    if (key === 'light') {
+      const raw = parseInt(value);
+      lightRawCache[roomId] = raw;
+      const pct = Math.max(0, Math.min(100, Math.round((1 - raw / 4095) * 100)));
+      el.textContent = pct + ' %';
+      el.title = `raw ADC: ${raw}`;
+      const isOn = raw <= LIGHT_OFF_THRESHOLD;
+      const r = ROOMS.find(x => x.id === roomId);
+      if (r) {
+        for (let i = 1; i <= r.lights; i++) updateLightUI(roomId, i, isOn);
+      }
+      return;
+    }
+
+    if (key === 'aqi') {
+      const v = parseInt(value);
+      const label = AQI_LABELS[v] || '未知';
+      const color = AQI_COLORS[v] || '#888';
+      el.textContent = `${v} [${label}]`;
+      el.style.color = color;
+      return;
+    }
+
+    if (key === 'tvoc') {
+      el.textContent = value + ' ppb';
+      const v = parseInt(value);
+      el.classList.toggle('warn', v >= 500 && v < 1500);
+      el.classList.toggle('danger', v >= 1500);
+      return;
+    }
+
+    if (key === 'eco2') {
+      el.textContent = value + ' ppm';
+      const v = parseInt(value);
+      el.classList.toggle('warn', v >= 1000 && v < 2000);
+      el.classList.toggle('danger', v >= 2000);
+      return;
+    }
+
+    if (key === 'temp') {
+      el.textContent = value + ' °C';
+      const v = parseFloat(value);
+      el.classList.toggle('warn', v >= 35 && v < 40);
+      el.classList.toggle('danger', v >= 40);
+      return;
+    }
+
+    if (key === 'humi') {
+      el.textContent = value + ' %';
+      const v = parseFloat(value);
+      el.classList.toggle('warn', (v >= 80 && v < 90) || (v <= 20 && v > 10));
+      el.classList.toggle('danger', v >= 90 || v <= 10);
+      return;
+    }
+
+    el.textContent = value;
+  }
+
+  // ===================== MQTT =====================
+  function initMQTT() {
+    client = mqtt.connect(BROKER, { clientId: CLIENT_ID, clean: true, reconnectPeriod: 3000 });
+
+    client.on('connect', () => {
+      $('#connStatus').textContent = '● ONLINE';
+      $('#connStatus').classList.add('online');
+      client.subscribe(TOPIC_IN, { qos: 0 }, err => {
+        if (!err) toast('mqtt subscribed: ' + TOPIC_IN);
+      });
+    });
+
+    client.on('message', (topic, payload) => {
+      try {
+        const d = JSON.parse(new TextDecoder().decode(payload));
+        if (!d.room) return;
+        const rid = d.room;
+        if (d.temp != null) updateSensor(rid, 'temp', d.temp);
+        if (d.humi != null) updateSensor(rid, 'humi', d.humi);
+        if (d.light != null) updateSensor(rid, 'light', d.light);
+        if (d.aqi != null) updateSensor(rid, 'aqi', d.aqi);
+        if (d.tvoc != null) updateSensor(rid, 'tvoc', d.tvoc);
+        if (d.eco2 != null) updateSensor(rid, 'eco2', d.eco2);
+      } catch (e) {
+        console.warn('mqtt parse error:', e);
+      }
+    });
+
+    client.on('error', () => {
+      $('#connStatus').textContent = '● ERROR';
+      $('#connStatus').classList.remove('online');
+    });
+    client.on('close', () => {
+      $('#connStatus').textContent = '● OFFLINE';
+      $('#connStatus').classList.remove('online');
+    });
+    client.on('reconnect', () => {
+      $('#connStatus').textContent = '● RECONNECT...';
+    });
+  }
+
+  // ===================== 3D MATERIALS =====================
+  // Card stack view
+  function renderMaterialCards() {
+    const container = $('#materialCards');
+    const items = getMaterials();
+    const groups = {};
+    items.forEach(m => {
+      if (!groups[m.type]) groups[m.type] = { count: 0, items: [] };
+      groups[m.type].count++;
+      groups[m.type].items.push(m);
+    });
+    container.innerHTML = '';
+    for (const type in groups) {
+      const g = groups[type];
+      const card = document.createElement('div');
+      card.className = 'inv-card';
+      card.innerHTML = `
+        <button class="card-del-btn" data-type="${type}" title="删除该类型所有">&times;</button>
+        <div class="card-name">${type}</div>
+        <div class="card-count">${g.count} <span>件</span></div>
+        <div class="card-actions">
+          <button class="qty-btn minus" data-type="${type}">-</button>
+          <input type="number" class="qty-display" value="${g.count}" min="0" data-type="${type}">
+          <button class="qty-btn plus" data-type="${type}">+</button>
+        </div>
+        <div class="card-detail-hint">点击查看详情</div>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.qty-btn') || e.target.closest('.card-del-btn')) return;
+        openMaterialDetail(type);
+      });
+      container.appendChild(card);
+    }
+    // +/- buttons
+    container.querySelectorAll('.qty-btn.minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const type = btn.dataset.type;
+        let items = getMaterials();
+        const typeItems = items.filter(x => x.type === type);
+        if (typeItems.length === 0) return;
+        const lastItem = typeItems[typeItems.length - 1];
+        items = items.filter(x => x.id !== lastItem.id);
+        saveMaterials(items);
+        renderMaterialCards();
+        if ($('#materialDetail').classList.contains('open') && $('#materialDetailTitle').textContent === type) {
+          openMaterialDetail(type);
+        }
+        toast(`${type} -1`);
+      });
+    });
+    container.querySelectorAll('.qty-btn.plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const type = btn.dataset.type;
+        const items = getMaterials();
+        items.push({ id: Date.now(), type, color: '新增', diameter: '1.75mm', weight: 1000, remain: 100, note: '快速添加', created: Date.now() });
+        saveMaterials(items);
+        renderMaterialCards();
+        if ($('#materialDetail').classList.contains('open') && $('#materialDetailTitle').textContent === type) {
+          openMaterialDetail(type);
+        }
+        toast(`${type} +1`);
+      });
+    });
+    // delete all button
+    container.querySelectorAll('.card-del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const type = btn.dataset.type;
+        if (!confirm(`确定删除所有 ${type} 吗？`)) return;
+        let items = getMaterials();
+        items = items.filter(x => x.type !== type);
+        saveMaterials(items);
+        renderMaterialCards();
+        $('#materialDetail').classList.remove('open');
+        toast(`已删除所有 ${type}`);
+      });
+    });
+    container.querySelectorAll('.qty-display').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        e.stopPropagation();
+        const type = inp.dataset.type;
+        const newCount = parseInt(inp.value) || 0;
+        let items = getMaterials();
+        const currentItems = items.filter(x => x.type === type);
+        const currentCount = currentItems.length;
+        if (newCount > currentCount) {
+          for (let i = 0; i < newCount - currentCount; i++) {
+            items.push({ id: Date.now() + i, type, color: '新增', diameter: '1.75mm', weight: 1000, remain: 100, note: '批量修改', created: Date.now() });
+          }
+        } else if (newCount < currentCount) {
+          const toRemove = currentCount - newCount;
+          const typeIds = currentItems.slice(-toRemove).map(x => x.id);
+          items = items.filter(x => !typeIds.includes(x.id));
+        }
+        saveMaterials(items);
+        renderMaterialCards();
+        if ($('#materialDetail').classList.contains('open') && $('#materialDetailTitle').textContent === type) {
+          openMaterialDetail(type);
+        }
+        toast(`${type} 数量调整为 ${newCount}`);
+      });
+    });
+  }
+
+  function openMaterialDetail(type) {
+    const panel = $('#materialDetail');
+    $('#materialDetailTitle').textContent = type;
+    panel.classList.add('open');
+    const tbody = $('#materialTable tbody');
+    const items = getMaterials().filter(m => m.type === type);
+    tbody.innerHTML = items.map((m, i) => {
+      let status = 'OK'; if (m.remain <= 0) status = 'EMPTY'; else if (m.remain < 15) status = 'LOW';
+      const sc = status === 'EMPTY' ? 'color:var(--danger)' : status === 'LOW' ? 'color:var(--accent)' : 'color:var(--fg)';
+      return `<tr><td>${i+1}</td><td>${m.type}</td><td>${m.color}</td><td>${m.diameter}</td><td>${m.weight}g</td><td>${m.remain}%</td><td style="${sc}">${status}</td><td>${m.note||'-'}</td><td><button class="term-btn-sm" onclick="editMaterial(${m.id})">[EDIT]</button><button class="term-btn-sm danger" onclick="deleteMaterial(${m.id})">[DEL]</button></td></tr>`;
+    }).join('');
+  }
+  $('#materialDetailClose').addEventListener('click', () => {
+    $('#materialDetail').classList.remove('open');
+  });
+
+  function renderMaterials() {
+    // Simplified - detail panel rendering handled by openMaterialDetail()
+    // Kept for backward compatibility with edit/delete callbacks
+  }
+
+  window.editMaterial = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    const items = getMaterials();
+    const m = items.find(x => x.id === id);
+    if (!m) return;
+    $('#mType').value = m.type;
+    $('#mColor').value = m.color;
+    $('#mDia').value = m.diameter;
+    $('#mWeight').value = m.weight;
+    $('#mRemain').value = m.remain;
+    $('#mNote').value = m.note;
+    deleteMaterial(id);
+  };
+
+  window.deleteMaterial = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    let items = getMaterials();
+    items = items.filter(x => x.id !== id);
+    saveMaterials(items);
+    renderMaterialCards();
+    // If detail panel is open, check if we need to refresh or close it
+    const openType = $('#materialDetailTitle').textContent;
+    const remaining = items.filter(x => x.type === openType);
+    if (remaining.length > 0) {
+      openMaterialDetail(openType);
+    } else {
+      $('#materialDetail').classList.remove('open');
+    }
+    toast('material deleted');
+  };
+
+  $('#addMaterialBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    const type = $('#mType').value;
+    const color = $('#mColor').value.trim() || 'unknown';
+    const diameter = $('#mDia').value;
+    const weight = parseInt($('#mWeight').value) || 0;
+    const remain = parseInt($('#mRemain').value) || 0;
+    const note = $('#mNote').value.trim();
+    const items = getMaterials();
+    items.push({ id: Date.now(), type, color, diameter, weight, remain, note, created: Date.now() });
+    saveMaterials(items);
+    renderMaterialCards();
+    toast('material added');
+  });
+
+  $('#resetMaterialBtn').addEventListener('click', () => {
+    $('#mColor').value = '';
+    $('#mWeight').value = '';
+    $('#mRemain').value = '';
+    $('#mNote').value = '';
+  });
+
+  // ===================== WAREHOUSE =====================
+  // tabs
+  $$('.term-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      $$('.term-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.wh;
+      $$('.wh-panel').forEach(p => p.style.display = 'none');
+      $('#wh-' + target).style.display = 'block';
+    });
+  });
+
+  // Components card stack view — 数量融合：卡片显示 qty 总和，与详情表格联动
+  function compSumQty(list) { return list.reduce((s, x) => s + (parseInt(x.qty) || 0), 0); }
+  function renderCompCards() {
+    const container = $('#compCards');
+    const items = getComponents();
+    const groups = {};
+    items.forEach(c => {
+      if (!groups[c.category]) groups[c.category] = { count: 0, totalQty: 0, items: [] };
+      groups[c.category].count++;
+      groups[c.category].totalQty += (parseInt(c.qty) || 0);
+      groups[c.category].items.push(c);
+    });
+    container.innerHTML = '';
+    for (const category in groups) {
+      const g = groups[category];
+      const card = document.createElement('div');
+      card.className = 'inv-card';
+      card.innerHTML = `
+        <button class="card-del-btn" data-cat="${category}" title="删除该类别所有">&times;</button>
+        <div class="card-name">${category}</div>
+        <div class="card-count">${g.totalQty} <span>件</span></div>
+        <div class="card-actions">
+          <button class="qty-btn minus" data-cat="${category}">-</button>
+          <input type="number" class="qty-display" value="${g.totalQty}" min="0" data-cat="${category}">
+          <button class="qty-btn plus" data-cat="${category}">+</button>
+        </div>
+        <div class="card-detail-hint">${g.count} 条记录 · 点击查看详情</div>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.qty-btn') || e.target.closest('.card-del-btn')) return;
+        openCompDetail(category);
+      });
+      container.appendChild(card);
+    }
+    // +/- 与输入框均联动 qty 总和（与详情表格同一数量口径）
+    container.querySelectorAll('.qty-btn.minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const cat = btn.dataset.cat;
+        let items = getComponents();
+        const catItems = items.filter(x => x.category === cat);
+        if (catItems.length === 0) return;
+        const lastItem = catItems[catItems.length - 1];
+        const target = items.find(x => x.id === lastItem.id);
+        target.qty = Math.max(0, (parseInt(target.qty) || 0) - 1);
+        if (target.qty === 0 && catItems.length > 1) items = items.filter(x => x.id !== target.id);
+        saveComponents(items);
+        renderCompCards();
+        if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
+          openCompDetail(cat);
+        }
+        toast(`${cat} -1`);
+      });
+    });
+    container.querySelectorAll('.qty-btn.plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const cat = btn.dataset.cat;
+        let items = getComponents();
+        const catItems = items.filter(x => x.category === cat);
+        if (catItems.length > 0) {
+          const target = items.find(x => x.id === catItems[catItems.length - 1].id);
+          target.qty = (parseInt(target.qty) || 0) + 1;
+        } else {
+          items.push({ id: Date.now(), category: cat, customName: '新增', spec: '-', qty: 1, location: '-', note: '快速添加', created: Date.now() });
+        }
+        saveComponents(items);
+        renderCompCards();
+        if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
+          openCompDetail(cat);
+        }
+        toast(`${cat} +1`);
+      });
+    });
+    container.querySelectorAll('.card-del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const cat = btn.dataset.cat;
+        if (!confirm(`确定删除所有 ${cat} 吗？`)) return;
+        let items = getComponents();
+        items = items.filter(x => x.category !== cat);
+        saveComponents(items);
+        renderCompCards();
+        $('#compDetail').classList.remove('open');
+        toast(`已删除所有 ${cat}`);
+      });
+    });
+    container.querySelectorAll('.qty-display').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const cat = inp.dataset.cat;
+        const newTotal = parseInt(inp.value) || 0;
+        let items = getComponents();
+        const catItems = items.filter(x => x.category === cat);
+        const currentTotal = compSumQty(catItems);
+        if (catItems.length === 0) {
+          if (newTotal > 0) items.push({ id: Date.now(), category: cat, customName: '新增', spec: '-', qty: newTotal, location: '-', note: '批量修改', created: Date.now() });
+        } else {
+          const diff = newTotal - currentTotal;
+          if (diff !== 0) {
+            const target = items.find(x => x.id === catItems[catItems.length - 1].id);
+            target.qty = Math.max(0, (parseInt(target.qty) || 0) + diff);
+            if (target.qty === 0 && catItems.length > 1) items = items.filter(x => x.id !== target.id);
+          }
+        }
+        saveComponents(items);
+        renderCompCards();
+        if ($('#compDetail').classList.contains('open') && $('#compDetailTitle').textContent === cat) {
+          openCompDetail(cat);
+        }
+        toast(`${cat} 总数调整为 ${newTotal}`);
+      });
+    });
+  }
+
+  function openCompDetail(category) {
+    const panel = $('#compDetail');
+    $('#compDetailTitle').textContent = category;
+    panel.classList.add('open');
+    const tbody = $('#compTable tbody');
+    const items = getComponents().filter(c => c.category === category);
+    tbody.innerHTML = items.map((c, i) => {
+      return `<tr><td>${i+1}</td><td>${c.category}</td><td>${c.customName||'-'}</td><td>${c.spec||'-'}</td><td><input type="number" class="qty-inline" value="${c.qty}" min="0" data-id="${c.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${c.location||'-'}</td><td>${c.note||'-'}</td><td><button class="term-btn-sm" onclick="editComponent(${c.id})">[EDIT]</button><button class="term-btn-sm danger" onclick="deleteComponent(${c.id})">[DEL]</button></td></tr>`;
+    }).join('');
+  }
+  $('#compDetailClose').addEventListener('click', () => {
+    $('#compDetail').classList.remove('open');
+  });
+
+  function renderComponents() {
+    // Simplified - detail panel rendering handled by openCompDetail()
+  }
+
+  window.editComponent = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const items = getComponents();
+    const c = items.find(x => x.id === id);
+    if (!c) return;
+    $('#cCat').value = c.category;
+    $('#cCustomName').value = c.customName || '';
+    $('#cSpec').value = c.spec;
+    $('#cQty').value = c.qty;
+    $('#cLoc').value = c.location;
+    $('#cNote').value = c.note;
+    deleteComponent(id);
+  };
+
+  window.deleteComponent = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    let items = getComponents();
+    items = items.filter(x => x.id !== id);
+    saveComponents(items);
+    renderCompCards();
+    const openCat = $('#compDetailTitle').textContent;
+    const remaining = items.filter(x => x.category === openCat);
+    if (remaining.length > 0) {
+      openCompDetail(openCat);
+    } else {
+      $('#compDetail').classList.remove('open');
+    }
+    toast('component deleted');
+  };
+
+  $('#addCompBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const category = $('#cCat').value;
+    const customName = $('#cCustomName').value.trim();
+    if (!customName) { toast('名称不能为空'); return; }
+    const spec = $('#cSpec').value.trim();
+    const qty = parseInt($('#cQty').value) || 0;
+    const location = $('#cLoc').value.trim();
+    const note = $('#cNote').value.trim();
+    const items = getComponents();
+    items.push({ id: Date.now(), category, customName, spec, qty, location, note, created: Date.now() });
+    saveComponents(items);
+    renderCompCards();
+    toast('component added');
+  });
+
+  // Boards card stack view — 数量融合：卡片显示 qty 总和，与详情表格联动
+  function renderBoardCards() {
+    const container = $('#boardCards');
+    const items = getBoards();
+    const groups = {};
+    items.forEach(b => {
+      if (!groups[b.type]) groups[b.type] = { count: 0, totalQty: 0, items: [] };
+      groups[b.type].count++;
+      groups[b.type].totalQty += (parseInt(b.qty) || 0);
+      groups[b.type].items.push(b);
+    });
+    container.innerHTML = '';
+    for (const type in groups) {
+      const g = groups[type];
+      const card = document.createElement('div');
+      card.className = 'inv-card';
+      card.innerHTML = `
+        <button class="card-del-btn" data-type="${type}" title="删除该类型所有">&times;</button>
+        <div class="card-name">${type}</div>
+        <div class="card-count">${g.totalQty} <span>件</span></div>
+        <div class="card-actions">
+          <button class="qty-btn minus" data-type="${type}">-</button>
+          <input type="number" class="qty-display" value="${g.totalQty}" min="0" data-type="${type}">
+          <button class="qty-btn plus" data-type="${type}">+</button>
+        </div>
+        <div class="card-detail-hint">${g.count} 条记录 · 点击查看详情</div>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.qty-btn') || e.target.closest('.card-del-btn')) return;
+        openBoardDetail(type);
+      });
+      container.appendChild(card);
+    }
+    // +/- 与输入框均联动 qty 总和（与详情表格同一数量口径）
+    container.querySelectorAll('.qty-btn.minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const type = btn.dataset.type;
+        let items = getBoards();
+        const typeItems = items.filter(x => x.type === type);
+        if (typeItems.length === 0) return;
+        const lastItem = typeItems[typeItems.length - 1];
+        const target = items.find(x => x.id === lastItem.id);
+        target.qty = Math.max(0, (parseInt(target.qty) || 0) - 1);
+        if (target.qty === 0 && typeItems.length > 1) items = items.filter(x => x.id !== target.id);
+        saveBoards(items);
+        renderBoardCards();
+        if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
+          openBoardDetail(type);
+        }
+        toast(`${type} -1`);
+      });
+    });
+    container.querySelectorAll('.qty-btn.plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const type = btn.dataset.type;
+        let items = getBoards();
+        const typeItems = items.filter(x => x.type === type);
+        if (typeItems.length > 0) {
+          const target = items.find(x => x.id === typeItems[typeItems.length - 1].id);
+          target.qty = (parseInt(target.qty) || 0) + 1;
+        } else {
+          items.push({ id: Date.now(), type, model: '新增', qty: 1, location: '-', status: '待测试', note: '快速添加', created: Date.now() });
+        }
+        saveBoards(items);
+        renderBoardCards();
+        if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
+          openBoardDetail(type);
+        }
+        toast(`${type} +1`);
+      });
+    });
+    container.querySelectorAll('.card-del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const type = btn.dataset.type;
+        if (!confirm(`确定删除所有 ${type} 吗？`)) return;
+        let items = getBoards();
+        items = items.filter(x => x.type !== type);
+        saveBoards(items);
+        renderBoardCards();
+        $('#boardDetail').classList.remove('open');
+        toast(`已删除所有 ${type}`);
+      });
+    });
+    container.querySelectorAll('.qty-display').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        const type = inp.dataset.type;
+        const newTotal = parseInt(inp.value) || 0;
+        let items = getBoards();
+        const typeItems = items.filter(x => x.type === type);
+        const currentTotal = compSumQty(typeItems);
+        if (typeItems.length === 0) {
+          if (newTotal > 0) items.push({ id: Date.now(), type, model: '新增', qty: newTotal, location: '-', status: '待测试', note: '批量修改', created: Date.now() });
+        } else {
+          const diff = newTotal - currentTotal;
+          if (diff !== 0) {
+            const target = items.find(x => x.id === typeItems[typeItems.length - 1].id);
+            target.qty = Math.max(0, (parseInt(target.qty) || 0) + diff);
+            if (target.qty === 0 && typeItems.length > 1) items = items.filter(x => x.id !== target.id);
+          }
+        }
+        saveBoards(items);
+        renderBoardCards();
+        if ($('#boardDetail').classList.contains('open') && $('#boardDetailTitle').textContent === type) {
+          openBoardDetail(type);
+        }
+        toast(`${type} 总数调整为 ${newTotal}`);
+      });
+    });
+  }
+
+  function openBoardDetail(type) {
+    const panel = $('#boardDetail');
+    $('#boardDetailTitle').textContent = type;
+    panel.classList.add('open');
+    const tbody = $('#boardTable tbody');
+    const items = getBoards().filter(b => b.type === type);
+    tbody.innerHTML = items.map((b, i) => {
+      const sc = b.status === '故障' ? 'color:var(--danger)' : b.status === '待测试' ? 'color:var(--warning)' : b.status === '全新' ? 'color:var(--success)' : 'color:var(--fg)';
+      return `<tr><td>${i+1}</td><td>${b.type}</td><td>${b.model||'-'}</td><td><input type="number" class="qty-inline" value="${b.qty}" min="0" data-id="${b.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${b.location||'-'}</td><td style="${sc}">${b.status}</td><td>${b.note||'-'}</td><td><button class="term-btn-sm" onclick="editBoard(${b.id})">[EDIT]</button><button class="term-btn-sm danger" onclick="deleteBoard(${b.id})">[DEL]</button></td></tr>`;
+    }).join('');
+  }
+  $('#boardDetailClose').addEventListener('click', () => {
+    $('#boardDetail').classList.remove('open');
+  });
+
+  function renderBoards() {
+    // Simplified - detail panel rendering handled by openBoardDetail()
+  }
+
+  window.editBoard = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const items = getBoards();
+    const b = items.find(x => x.id === id);
+    if (!b) return;
+    $('#bType').value = b.type;
+    $('#bModel').value = b.model;
+    $('#bQty').value = b.qty;
+    $('#bLoc').value = b.location;
+    $('#bStatus').value = b.status;
+    $('#bNote').value = b.note;
+    deleteBoard(id);
+  };
+
+  window.deleteBoard = function(id) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    let items = getBoards();
+    items = items.filter(x => x.id !== id);
+    saveBoards(items);
+    renderBoardCards();
+    const openType = $('#boardDetailTitle').textContent;
+    const remaining = items.filter(x => x.type === openType);
+    if (remaining.length > 0) {
+      openBoardDetail(openType);
+    } else {
+      $('#boardDetail').classList.remove('open');
+    }
+    toast('board deleted');
+  };
+
+  window.updateItemQty = function(el) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const id = parseInt(el.dataset.id);
+    const newQty = parseInt(el.value) || 0;
+    // 尝试更新 materials
+    let items = getMaterials();
+    const m = items.find(x => x.id === id);
+    if (m) { m.qty = newQty; saveMaterials(items); renderMaterialCards(); toast('数量已更新'); return; }
+    // 尝试更新 components
+    items = getComponents();
+    const c = items.find(x => x.id === id);
+    if (c) { c.qty = newQty; saveComponents(items); renderCompCards(); toast('数量已更新'); return; }
+    // 尝试更新 boards
+    items = getBoards();
+    const b = items.find(x => x.id === id);
+    if (b) { b.qty = newQty; saveBoards(items); renderBoardCards(); toast('数量已更新'); return; }
+  };
+
+  $('#addBoardBtn').addEventListener('click', () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const type = $('#bType').value;
+    const model = $('#bModel').value.trim();
+    const qty = parseInt($('#bQty').value) || 0;
+    const location = $('#bLoc').value.trim();
+    const status = $('#bStatus').value;
+    const note = $('#bNote').value.trim();
+    const items = getBoards();
+    items.push({ id: Date.now(), type, model, qty, location, status, note, created: Date.now() });
+    saveBoards(items);
+    renderBoardCards();
+    toast('board added');
+  });
+
+  // ===================== USER MANAGEMENT =====================
+  async function renderUsers() {
+    const tbody = $('#userTable tbody');
+    const users = await apiGetUsers();
+    tbody.innerHTML = users.map(u => `<tr>
+      <td>${u.name}</td>
+      <td>${u.role}</td>
+      <td>${fmtDate(u.created)}</td>
+      <td>
+        ${u.name === 'admin' ? '<span style="color:var(--muted)">[PROTECTED]</span>' : `<button class="term-btn-sm danger" onclick="deleteUser('${u.name}')">[DEL]</button>`}
+      </td>
+    </tr>`).join('');
+  }
+
+  window.deleteUser = async function(name) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (name === 'admin') { toast('cannot delete admin'); return; }
+    const res = await apiDeleteUser(name);
+    if (!res.ok) { toast('删除失败: ' + (res.msg || '未知错误')); return; }
+    await renderUsers();
+    toast('user deleted');
+  };
+
+  $('#addUserBtn').addEventListener('click', async () => {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const name = $('#uName').value.trim();
+    const pass = $('#uPass').value.trim();
+    const role = $('#uRole').value;
+    if (!name || !pass) { toast('username and password required'); return; }
+    const res = await apiAddUser(name, pass, role);
+    if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
+    await renderUsers();
+    $('#uName').value = '';
+    $('#uPass').value = '';
+    toast('user created');
+  });
+
+  // ===================== INIT =====================
+  initLogin();
+})();
+</script>
+</body>
+</html>
