@@ -1,5 +1,5 @@
 /**
- * SparkMinds Lab v1.7 — Cloudflare Worker
+ * SparkMinds Lab v1.8 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权系统，静态资源由 Cloudflare Assets 分发
  */
 
@@ -60,7 +60,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       try {
         if (url.pathname === '/api/health')
-          return json({ ok: true, time: Date.now(), version: 'v1.7' });
+          return json({ ok: true, time: Date.now(), version: 'v1.8' });
 
         if (url.pathname === '/api/login' && request.method === 'POST') {
           const { name, pass } = await readBody(request);
