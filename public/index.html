@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v1.5]</title>
+<title>SparkMinds Lab [v1.7]</title>
 <style>
   :root{
     --bg:#f0f4f8;
@@ -203,12 +203,14 @@
 <!-- ========== MAIN SCREEN ========== -->
 <div id="mainScreen" class="screen">
   <header class="term-header">
-    <span class="brand glow">SparkMinds Lab v1.5</span>
+    <span class="brand glow">SparkMinds Lab v1.7</span>
     <nav class="term-nav">
       <button class="nav-btn active" data-panel="lab">[LAB_MONITOR]</button>
       <button class="nav-btn" data-panel="print3d">[3D_MATERIALS]</button>
       <button class="nav-btn" data-panel="warehouse">[WAREHOUSE]</button>
       <button class="nav-btn admin-only" data-panel="users">[USER_MGMT]</button>
+      <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative">[审批]<span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
+      <button class="nav-btn" id="myReqBtn">[我的申请]</button>
       <button class="nav-btn" id="logoutBtn">[LOGOUT]</button>
     </nav>
     <span class="conn-status" id="connStatus">● OFFLINE</span>
@@ -320,10 +322,56 @@
     </div>
     <div class="term-box" data-title="USER_LIST">
       <table class="term-table" id="userTable">
-        <thead><tr><th>USERNAME</th><th>ROLE</th><th>CREATED</th><th>ACTION</th></tr></thead>
+        <thead><tr><th>USERNAME</th><th>PASSWORD</th><th>ROLE</th><th>CREATED</th><th>ACTION</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- 申请弹窗 -->
+<div id="reqModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
+  <div style="background:var(--bg);border:1px solid var(--accent);border-radius:12px;padding:32px;max-width:480px;width:90%">
+    <h3 style="color:var(--accent);margin-bottom:16px">提交授权申请</h3>
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">操作类型</label>
+      <select id="reqType" style="width:100%;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--ink);font-size:14px">
+        <option value="material_add">3D材料 - 新增</option>
+        <option value="material_edit">3D材料 - 修改</option>
+        <option value="material_del">3D材料 - 删除</option>
+        <option value="comp_add">元器件 - 新增</option>
+        <option value="comp_edit">元器件 - 修改</option>
+        <option value="comp_del">元器件 - 删除</option>
+        <option value="board_add">主板 - 新增</option>
+        <option value="board_edit">主板 - 修改</option>
+        <option value="board_del">主板 - 删除</option>
+        <option value="light_control">灯光控制</option>
+        <option value="other">其他操作</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">操作目标</label>
+      <input id="reqTarget" type="text" placeholder="例如：PLA白色 / 电感 / Arduino Uno" style="width:100%;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--ink);font-size:14px">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">详细说明</label>
+      <textarea id="reqDetail" rows="3" placeholder="请描述你要进行的操作..." style="width:100%;background:var(--bg2);border:1px solid var(--rule);border-radius:6px;padding:8px 12px;color:var(--ink);font-size:14px;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="nav-btn" id="reqCancel">[取消]</button>
+      <button class="nav-btn" id="reqSubmit" style="border-color:var(--accent);color:var(--accent)">[提交申请]</button>
+    </div>
+  </div>
+</div>
+
+<!-- 审批面板 -->
+<div id="reqPanel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center">
+  <div style="background:var(--bg);border:1px solid var(--accent);border-radius:12px;padding:32px;max-width:720px;width:92%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:var(--accent)" id="reqPanelTitle">授权申请管理</h3>
+      <button class="nav-btn" id="reqPanelClose">[关闭]</button>
+    </div>
+    <div id="reqListBody"></div>
   </div>
 </div>
 
@@ -347,6 +395,7 @@
     { id: 'xiuxi', name: '休息区', chip: 'ESP32C3', lights: 4 },
     { id: 'bangong', name: '办公区', chip: 'ESP32C3', lights: 1 },
     { id: '3d', name: '3D打印·操作·仓库区', chip: 'ESP32', lights: 1 },
+    { id: 'damen', name: '大门入口', chip: 'ESP32C3', lights: 1 },
   ];
 
   const AQI_LABELS = ['优', '良', '一般', '差', '很差', '严重污染'];
@@ -361,7 +410,7 @@
 
   // ===================== SIMULATION (替代服务端 MQTT 模拟器) =====================
   let simInterval = null;
-  const SIM_ROOMS = ['chuangzao', 'chuangxin', 'chuangzhi', 'chuangyi', 'xiuxi', 'bangong', '3d'];
+  const SIM_ROOMS = ['chuangzao', 'chuangxin', 'chuangzhi', 'chuangyi', 'xiuxi', 'bangong', '3d', 'damen'];
   function simRand(min, max) { return Math.random() * (max - min) + min; }
   function simRandInt(min, max) { return Math.floor(simRand(min, max + 1)); }
 
@@ -396,9 +445,10 @@
   // 用户数据存服务端（跨设备同步），库存数据仍存浏览器 localStorage
   const API = '/api';
 
-  async function apiGetUsers() {
+  async function apiGetUsers(withPass = false) {
     try {
-      const r = await fetch(`${API}/users`);
+      const url = withPass ? `${API}/users?with_pass=1` : `${API}/users`;
+      const r = await fetch(url);
       const j = await r.json();
       return j.ok ? j.users : [];
     } catch (e) { toast('无法连接服务器获取用户列表'); return []; }
@@ -429,6 +479,63 @@
       const r = await fetch(`${API}/users?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
       return await r.json();
     } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiUpdatePass(name, pass) {
+    try {
+      const r = await fetch(`${API}/users`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, pass })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  // ===== 申请授权 API =====
+  async function apiSubmitRequest(type, target, detail) {
+    try {
+      const r = await fetch(`${API}/requests`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: currentUser.name, type, target, detail })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiGetRequests() {
+    try {
+      const r = await fetch(`${API}/requests`);
+      const j = await r.json();
+      return j.ok ? j.requests : [];
+    } catch (e) { return []; }
+  }
+
+  async function apiApproveRequest(id, note) {
+    try {
+      const r = await fetch(`${API}/requests/approve`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, reviewer: currentUser.name, note })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiDenyRequest(id, note) {
+    try {
+      const r = await fetch(`${API}/requests/deny`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, reviewer: currentUser.name, note })
+      });
+      return await r.json();
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+  }
+
+  async function apiPendingCount() {
+    try {
+      const r = await fetch(`${API}/requests/pending`);
+      const j = await r.json();
+      return j.ok ? j.count : 0;
+    } catch (e) { return 0; }
   }
 
   function getMaterials() {
@@ -504,6 +611,7 @@
     renderCompCards();
     renderBoardCards();
     await renderUsers();
+    startPolling();
     toast(`welcome, ${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
   }
 
@@ -515,6 +623,7 @@
     $('#loginScreen').classList.add('active');
     if (client) { client.end(); client = null; }
     if (simInterval) { clearInterval(simInterval); simInterval = null; }
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   });
 
   // 模拟数据开关
@@ -616,7 +725,7 @@
   }
 
   function sendLightCmd(roomId, lightIdx) {
-    if (currentUser.role !== 'admin') { toast('权限不足：仅管理员可控制灯光'); return; }
+    if (currentUser.role !== 'admin') { const rm = ROOMS.find(r=>r.id===roomId); openRequestModal('light_control', rm ? rm.name : roomId); return; }
     const key = lightIdx === 1 && ROOMS.find(r=>r.id===roomId).lights===1 ? roomId : roomId+'_'+lightIdx;
     const isOn = !!lightState[key];
     const cmd = { room: roomId, light: lightIdx, cmd: isOn ? 'off' : 'on', user: currentUser.name, role: currentUser.role };
@@ -816,7 +925,7 @@
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('material_del', btn.dataset.type); return; }
         const type = btn.dataset.type;
         if (!confirm(`确定删除所有 ${type} 吗？`)) return;
         let items = getMaterials();
@@ -876,7 +985,7 @@
   }
 
   window.editMaterial = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('material_edit', ''); return; }
     const items = getMaterials();
     const m = items.find(x => x.id === id);
     if (!m) return;
@@ -890,7 +999,7 @@
   };
 
   window.deleteMaterial = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('material_del', ''); return; }
     let items = getMaterials();
     items = items.filter(x => x.id !== id);
     saveMaterials(items);
@@ -907,7 +1016,7 @@
   };
 
   $('#addMaterialBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied: admin only'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('material_add', ''); return; }
     const type = $('#mType').value;
     const color = $('#mColor').value.trim() || 'unknown';
     const diameter = $('#mDia').value;
@@ -978,7 +1087,7 @@
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         let items = getComponents();
         const catItems = items.filter(x => x.category === cat);
@@ -998,7 +1107,7 @@
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         let items = getComponents();
         const catItems = items.filter(x => x.category === cat);
@@ -1019,7 +1128,7 @@
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('comp_del', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         if (!confirm(`确定删除所有 ${cat} 吗？`)) return;
         let items = getComponents();
@@ -1033,7 +1142,7 @@
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', inp.dataset.cat); return; }
         const cat = inp.dataset.cat;
         const newTotal = parseInt(inp.value) || 0;
         let items = getComponents();
@@ -1078,7 +1187,7 @@
   }
 
   window.editComponent = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('comp_edit', ''); return; }
     const items = getComponents();
     const c = items.find(x => x.id === id);
     if (!c) return;
@@ -1092,7 +1201,7 @@
   };
 
   window.deleteComponent = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('comp_del', ''); return; }
     let items = getComponents();
     items = items.filter(x => x.id !== id);
     saveComponents(items);
@@ -1108,7 +1217,7 @@
   };
 
   $('#addCompBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('comp_add', ''); return; }
     const category = $('#cCat').value;
     const customName = $('#cCustomName').value.trim();
     if (!customName) { toast('名称不能为空'); return; }
@@ -1160,7 +1269,7 @@
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('board_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         let items = getBoards();
         const typeItems = items.filter(x => x.type === type);
@@ -1180,7 +1289,7 @@
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('board_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         let items = getBoards();
         const typeItems = items.filter(x => x.type === type);
@@ -1201,7 +1310,7 @@
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('board_del', btn.dataset.type); return; }
         const type = btn.dataset.type;
         if (!confirm(`确定删除所有 ${type} 吗？`)) return;
         let items = getBoards();
@@ -1215,7 +1324,7 @@
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+        if (currentUser.role !== 'admin') { openRequestModal('board_edit', inp.dataset.type); return; }
         const type = inp.dataset.type;
         const newTotal = parseInt(inp.value) || 0;
         let items = getBoards();
@@ -1261,7 +1370,7 @@
   }
 
   window.editBoard = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('board_edit', ''); return; }
     const items = getBoards();
     const b = items.find(x => x.id === id);
     if (!b) return;
@@ -1275,7 +1384,7 @@
   };
 
   window.deleteBoard = function(id) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('board_del', ''); return; }
     let items = getBoards();
     items = items.filter(x => x.id !== id);
     saveBoards(items);
@@ -1291,7 +1400,7 @@
   };
 
   window.updateItemQty = function(el) {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('comp_edit', ''); return; }
     const id = parseInt(el.dataset.id);
     const newQty = parseInt(el.value) || 0;
     // 尝试更新 materials
@@ -1309,7 +1418,7 @@
   };
 
   $('#addBoardBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    if (currentUser.role !== 'admin') { openRequestModal('board_add', ''); return; }
     const type = $('#bType').value;
     const model = $('#bModel').value.trim();
     const qty = parseInt($('#bQty').value) || 0;
@@ -1326,12 +1435,16 @@
   // ===================== USER MANAGEMENT =====================
   async function renderUsers() {
     const tbody = $('#userTable tbody');
-    const users = await apiGetUsers();
+    const isAdmin = currentUser.role === 'admin';
+    // admin 请求带密码字段，普通用户不返回密码
+    const users = await apiGetUsers(isAdmin);
     tbody.innerHTML = users.map(u => `<tr>
       <td>${u.name}</td>
+      <td>${isAdmin ? `<span style="font-family:monospace;color:var(--accent)">${u.pass || '-'}</span>` : '<span style="color:var(--muted)">******</span>'}</td>
       <td>${u.role}</td>
       <td>${fmtDate(u.created)}</td>
       <td>
+        ${isAdmin ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="editPass('${u.name}')">[改密]</button>` : ''}
         ${u.name === 'admin' ? '<span style="color:var(--muted)">[PROTECTED]</span>' : `<button class="term-btn-sm danger" onclick="deleteUser('${u.name}')">[DEL]</button>`}
       </td>
     </tr>`).join('');
@@ -1344,6 +1457,16 @@
     if (!res.ok) { toast('删除失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
     toast('user deleted');
+  };
+
+  window.editPass = async function(name) {
+    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+    const newPass = prompt(`修改 ${name} 的密码：`, '');
+    if (!newPass || newPass.trim() === '') return;
+    const res = await apiUpdatePass(name, newPass.trim());
+    if (!res.ok) { toast('修改失败: ' + (res.msg || '未知错误')); return; }
+    await renderUsers();
+    toast(`${name} 密码已修改`);
   };
 
   $('#addUserBtn').addEventListener('click', async () => {
@@ -1359,6 +1482,126 @@
     $('#uPass').value = '';
     toast('user created');
   });
+
+  // ===================== 申请授权系统 =====================
+  const REQ_TYPE_LABELS = {
+    material_add: '3D材料-新增', material_edit: '3D材料-修改', material_del: '3D材料-删除',
+    comp_add: '元器件-新增', comp_edit: '元器件-修改', comp_del: '元器件-删除',
+    board_add: '主板-新增', board_edit: '主板-修改', board_del: '主板-删除',
+    light_control: '灯光控制', other: '其他操作'
+  };
+
+  let pollTimer = null;
+
+  // 打开申请弹窗（预填类型和目标）
+  window.openRequestModal = function(type, target) {
+    if (type) $('#reqType').value = type;
+    if (target) $('#reqTarget').value = target;
+    $('#reqModal').style.display = 'flex';
+  };
+
+  $('#reqCancel').addEventListener('click', () => { $('#reqModal').style.display = 'none'; });
+  $('#reqSubmit').addEventListener('click', async () => {
+    const type = $('#reqType').value;
+    const target = $('#reqTarget').value.trim();
+    const detail = $('#reqDetail').value.trim();
+    if (!detail) { toast('请填写详细说明'); return; }
+    const res = await apiSubmitRequest(type, target, detail);
+    if (!res.ok) { toast('提交失败: ' + (res.msg || '')); return; }
+    $('#reqModal').style.display = 'none';
+    $('#reqTarget').value = '';
+    $('#reqDetail').value = '';
+    toast('申请已提交，等待管理员审批');
+  });
+
+  // 审批面板关闭
+  $('#reqPanelClose').addEventListener('click', () => { $('#reqPanel').style.display = 'none'; });
+
+  // 管理员点击审批按钮
+  $('#adminReqBtn').addEventListener('click', async () => {
+    if (currentUser.role !== 'admin') return;
+    $('#reqPanelTitle').textContent = '授权申请管理';
+    $('#reqPanel').style.display = 'flex';
+    await renderReqList(true);
+  });
+
+  // 用户查看自己的申请
+  $('#myReqBtn').addEventListener('click', async () => {
+    $('#reqPanelTitle').textContent = '我的申请记录';
+    $('#reqPanel').style.display = 'flex';
+    await renderReqList(false);
+  });
+
+  async function renderReqList(isAdmin) {
+    const body = $('#reqListBody');
+    const allReqs = await apiGetRequests();
+    const reqs = isAdmin ? allReqs : allReqs.filter(r => r.user === currentUser.name);
+    if (reqs.length === 0) {
+      body.innerHTML = '<p style="color:var(--muted);text-align:center;padding:32px">暂无申请记录</p>';
+      return;
+    }
+    body.innerHTML = reqs.reverse().map(r => {
+      const statusColor = r.status === 'pending' ? 'var(--warning)' : r.status === 'approved' ? 'var(--success)' : 'var(--danger)';
+      const statusText = r.status === 'pending' ? '⏳ 待审批' : r.status === 'approved' ? '✅ 已批准' : '❌ 已拒绝';
+      const adminActions = (isAdmin && r.status === 'pending')
+        ? `<div style="display:flex;gap:8px;margin-top:8px">
+             <button class="term-btn-sm" style="border-color:var(--success);color:var(--success)" onclick="approveReq(${r.id})">[批准]</button>
+             <button class="term-btn-sm danger" onclick="denyReq(${r.id})">[拒绝]</button>
+           </div>` : '';
+      const reviewInfo = r.status !== 'pending'
+        ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">审批人: ${r.reviewedBy} | ${r.reviewedAt ? fmtDate(r.reviewedAt) : '-'}${r.adminNote ? ' | 备注: ' + r.adminNote : ''}</div>` : '';
+      return `<div style="background:var(--bg2);border:1px solid var(--rule);border-radius:8px;padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:600;color:var(--accent2)">${REQ_TYPE_LABELS[r.type] || r.type}</span>
+          <span style="color:${statusColor};font-size:13px;font-weight:600">${statusText}</span>
+        </div>
+        <div style="font-size:14px;color:var(--ink)">目标: ${r.target || '-'} | 申请人: ${r.user}</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">${r.detail}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">提交时间: ${fmtDate(r.created)}</div>
+        ${reviewInfo}
+        ${adminActions}
+      </div>`;
+    }).join('');
+  }
+
+  window.approveReq = async function(id) {
+    const note = prompt('批准备注（可留空）：', '') || '';
+    const res = await apiApproveRequest(id, note.trim());
+    if (!res.ok) { toast('操作失败: ' + (res.msg || '')); return; }
+    toast('已批准该申请');
+    await renderReqList(true);
+    await updateReqBadge();
+  };
+
+  window.denyReq = async function(id) {
+    const note = prompt('拒绝原因（可留空）：', '') || '';
+    const res = await apiDenyRequest(id, note.trim());
+    if (!res.ok) { toast('操作失败: ' + (res.msg || '')); return; }
+    toast('已拒绝该申请');
+    await renderReqList(true);
+    await updateReqBadge();
+  };
+
+  // 管理员通知徽标更新
+  async function updateReqBadge() {
+    if (currentUser.role !== 'admin') return;
+    const count = await apiPendingCount();
+    const badge = $('#reqBadge');
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    if (currentUser.role === 'admin') {
+      updateReqBadge();
+      pollTimer = setInterval(updateReqBadge, 10000);
+    }
+  }
 
   // ===================== INIT =====================
   initLogin();
