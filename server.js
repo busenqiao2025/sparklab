@@ -1,11 +1,10 @@
 /**
- * SparkMinds Lab v1.4 — 模拟服务器 + MQTT 数据模拟器 + 用户数据持久化
+ * SparkMinds Lab v1.3 — 模拟服务器 + MQTT 数据模拟器
  * 
  * 功能:
  * 1. 启动本地 HTTP 服务器 (默认 http://localhost:8080)
  * 2. 连接公共 MQTT Broker 并模拟 7 个 ESP32 设备发送传感器数据
  * 3. 审计灯光控制命令，记录操作者与权限判定
- * 4. 用户数据服务端持久化（data/users.json），支持跨设备登录
  * 
  * 权限策略 (v1.1+):
  *   - admin 角色: 可查看数据 + 控制灯光开关 + 增删改库存
@@ -22,18 +21,6 @@
  *   - getUsers() 空数组回退：localStorage 存空数组 "[]" 时恢复默认用户，避免列表永久空白
  *   - 新增用户表单密码框改为 type=password，修复明文显示
  * 
- * 用户数据持久化 (v1.4):
- *   - 用户账号存储由浏览器 localStorage 迁移到服务端 data/users.json
- *   - 提供 REST API：登录验证、用户列表、新增/删除用户
- *   - 任意设备注册的账号，其他设备均可登录（跨设备同步）
- *   - 库存数据（材料/元器件/主板）仍存浏览器 localStorage，后续版本迁移
- * 
- * REST API:
- *   POST /api/login        body:{name,pass}        → {ok:true,user} | {ok:false}
- *   GET  /api/users                                → [用户列表，不含密码]
- *   POST /api/users        body:{name,pass,role}   → {ok:true,user} | {ok:false,msg}
- *   DELETE /api/users?name=xxx                     → {ok:true} | {ok:false,msg}
- * 
  * 使用方法:
  *   node server.js
  * 
@@ -45,148 +32,24 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// ========== 用户数据持久化 ==========
-const DATA_DIR = path.join(__dirname, 'data');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-
-function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-
-function loadUsers() {
-  ensureDataDir();
-  if (!fs.existsSync(USERS_FILE)) {
-    const defaults = [
-      { name: 'admin', pass: 'admin123', role: 'admin', created: Date.now() },
-      { name: 'user', pass: 'user123', role: 'user', created: Date.now() }
-    ];
-    fs.writeFileSync(USERS_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
-    return defaults;
-  }
-  const raw = fs.readFileSync(USERS_FILE, 'utf-8');
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-  } catch (e) { /* 损坏则走默认 */ }
-  const defaults = [
-    { name: 'admin', pass: 'admin123', role: 'admin', created: Date.now() },
-    { name: 'user', pass: 'user123', role: 'user', created: Date.now() }
-  ];
-  fs.writeFileSync(USERS_FILE, JSON.stringify(defaults, null, 2), 'utf-8');
-  return defaults;
-}
-
-function saveUsers(users) {
-  ensureDataDir();
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
-}
-
-// 读取请求 body（JSON）
-function readBody(req) {
-  return new Promise((resolve) => {
-    let chunks = '';
-    req.on('data', c => chunks += c);
-    req.on('end', () => {
-      try { resolve(JSON.parse(chunks || '{}')); }
-      catch (e) { resolve({}); }
-    });
-  });
-}
-
-function sendJSON(res, status, obj) {
-  const body = JSON.stringify(obj);
-  res.writeHead(status, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  });
-  res.end(body);
-}
-
 // ========== HTTP SERVER ==========
 const PORT = 8080;
 const MIME = {
-  '.html': 'text/html; charset=utf-8',
+  '.html': 'text/html',
   '.js': 'application/javascript',
   '.css': 'text/css',
   '.json': 'application/json',
   '.md': 'text/markdown',
 };
 
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
-  const pathname = url.pathname;
-
-  // ---------- REST API ----------
-  if (pathname.startsWith('/api/')) {
-    // CORS 预检
-    if (req.method === 'OPTIONS') { sendJSON(res, 204, {}); return; }
-
-    // POST /api/login
-    if (pathname === '/api/login' && req.method === 'POST') {
-      const { name, pass } = await readBody(req);
-      const users = loadUsers();
-      const found = users.find(u => u.name === name && u.pass === pass);
-      if (found) {
-        const { pass: _p, ...safe } = found;
-        console.log(`[API] login OK: ${name}`);
-        sendJSON(res, 200, { ok: true, user: safe });
-      } else {
-        console.log(`[API] login FAIL: ${name}`);
-        sendJSON(res, 200, { ok: false, msg: 'invalid credentials' });
-      }
-      return;
-    }
-
-    // GET /api/users
-    if (pathname === '/api/users' && req.method === 'GET') {
-      const users = loadUsers().map(({ pass, ...rest }) => rest);
-      sendJSON(res, 200, { ok: true, users });
-      return;
-    }
-
-    // POST /api/users
-    if (pathname === '/api/users' && req.method === 'POST') {
-      const { name, pass, role } = await readBody(req);
-      if (!name || !pass) { sendJSON(res, 200, { ok: false, msg: 'username and password required' }); return; }
-      let users = loadUsers();
-      if (users.find(u => u.name === name)) { sendJSON(res, 200, { ok: false, msg: 'user already exists' }); return; }
-      const newUser = { name, pass, role: role || 'user', created: Date.now() };
-      users.push(newUser);
-      saveUsers(users);
-      console.log(`[API] user created: ${name} (${role || 'user'})`);
-      const { pass: _p, ...safe } = newUser;
-      sendJSON(res, 200, { ok: true, user: safe });
-      return;
-    }
-
-    // DELETE /api/users?name=xxx
-    if (pathname === '/api/users' && req.method === 'DELETE') {
-      const name = url.searchParams.get('name');
-      if (!name) { sendJSON(res, 200, { ok: false, msg: 'name required' }); return; }
-      if (name === 'admin') { sendJSON(res, 200, { ok: false, msg: 'cannot delete admin' }); return; }
-      let users = loadUsers();
-      users = users.filter(u => u.name !== name);
-      saveUsers(users);
-      console.log(`[API] user deleted: ${name}`);
-      sendJSON(res, 200, { ok: true });
-      return;
-    }
-
-    // 未匹配的 API
-    sendJSON(res, 404, { ok: false, msg: 'not found' });
-    return;
-  }
-
-  // ---------- 静态文件 ----------
-  let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
+const server = http.createServer((req, res) => {
+  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
   const ext = path.extname(filePath).toLowerCase();
   const mime = MIME[ext] || 'application/octet-stream';
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('404 Not Found');
       return;
     }
@@ -200,9 +63,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`[HTTP] Server running at http://localhost:${PORT}`);
-  console.log(`[DATA] 用户数据持久化于: ${USERS_FILE}`);
-  // 启动时确保用户文件存在
-  loadUsers();
 });
 
 // ========== MQTT SIMULATOR ==========

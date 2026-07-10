@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v1.4]</title>
+<title>SparkMinds Lab [v1.3]</title>
 <style>
   :root{
     --bg:#f0f4f8;
@@ -203,7 +203,7 @@
 <!-- ========== MAIN SCREEN ========== -->
 <div id="mainScreen" class="screen">
   <header class="term-header">
-    <span class="brand glow">SparkMinds Lab v1.4</span>
+    <span class="brand glow">SparkMinds Lab v1.3</span>
     <nav class="term-nav">
       <button class="nav-btn active" data-panel="lab">[LAB_MONITOR]</button>
       <button class="nav-btn" data-panel="print3d">[3D_MATERIALS]</button>
@@ -359,43 +359,21 @@
   const sensorCache = {};
 
   // ===================== STORAGE =====================
-  // 用户数据存服务端（跨设备同步），库存数据仍存浏览器 localStorage
-  const API = '/api';
-
-  async function apiGetUsers() {
-    try {
-      const r = await fetch(`${API}/users`);
-      const j = await r.json();
-      return j.ok ? j.users : [];
-    } catch (e) { toast('无法连接服务器获取用户列表'); return []; }
+  function getUsers() {
+    const raw = localStorage.getItem('lab_users');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // 空数组时回退默认用户，避免用户列表永久空白
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    const defaults = [
+      { name: 'admin', pass: 'admin123', role: 'admin', created: Date.now() },
+      { name: 'user', pass: 'user123', role: 'user', created: Date.now() }
+    ];
+    localStorage.setItem('lab_users', JSON.stringify(defaults));
+    return defaults;
   }
-
-  async function apiLogin(name, pass) {
-    try {
-      const r = await fetch(`${API}/login`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pass })
-      });
-      return await r.json();
-    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
-  }
-
-  async function apiAddUser(name, pass, role) {
-    try {
-      const r = await fetch(`${API}/users`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pass, role })
-      });
-      return await r.json();
-    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
-  }
-
-  async function apiDeleteUser(name) {
-    try {
-      const r = await fetch(`${API}/users?name=${encodeURIComponent(name)}`, { method: 'DELETE' });
-      return await r.json();
-    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
-  }
+  function saveUsers(u) { localStorage.setItem('lab_users', JSON.stringify(u)); }
 
   function getMaterials() {
     const raw = localStorage.getItem('lab_materials');
@@ -444,23 +422,22 @@
     }
   }
 
-  async function doLogin() {
+  function doLogin() {
     const name = $('#loginUser').value.trim();
     const pass = $('#loginPass').value.trim();
-    if (!name || !pass) { $('#loginError').textContent = '请输入用户名和密码'; return; }
-    $('#loginError').textContent = '验证中...';
-    const res = await apiLogin(name, pass);
-    if (!res.ok) {
-      $('#loginError').textContent = '登录失败: ' + (res.msg || '无效凭证');
+    const users = getUsers();
+    const found = users.find(u => u.name === name && u.pass === pass);
+    if (!found) {
+      $('#loginError').textContent = 'auth failed: invalid credentials';
       return;
     }
-    currentUser = res.user;
-    sessionStorage.setItem('lab_session', JSON.stringify(res.user));
+    currentUser = found;
+    sessionStorage.setItem('lab_session', JSON.stringify(found));
     $('#loginError').textContent = '';
-    await enterApp();
+    enterApp();
   }
 
-  async function enterApp() {
+  function enterApp() {
     $('#loginScreen').classList.remove('active');
     $('#mainScreen').classList.add('active');
     if (currentUser.role === 'admin') document.body.classList.add('is-admin');
@@ -469,7 +446,7 @@
     renderMaterialCards();
     renderCompCards();
     renderBoardCards();
-    await renderUsers();
+    renderUsers();
     toast(`welcome, ${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
   }
 
@@ -1286,9 +1263,9 @@
   });
 
   // ===================== USER MANAGEMENT =====================
-  async function renderUsers() {
+  function renderUsers() {
     const tbody = $('#userTable tbody');
-    const users = await apiGetUsers();
+    const users = getUsers();
     tbody.innerHTML = users.map(u => `<tr>
       <td>${u.name}</td>
       <td>${u.role}</td>
@@ -1299,24 +1276,26 @@
     </tr>`).join('');
   }
 
-  window.deleteUser = async function(name) {
+  window.deleteUser = function(name) {
     if (currentUser.role !== 'admin') { toast('permission denied'); return; }
     if (name === 'admin') { toast('cannot delete admin'); return; }
-    const res = await apiDeleteUser(name);
-    if (!res.ok) { toast('删除失败: ' + (res.msg || '未知错误')); return; }
-    await renderUsers();
+    let users = getUsers();
+    users = users.filter(u => u.name !== name);
+    saveUsers(users);
+    renderUsers();
     toast('user deleted');
   };
 
-  $('#addUserBtn').addEventListener('click', async () => {
-    if (currentUser.role !== 'admin') { toast('permission denied'); return; }
+  $('#addUserBtn').addEventListener('click', () => {
     const name = $('#uName').value.trim();
     const pass = $('#uPass').value.trim();
     const role = $('#uRole').value;
     if (!name || !pass) { toast('username and password required'); return; }
-    const res = await apiAddUser(name, pass, role);
-    if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
-    await renderUsers();
+    const users = getUsers();
+    if (users.find(u => u.name === name)) { toast('user already exists'); return; }
+    users.push({ name, pass, role, created: Date.now() });
+    saveUsers(users);
+    renderUsers();
     $('#uName').value = '';
     $('#uPass').value = '';
     toast('user created');
