@@ -10,4 +10,4 @@ run_worker_first = true
 
 [[kv_namespaces]]
 binding = "USERS"
-id = "你的KV_NAMESPACE_ID"
+id = "7c9d913316cd47a68fa583b77a6921ab"
