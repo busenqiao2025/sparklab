@@ -25,8 +25,8 @@ async function readBody(request) {
 
 const AVATARS = ['😀','😎','🤓','🧑‍💻','👨‍🔬','👩‍🔬','🧑‍🔧','👷','🦊','🐱','🐧','🤖','🦉','🐯','🐨','🦁','🐸','🐙','🦄','🐲'];
 const DEFAULT_USERS = [
-  { name: 'admin', pass: 'admin123', role: 'admin', uid: '10001', nickname: '管理员', avatar: '👨‍💼', friends: [], created: 1783588201655 },
-  { name: 'user', pass: 'user123', role: 'user', uid: '10002', nickname: '普通用户', avatar: '😀', friends: [], created: 1783588201655 },
+  { name: 'admin', pass: 'admin123', role: 'admin', uid: '00001', nickname: '管理员', avatar: '👨‍💼', friends: [], created: 1783588201655 },
+  { name: 'user', pass: 'user123', role: 'user', uid: '00002', nickname: '普通用户', avatar: '😀', friends: [], created: 1783588201655 },
 ];
 
 async function loadUsers(env) {
@@ -38,7 +38,12 @@ async function loadUsers(env) {
         // 补全旧用户缺少的字段
         let modified = false;
         for (const u of parsed) {
-          if (!u.uid) { u.uid = String(10000 + parsed.indexOf(u) + 1); modified = true; }
+          if (!u.uid) { u.uid = String(parsed.indexOf(u) + 1).padStart(5, '0'); modified = true; }
+          else if (!/^\d{5}$/.test(u.uid)) {
+            // 兼容旧格式（如 10001），补零为 5 位
+            const n = parseInt(u.uid);
+            if (!isNaN(n)) { u.uid = String(n).padStart(5, '0'); modified = true; }
+          }
           if (!u.nickname) { u.nickname = u.name; modified = true; }
           if (!u.avatar) { u.avatar = AVATARS[Math.floor(Math.random()*AVATARS.length)]; modified = true; }
           if (!u.friends) { u.friends = []; modified = true; }
@@ -86,12 +91,12 @@ function sanitize(user) {
 }
 
 function genUid(users) {
-  let max = 10000;
+  let max = 0;
   for (const u of users) {
     const n = parseInt(u.uid);
-    if (n > max) max = n;
+    if (!isNaN(n) && n > max) max = n;
   }
-  return String(max + 1);
+  return String(max + 1).padStart(5, '0');
 }
 
 export default {
@@ -286,9 +291,10 @@ export default {
           let result;
           if (peerUid) {
             // 两人私聊
-            result = msgs.filter(m => !m.broadcast && (
-              (m.from === uid && m.to === peerUid) || (m.from === peerUid && m.to === uid)
-            ));
+            result = msgs.filter(m =>
+              (m.broadcast && m.from === peerUid && m.to === uid) ||
+              (!m.broadcast && ((m.from === uid && m.to === peerUid) || (m.from === peerUid && m.to === uid)))
+            );
           } else {
             // 所有与我相关的消息（含广播）
             result = msgs.filter(m => m.broadcast ? m.to === 'all' || m.to === uid : m.from === uid || m.to === uid);
@@ -314,14 +320,30 @@ export default {
         }
 
         // POST /api/messages/broadcast — 管理员广播
+        // to: 'all_including_admin' | 'all_users' | UID 数组
         if (url.pathname === '/api/messages/broadcast' && request.method === 'POST') {
           const { from, to, content } = await readBody(request);
           if (!from || !content) return json({ ok: false, msg: '缺少参数' });
-          // to = 'all' 或 UID 数组
-          const targets = to === 'all' ? ['all'] : (Array.isArray(to) ? to : [to]);
+          const users = await loadUsers(env);
+          let targets;
+          if (to === 'all_including_admin') {
+            // 全体用户（含管理员自己）
+            targets = users.map(u => u.uid);
+          } else if (to === 'all_users') {
+            // 仅普通用户
+            targets = users.filter(u => u.role !== 'admin').map(u => u.uid);
+          } else {
+            // 指定 UID 数组
+            targets = Array.isArray(to) ? to : [to];
+            // 验证 UID 是否存在
+            const validUids = users.map(u => u.uid);
+            const invalid = targets.filter(t => !validUids.includes(t));
+            if (invalid.length > 0) return json({ ok: false, msg: `UID 不存在: ${invalid.join(', ')}` });
+          }
           let msgs = await loadMessages(env);
+          const baseTime = Date.now();
           for (const t of targets) {
-            msgs.push({ id: Date.now() + Math.random(), from, to: t, content, broadcast: true, read: false, created: Date.now() });
+            msgs.push({ id: baseTime + Math.random(), from, to: t, content, broadcast: true, read: false, created: baseTime });
           }
           await saveMessages(env, msgs);
           return json({ ok: true, count: targets.length });
@@ -332,7 +354,7 @@ export default {
           const uid = url.searchParams.get('uid');
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           let msgs = await loadMessages(env);
-          const count = msgs.filter(m => m.to === uid && !m.read).length + msgs.filter(m => m.to === 'all' && !m.read && m.from !== uid).length;
+          const count = msgs.filter(m => m.to === uid && !m.read).length;
           return json({ ok: true, count });
         }
 
@@ -349,8 +371,9 @@ export default {
             for (const fuid of user.friends) {
               const f = users.find(u => u.uid === fuid);
               if (f) {
-                const lastMsg = msgs.filter(m => !m.broadcast && ((m.from === uid && m.to === fuid) || (m.from === fuid && m.to === uid))).sort((a,b) => b.created - a.created)[0];
-                const unread = msgs.filter(m => m.from === fuid && m.to === uid && !m.read).length;
+                const fMsgs = msgs.filter(m => (m.from === uid && m.to === fuid) || (m.from === fuid && m.to === uid));
+                const lastMsg = fMsgs.sort((a,b) => b.created - a.created)[0];
+                const unread = fMsgs.filter(m => m.to === uid && !m.read).length;
                 contacts.push({ uid: f.uid, name: f.name, nickname: f.nickname, avatar: f.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread });
               }
             }
@@ -359,13 +382,27 @@ export default {
           if (user && user.role !== 'admin') {
             const admin = users.find(u => u.role === 'admin');
             if (admin && (!user.friends || !user.friends.includes(admin.uid))) {
-              const lastMsg = msgs.filter(m => !m.broadcast && ((m.from === uid && m.to === admin.uid) || (m.from === admin.uid && m.to === uid))).sort((a,b) => b.created - a.created)[0];
-              contacts.unshift({ uid: admin.uid, name: admin.name, nickname: admin.nickname, avatar: admin.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread: 0, isAdmin: true });
+              const aMsgs = msgs.filter(m => (m.from === uid && m.to === admin.uid) || (m.from === admin.uid && m.to === uid));
+              const lastMsg = aMsgs.sort((a,b) => b.created - a.created)[0];
+              const unread = aMsgs.filter(m => m.to === uid && !m.read).length;
+              contacts.unshift({ uid: admin.uid, name: admin.name, nickname: admin.nickname, avatar: admin.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread, isAdmin: true });
             }
           }
-          // 广播消息
-          const broadcasts = msgs.filter(m => m.broadcast && (m.to === 'all' || m.to === uid));
-          return json({ ok: true, contacts, hasBroadcasts: broadcasts.length > 0 });
+          // 管理员视角：查看有广播消息往来的用户
+          if (user && user.role === 'admin') {
+            // 管理员发出的广播目标用户（非好友）也显示在联系人列表
+            const broadcastTargets = msgs.filter(m => m.broadcast && m.from === uid).map(m => m.to);
+            for (const tUid of [...new Set(broadcastTargets)]) {
+              if (contacts.find(c => c.uid === tUid)) continue;
+              const t = users.find(u => u.uid === tUid);
+              if (t) {
+                const tMsgs = msgs.filter(m => (m.from === uid && m.to === tUid) || (m.from === tUid && m.to === uid));
+                const lastMsg = tMsgs.sort((a,b) => b.created - a.created)[0];
+                contacts.push({ uid: t.uid, name: t.name, nickname: t.nickname, avatar: t.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread: 0 });
+              }
+            }
+          }
+          return json({ ok: true, contacts });
         }
 
         // ========== 申请授权系统（v1.7 保留） ==========

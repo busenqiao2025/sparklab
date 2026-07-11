@@ -106,8 +106,8 @@
 
 | 用户名 | 密码 | UID | 角色 |
 |--------|------|-----|------|
-| admin | admin123 | 10001 | admin |
-| user | user123 | 10002 | user |
+| admin | admin123 | 00001 | admin |
+| user | user123 | 00002 | user |
 
 ## KV 存储键
 

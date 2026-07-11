@@ -413,7 +413,7 @@
         <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
         <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
         <div style="padding:8px 12px;border-top:1px solid var(--border)">
-          <button class="nav-btn admin-only" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
+          <button class="nav-btn admin-only flex" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
         </div>
       </div>
       <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
@@ -479,10 +479,16 @@
   <div class="modal-card">
     <div class="modal-title">群发消息</div>
     <div class="modal-field">
-      <label>收件人</label>
-      <select id="broadcastTarget">
-        <option value="all">全体用户</option>
+      <label>发送方式</label>
+      <select id="broadcastMode">
+        <option value="all_including_admin">全体用户（含管理员）</option>
+        <option value="all_users">全体普通用户</option>
+        <option value="custom">指定 UID（逗号分隔）</option>
       </select>
+    </div>
+    <div class="modal-field" id="customUidField" style="display:none">
+      <label>目标 UID（多个用逗号分隔）</label>
+      <input id="customUids" type="text" placeholder="例如: 10002, 10003, 10005">
     </div>
     <div class="modal-field">
       <label>消息内容</label>
@@ -2054,27 +2060,34 @@
     // 搜索弹窗关闭
     $('#searchUserClose').addEventListener('click', () => { $('#searchUserModal').style.display = 'none'; });
     // 广播按钮
-    $('#broadcastBtn').addEventListener('click', async () => {
-      // 加载用户列表填充下拉
-      const r = await fetch('/api/users'); const data = await r.json();
-      if (data.ok) {
-        const sel = $('#broadcastTarget');
-        sel.innerHTML = '<option value="all">全体用户</option>' +
-          data.users.filter(u => u.uid !== currentUser.uid).map(u => `<option value="${u.uid}">${u.nickname} (${u.uid})</option>`).join('');
-      }
+    $('#broadcastBtn').addEventListener('click', () => {
+      $('#broadcastMode').value = 'all_including_admin';
+      $('#customUidField').style.display = 'none';
+      $('#customUids').value = '';
       $('#broadcastContent').value = '';
       $('#broadcastModal').style.display = 'flex';
     });
+    $('#broadcastMode').addEventListener('change', e => {
+      $('#customUidField').style.display = e.target.value === 'custom' ? 'block' : 'none';
+    });
     $('#broadcastCancel').addEventListener('click', () => { $('#broadcastModal').style.display = 'none'; });
     $('#broadcastSend').addEventListener('click', async () => {
-      const target = $('#broadcastTarget').value;
+      const mode = $('#broadcastMode').value;
       const content = $('#broadcastContent').value.trim();
       if (!content) { toast('消息内容不能为空'); return; }
+      let target;
+      if (mode === 'custom') {
+        const uids = $('#customUids').value.split(',').map(s => s.trim()).filter(Boolean);
+        if (uids.length === 0) { toast('请输入至少一个 UID'); return; }
+        target = uids;
+      } else {
+        target = mode; // 'all_including_admin' 或 'all_users'
+      }
       const r = await apiBroadcast(currentUser.uid, target, content);
       if (r.ok) {
-        toast(`已发送给 ${r.count} 个目标`);
+        toast(`已发送给 ${r.count} 个用户`);
         $('#broadcastModal').style.display = 'none';
-      } else { toast('发送失败'); }
+      } else { toast(r.msg || '发送失败'); }
     });
   }
 
