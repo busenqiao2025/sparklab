@@ -394,6 +394,38 @@
       </table>
     </div>
   </div>
+
+  <!-- 个人主页面板 -->
+  <div id="panel-profile" class="panel">
+    <div class="panel-title">个人主页</div>
+    <div id="profileContent" style="max-width:600px"></div>
+  </div>
+
+  <!-- 站内信面板 -->
+  <div id="panel-messages" class="panel">
+    <div class="panel-title">站内信</div>
+    <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 160px);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+      <div style="width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-soft)">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+          <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
+          <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px">搜索</button>
+        </div>
+        <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
+        <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
+        <div style="padding:8px 12px;border-top:1px solid var(--border)">
+          <button class="nav-btn admin-only" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
+        </div>
+      </div>
+      <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
+        <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-soft);font-weight:600;font-size:14px;color:var(--fg)">选择一个联系人开始聊天</div>
+        <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
+        <div id="chatInputBar" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+          <input id="chatInput" type="text" placeholder="输入消息..." style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;outline:none" disabled>
+          <button class="nav-btn active" id="sendMsgBtn" disabled>发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- 申请弹窗 -->
@@ -439,40 +471,6 @@
       <button class="nav-btn" id="reqPanelClose">关闭</button>
     </div>
     <div id="reqListBody"></div>
-  </div>
-</div>
-
-<!-- 个人主页面板 -->
-<div id="panel-profile" class="panel">
-  <div class="panel-title">个人主页</div>
-  <div id="profileContent" style="max-width:600px"></div>
-</div>
-
-<!-- 站内信面板 -->
-<div id="panel-messages" class="panel">
-  <div class="panel-title">站内信</div>
-  <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 160px);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
-    <!-- 左侧联系人列表 -->
-    <div style="width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-soft)">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
-        <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
-        <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px">搜索</button>
-      </div>
-      <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
-      <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
-      <div style="padding:8px 12px;border-top:1px solid var(--border)">
-        <button class="nav-btn admin-only" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
-      </div>
-    </div>
-    <!-- 右侧聊天区 -->
-    <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
-      <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-soft);font-weight:600;font-size:14px;color:var(--fg)">选择一个联系人开始聊天</div>
-      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
-      <div id="chatInputBar" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
-        <input id="chatInput" type="text" placeholder="输入消息..." style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;outline:none" disabled>
-        <button class="nav-btn active" id="sendMsgBtn" disabled>发送</button>
-      </div>
-    </div>
   </div>
 </div>
 
