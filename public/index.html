@@ -39,7 +39,28 @@
     --transition:all .2s cubic-bezier(.4,0,.2,1);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;font-family:var(--font);font-size:14px;background:var(--bg);color:var(--fg);overflow:hidden}
+  html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--fg);overflow:hidden}
+
+  /* 动态背景 */
+  body{position:relative}
+  body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;background:var(--bg)}
+  body::after{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;z-index:-1;background:
+    radial-gradient(circle at 20% 30%,rgba(59,130,246,0.08) 0%,transparent 40%),
+    radial-gradient(circle at 80% 70%,rgba(168,85,247,0.06) 0%,transparent 40%),
+    radial-gradient(circle at 50% 50%,rgba(34,197,94,0.05) 0%,transparent 40%);
+    animation:bgFloat 25s ease-in-out infinite}
+  @keyframes bgFloat{
+    0%,100%{transform:translate(0,0) rotate(0deg)}
+    25%{transform:translate(3%,2%) rotate(2deg)}
+    50%{transform:translate(-2%,3%) rotate(-1deg)}
+    75%{transform:translate(-3%,-2%) rotate(1deg)}
+  }
+  /* 登录页动态背景 */
+  #loginScreen::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;background:
+    radial-gradient(circle at 20% 50%,rgba(255,255,255,0.1) 0%,transparent 50%),
+    radial-gradient(circle at 80% 20%,rgba(255,255,255,0.08) 0%,transparent 50%),
+    radial-gradient(circle at 50% 80%,rgba(255,255,255,0.06) 0%,transparent 50%);
+    animation:bgFloat 20s ease-in-out infinite}
 
   .scanline{display:none}
   .glow{text-shadow:none}
@@ -243,6 +264,327 @@
   .friend-req-item .r-avatar{font-size:16px}
   .friend-req-item .r-name{flex:1;color:var(--fg);font-weight:500}
 </style>
+<script>
+// ===================== I18N MULTI-LANGUAGE SYSTEM =====================
+const I18N = {
+  'zh-CN': {
+    // Login
+    'app_name': 'SparkMinds Lab', 'app_subtitle': '实验室物联网监控平台',
+    'username': '用户名', 'password': '密码', 'login': '登 录',
+    'login_hint': '默认账号：admin / admin123 | user / user123',
+    'login_error_user_pass': '请输入用户名和密码', 'login_error_wrong': '用户名或密码错误',
+    // Nav
+    'nav_lab': '实验室监控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件仓库',
+    'nav_users': '用户管理', 'nav_approval': '审批', 'nav_my_req': '我的申请',
+    'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_logout': '退出',
+    'conn_online': '● 在线', 'conn_offline': '● 离线',
+    'sim_on': '模拟:开', 'sim_off': '模拟:关',
+    // Panels
+    'panel_sensor': '实时传感器监控', 'panel_3d': '3D 打印材料管理',
+    'panel_warehouse': '仓库库存管理', 'panel_users': '用户管理',
+    'panel_profile': '个人主页', 'panel_messages': '站内信',
+    // Forms
+    'type': '类型', 'color': '颜色', 'diameter': '直径', 'weight': '重量(g)',
+    'remain': '剩余(%)', 'note': '备注', 'add': '添加', 'reset': '重置',
+    'category': '种类', 'name': '名称', 'spec': '型号', 'qty': '数量',
+    'location': '位置', 'status': '状态', 'model': '型号', 'role': '角色',
+    'add_material': '添加材料', 'add_component': '添加元器件', 'add_board': '添加主板',
+    'add_user': '添加用户', 'user_list': '用户列表',
+    // Table headers
+    'th_id': '#', 'th_type': '类型', 'th_color': '颜色', 'th_diameter': '直径',
+    'th_weight': '重量', 'th_remain': '剩余', 'th_status': '状态', 'th_note': '备注',
+    'th_action': '操作', 'th_category': '种类', 'th_name': '名称', 'th_spec': '型号',
+    'th_qty': '数量', 'th_location': '位置', 'th_model': '型号',
+    'th_username': '用户名', 'th_uid': 'UID', 'th_nickname': '昵称',
+    'th_password': '密码', 'th_role': '角色', 'th_created': '创建时间',
+    // Detail
+    'material_detail': '材料详情', 'comp_detail': '元器件详情', 'board_detail': '主板详情',
+    // Tabs
+    'tab_components': '元器件', 'tab_boards': '主板',
+    // Actions
+    'edit': '编辑', 'delete': '删除', 'change_pass': '改密', 'protected': '受保护',
+    'send': '发送', 'search': '搜索', 'close': '关闭', 'cancel': '取消',
+    // Toasts
+    't_welcome': '欢迎', 't_readonly': ' · 只读模式：仅可查看数据',
+    't_material_added': '材料已添加', 't_material_updated': '材料已更新', 't_material_deleted': '材料已删除',
+    't_comp_added': '元器件已添加', 't_comp_updated': '元器件已更新', 't_comp_deleted': '元器件已删除',
+    't_board_added': '主板已添加', 't_board_updated': '主板已更新', 't_board_deleted': '主板已删除',
+    't_user_created': '用户已创建', 't_user_deleted': '用户已删除',
+    't_permission_denied': '权限不足', 't_cannot_delete_admin': '不能删除 admin 账号',
+    't_user_pass_required': '用户名和密码不能为空', 't_nickname_empty': '昵称不能为空',
+    't_profile_updated': '个人资料已更新', 't_update_failed': '更新失败',
+    't_mqtt_subscribed': 'MQTT 已订阅: ', 't_loaded_edit': '已加载数据，修改后点击「添加」保存',
+    't_light': '灯光', 'light_off': '关', 'light_on': '开', 'light_switch': '开关',
+    // Messaging
+    'msg_select_contact': '选择一个联系人开始聊天', 'msg_input_placeholder': '输入消息...',
+    'msg_no_contacts': '暂无联系人', 'msg_add_friend_hint': '输入 UID 添加好友',
+    'msg_no_messages': '暂无消息，发送第一条吧', 'msg_friend_req': '好友请求',
+    'msg_accept': '接受', 'msg_reject': '拒绝', 'msg_friend_added': '已添加好友',
+    'msg_friend_rejected': '已拒绝', 'msg_friend_req_sent': '好友请求已发送',
+    'msg_already_friend': '已经是好友', 'msg_self': '这是你自己',
+    'msg_broadcast': '📢 群发消息', 'msg_broadcast_title': '群发消息',
+    'msg_broadcast_mode': '发送方式', 'msg_broadcast_all_admin': '全体用户（含管理员）',
+    'msg_broadcast_all_users': '全体普通用户', 'msg_broadcast_custom': '指定 UID（逗号分隔）',
+    'msg_broadcast_target_uid': '目标 UID（多个用逗号分隔）', 'msg_broadcast_content': '消息内容',
+    'msg_broadcast_placeholder': '输入要广播的消息...', 'msg_broadcast_sent': '已发送给',
+    'msg_broadcast_content_empty': '消息内容不能为空', 'msg_broadcast_uid_empty': '请输入至少一个 UID',
+    'msg_banner_from': '来自: ', 'msg_banner_remaining': '剩余',
+    'msg_send_friend_req': '发送好友请求', 'msg_user_not_found': '用户不存在',
+    'msg_enter_uid': '请输入 UID', 'msg_uid_enter_uid': '请输入至少一个 UID',
+    // Profile
+    'profile_account': '账号名', 'profile_uid': 'UID', 'profile_password': '密码',
+    'profile_role': '角色', 'profile_created': '注册时间',
+    'profile_edit_nickname': '编辑昵称', 'profile_select_avatar': '选择头像',
+    'profile_upload_img': '📷 上传图片', 'profile_save': '保存修改',
+    'profile_img_too_big': '图片不能超过 5MB', 'profile_img_loaded': '图片已加载，点击保存修改生效',
+    'profile_avatar_too_big': '头像图片过大，请选择更小的图片',
+    'profile_input_nickname': '输入新昵称',
+    // Roles
+    'role_admin': '管理员', 'role_user': '普通用户',
+    // Status
+    'st_brand_new': '全新', 'st_good': '良好', 'st_testing': '待测试', 'st_faulty': '故障',
+    'st_normal': '正常', 'st_low': '偏低', 'st_critical': '不足',
+    // Misc
+    'corridor': '走 廊', 'door_label': '🚪 大门入口',
+    'req_title': '提交授权申请', 'req_type': '操作类型', 'req_target': '操作目标',
+    'req_detail': '详细说明', 'req_submit': '提交申请',
+    'req_panel_title': '授权申请管理', 'req_pending': '待审批', 'req_approved': '已批准',
+    'req_denied': '已拒绝', 'req_approve': '批准', 'req_deny': '拒绝',
+    'req_target_placeholder': '例如：PLA白色 / 电感 / Arduino Uno',
+    'req_detail_placeholder': '请描述你要进行的操作...',
+    'req_submitter': '申请人', 'req_submit_time': '提交时间', 'req_reviewer': '审批人',
+    'req_review_time': '审批时间', 'req_admin_note': '备注',
+    'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
+    'req_type_material_del': '3D材料 - 删除', 'req_type_comp_add': '元器件 - 新增',
+    'req_type_comp_edit': '元器件 - 修改', 'req_type_comp_del': '元器件 - 删除',
+    'req_type_board_add': '主板 - 新增', 'req_type_board_edit': '主板 - 修改',
+    'req_type_board_del': '主板 - 删除', 'req_type_light': '灯光控制', 'req_type_other': '其他操作',
+    // Sensor labels
+    'sensor_temp': '温度', 'sensor_humi': '湿度', 'sensor_light': '光照',
+    'sensor_aqi': '空气质量', 'sensor_tvoc': 'TVOC', 'sensor_eco2': 'eCO2',
+    // Material types
+    'mat_resin': '树脂', 'mat_nylon': '尼龙', 'mat_other': '其他',
+    // Component categories
+    'cat_resistor': '电阻', 'cat_capacitor': '电容', 'cat_inductor': '电感',
+    'cat_diode': '二极管', 'cat_transistor': '三极管/MOS', 'cat_ic': '芯片/IC',
+    'cat_sensor_module': '传感器模块', 'cat_connector': '连接器', 'cat_dupont': '杜邦线',
+    'cat_power_module': '电源模块', 'cat_other': '其他',
+    // Board types
+    'board_rpi_pico': '树莓派 Pico', 'board_rpi_4b': '树莓派 4B', 'board_rpi_5': '树莓派 5',
+    // Rooms
+    'room_chuangzao': '创造课室', 'room_chuangxin': '创新课室', 'room_chuangzhi': '创智课室',
+    'room_chuangyi': '创意课室', 'room_xiuxi': '休息区', 'room_bangong': '办公区',
+    'room_3d': '3D打印·操作·仓库区',
+  },
+  'zh-TW': {
+    'app_name': 'SparkMinds Lab', 'app_subtitle': '實驗室物聯網監控平台',
+    'username': '用戶名', 'password': '密碼', 'login': '登 入',
+    'login_hint': '預設帳號：admin / admin123 | user / user123',
+    'login_error_user_pass': '請輸入用戶名和密碼', 'login_error_wrong': '用戶名或密碼錯誤',
+    'nav_lab': '實驗室監控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件倉庫',
+    'nav_users': '用戶管理', 'nav_approval': '審批', 'nav_my_req': '我的申請',
+    'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_logout': '退出',
+    'conn_online': '● 在線', 'conn_offline': '● 離線',
+    'sim_on': '模擬:開', 'sim_off': '模擬:關',
+    'panel_sensor': '即時感測器監控', 'panel_3d': '3D 列印材料管理',
+    'panel_warehouse': '倉庫庫存管理', 'panel_users': '用戶管理',
+    'panel_profile': '個人主頁', 'panel_messages': '站內信',
+    'type': '類型', 'color': '顏色', 'diameter': '直徑', 'weight': '重量(g)',
+    'remain': '剩餘(%)', 'note': '備註', 'add': '添加', 'reset': '重置',
+    'category': '種類', 'name': '名稱', 'spec': '型號', 'qty': '數量',
+    'location': '位置', 'status': '狀態', 'model': '型號', 'role': '角色',
+    'add_material': '添加材料', 'add_component': '添加元器件', 'add_board': '添加主板',
+    'add_user': '添加用戶', 'user_list': '用戶列表',
+    'th_id': '#', 'th_type': '類型', 'th_color': '顏色', 'th_diameter': '直徑',
+    'th_weight': '重量', 'th_remain': '剩餘', 'th_status': '狀態', 'th_note': '備註',
+    'th_action': '操作', 'th_category': '種類', 'th_name': '名稱', 'th_spec': '型號',
+    'th_qty': '數量', 'th_location': '位置', 'th_model': '型號',
+    'th_username': '用戶名', 'th_uid': 'UID', 'th_nickname': '暱稱',
+    'th_password': '密碼', 'th_role': '角色', 'th_created': '建立時間',
+    'material_detail': '材料詳情', 'comp_detail': '元器件詳情', 'board_detail': '主板詳情',
+    'tab_components': '元器件', 'tab_boards': '主板',
+    'edit': '編輯', 'delete': '刪除', 'change_pass': '改密', 'protected': '受保護',
+    'send': '發送', 'search': '搜尋', 'close': '關閉', 'cancel': '取消',
+    't_welcome': '歡迎', 't_readonly': ' · 唯讀模式：僅可查看資料',
+    't_material_added': '材料已添加', 't_material_updated': '材料已更新', 't_material_deleted': '材料已刪除',
+    't_comp_added': '元器件已添加', 't_comp_updated': '元器件已更新', 't_comp_deleted': '元器件已刪除',
+    't_board_added': '主板已添加', 't_board_updated': '主板已更新', 't_board_deleted': '主板已刪除',
+    't_user_created': '用戶已建立', 't_user_deleted': '用戶已刪除',
+    't_permission_denied': '權限不足', 't_cannot_delete_admin': '不能刪除 admin 帳號',
+    't_user_pass_required': '用戶名和密碼不能為空', 't_nickname_empty': '暱稱不能為空',
+    't_profile_updated': '個人資料已更新', 't_update_failed': '更新失敗',
+    't_mqtt_subscribed': 'MQTT 已訂閱: ', 't_loaded_edit': '已載入資料，修改後點擊「添加」儲存',
+    't_light': '燈光', 'light_off': '關', 'light_on': '開', 'light_switch': '開關',
+    'msg_select_contact': '選擇一個聯絡人開始聊天', 'msg_input_placeholder': '輸入訊息...',
+    'msg_no_contacts': '暫無聯絡人', 'msg_add_friend_hint': '輸入 UID 添加好友',
+    'msg_no_messages': '暫無訊息，發送第一條吧', 'msg_friend_req': '好友請求',
+    'msg_accept': '接受', 'msg_reject': '拒絕', 'msg_friend_added': '已添加好友',
+    'msg_friend_rejected': '已拒絕', 'msg_friend_req_sent': '好友請求已發送',
+    'msg_already_friend': '已經是好友', 'msg_self': '這是你自己',
+    'msg_broadcast': '📢 群發訊息', 'msg_broadcast_title': '群發訊息',
+    'msg_broadcast_mode': '發送方式', 'msg_broadcast_all_admin': '全體用戶（含管理員）',
+    'msg_broadcast_all_users': '全體普通用戶', 'msg_broadcast_custom': '指定 UID（逗號分隔）',
+    'msg_broadcast_target_uid': '目標 UID（多個用逗號分隔）', 'msg_broadcast_content': '訊息內容',
+    'msg_broadcast_placeholder': '輸入要廣播的訊息...', 'msg_broadcast_sent': '已發送給',
+    'msg_broadcast_content_empty': '訊息內容不能為空', 'msg_broadcast_uid_empty': '請輸入至少一個 UID',
+    'msg_banner_from': '來自: ', 'msg_banner_remaining': '剩餘',
+    'msg_send_friend_req': '發送好友請求', 'msg_user_not_found': '用戶不存在',
+    'msg_enter_uid': '請輸入 UID', 'msg_uid_enter_uid': '請輸入至少一個 UID',
+    'profile_account': '帳號名', 'profile_uid': 'UID', 'profile_password': '密碼',
+    'profile_role': '角色', 'profile_created': '註冊時間',
+    'profile_edit_nickname': '編輯暱稱', 'profile_select_avatar': '選擇頭像',
+    'profile_upload_img': '📷 上傳圖片', 'profile_save': '儲存修改',
+    'profile_img_too_big': '圖片不能超過 5MB', 'profile_img_loaded': '圖片已載入，點擊儲存修改生效',
+    'profile_avatar_too_big': '頭像圖片過大，請選擇更小的圖片',
+    'profile_input_nickname': '輸入新暱稱',
+    'role_admin': '管理員', 'role_user': '普通用戶',
+    'st_brand_new': '全新', 'st_good': '良好', 'st_testing': '待測試', 'st_faulty': '故障',
+    'st_normal': '正常', 'st_low': '偏低', 'st_critical': '不足',
+    'corridor': '走 廊', 'door_label': '🚪 大門入口',
+    'req_title': '提交授權申請', 'req_type': '操作類型', 'req_target': '操作目標',
+    'req_detail': '詳細說明', 'req_submit': '提交申請',
+    'req_panel_title': '授權申請管理', 'req_pending': '待審批', 'req_approved': '已批准',
+    'req_denied': '已拒絕', 'req_approve': '批准', 'req_deny': '拒絕',
+    'req_target_placeholder': '例如：PLA白色 / 電感 / Arduino Uno',
+    'req_detail_placeholder': '請描述你要進行的操作...',
+    'req_submitter': '申請人', 'req_submit_time': '提交時間', 'req_reviewer': '審批人',
+    'req_review_time': '審批時間', 'req_admin_note': '備註',
+    'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
+    'req_type_material_del': '3D材料 - 刪除', 'req_type_comp_add': '元器件 - 新增',
+    'req_type_comp_edit': '元器件 - 修改', 'req_type_comp_del': '元器件 - 刪除',
+    'req_type_board_add': '主板 - 新增', 'req_type_board_edit': '主板 - 修改',
+    'req_type_board_del': '主板 - 刪除', 'req_type_light': '燈光控制', 'req_type_other': '其他操作',
+    'sensor_temp': '溫度', 'sensor_humi': '濕度', 'sensor_light': '光照',
+    'sensor_aqi': '空氣品質', 'sensor_tvoc': 'TVOC', 'sensor_eco2': 'eCO2',
+    'mat_resin': '樹脂', 'mat_nylon': '尼龍', 'mat_other': '其他',
+    'cat_resistor': '電阻', 'cat_capacitor': '電容', 'cat_inductor': '電感',
+    'cat_diode': '二極體', 'cat_transistor': '三極管/MOS', 'cat_ic': '晶片/IC',
+    'cat_sensor_module': '感測器模組', 'cat_connector': '連接器', 'cat_dupont': '杜邦線',
+    'cat_power_module': '電源模組', 'cat_other': '其他',
+    'board_rpi_pico': '樹莓派 Pico', 'board_rpi_4b': '樹莓派 4B', 'board_rpi_5': '樹莓派 5',
+    'room_chuangzao': '創造課室', 'room_chuangxin': '創新課室', 'room_chuangzhi': '創智課室',
+    'room_chuangyi': '創意課室', 'room_xiuxi': '休息區', 'room_bangong': '辦公區',
+    'room_3d': '3D列印·操作·倉庫區',
+  },
+  'en': {
+    'app_name': 'SparkMinds Lab', 'app_subtitle': 'Lab IoT Monitoring Platform',
+    'username': 'Username', 'password': 'Password', 'login': 'Log In',
+    'login_hint': 'Default: admin / admin123 | user / user123',
+    'login_error_user_pass': 'Please enter username and password', 'login_error_wrong': 'Invalid username or password',
+    'nav_lab': 'Lab Monitor', 'nav_3d': '3D Materials', 'nav_warehouse': 'Components',
+    'nav_users': 'User Mgmt', 'nav_approval': 'Approvals', 'nav_my_req': 'My Requests',
+    'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_logout': 'Logout',
+    'conn_online': '● Online', 'conn_offline': '● Offline',
+    'sim_on': 'Sim:ON', 'sim_off': 'Sim:OFF',
+    'panel_sensor': 'Real-time Sensor Monitor', 'panel_3d': '3D Printing Materials',
+    'panel_warehouse': 'Warehouse Inventory', 'panel_users': 'User Management',
+    'panel_profile': 'Profile', 'panel_messages': 'Messages',
+    'type': 'Type', 'color': 'Color', 'diameter': 'Diameter', 'weight': 'Weight(g)',
+    'remain': 'Remaining(%)', 'note': 'Note', 'add': 'Add', 'reset': 'Reset',
+    'category': 'Category', 'name': 'Name', 'spec': 'Spec', 'qty': 'Qty',
+    'location': 'Location', 'status': 'Status', 'model': 'Model', 'role': 'Role',
+    'add_material': 'Add Material', 'add_component': 'Add Component', 'add_board': 'Add Board',
+    'add_user': 'Add User', 'user_list': 'User List',
+    'th_id': '#', 'th_type': 'Type', 'th_color': 'Color', 'th_diameter': 'Diameter',
+    'th_weight': 'Weight', 'th_remain': 'Remain', 'th_status': 'Status', 'th_note': 'Note',
+    'th_action': 'Action', 'th_category': 'Category', 'th_name': 'Name', 'th_spec': 'Spec',
+    'th_qty': 'Qty', 'th_location': 'Location', 'th_model': 'Model',
+    'th_username': 'Username', 'th_uid': 'UID', 'th_nickname': 'Nickname',
+    'th_password': 'Password', 'th_role': 'Role', 'th_created': 'Created',
+    'material_detail': 'Material Details', 'comp_detail': 'Component Details', 'board_detail': 'Board Details',
+    'tab_components': 'Components', 'tab_boards': 'Boards',
+    'edit': 'Edit', 'delete': 'Delete', 'change_pass': 'Pass', 'protected': 'Protected',
+    'send': 'Send', 'search': 'Search', 'close': 'Close', 'cancel': 'Cancel',
+    't_welcome': 'Welcome', 't_readonly': ' · Read-only mode: view only',
+    't_material_added': 'Material added', 't_material_updated': 'Material updated', 't_material_deleted': 'Material deleted',
+    't_comp_added': 'Component added', 't_comp_updated': 'Component updated', 't_comp_deleted': 'Component deleted',
+    't_board_added': 'Board added', 't_board_updated': 'Board updated', 't_board_deleted': 'Board deleted',
+    't_user_created': 'User created', 't_user_deleted': 'User deleted',
+    't_permission_denied': 'Permission denied', 't_cannot_delete_admin': 'Cannot delete admin',
+    't_user_pass_required': 'Username and password required', 't_nickname_empty': 'Nickname cannot be empty',
+    't_profile_updated': 'Profile updated', 't_update_failed': 'Update failed',
+    't_mqtt_subscribed': 'MQTT subscribed: ', 't_loaded_edit': 'Data loaded, click Add to save',
+    't_light': 'Light', 'light_off': 'OFF', 'light_on': 'ON', 'light_switch': 'Toggle',
+    'msg_select_contact': 'Select a contact to start chatting', 'msg_input_placeholder': 'Type a message...',
+    'msg_no_contacts': 'No contacts', 'msg_add_friend_hint': 'Enter UID to add friend',
+    'msg_no_messages': 'No messages yet, send the first one', 'msg_friend_req': 'Friend Requests',
+    'msg_accept': 'Accept', 'msg_reject': 'Reject', 'msg_friend_added': 'Friend added',
+    'msg_friend_rejected': 'Rejected', 'msg_friend_req_sent': 'Friend request sent',
+    'msg_already_friend': 'Already friends', 'msg_self': 'This is you',
+    'msg_broadcast': '📢 Broadcast', 'msg_broadcast_title': 'Broadcast Message',
+    'msg_broadcast_mode': 'Send Mode', 'msg_broadcast_all_admin': 'All users (incl. admin)',
+    'msg_broadcast_all_users': 'All regular users', 'msg_broadcast_custom': 'Custom UIDs (comma-separated)',
+    'msg_broadcast_target_uid': 'Target UIDs (comma-separated)', 'msg_broadcast_content': 'Message',
+    'msg_broadcast_placeholder': 'Enter broadcast message...', 'msg_broadcast_sent': 'Sent to',
+    'msg_broadcast_content_empty': 'Message cannot be empty', 'msg_broadcast_uid_empty': 'Please enter at least one UID',
+    'msg_banner_from': 'From: ', 'msg_banner_remaining': 'Remaining',
+    'msg_send_friend_req': 'Send Friend Request', 'msg_user_not_found': 'User not found',
+    'msg_enter_uid': 'Please enter UID', 'msg_uid_enter_uid': 'Please enter at least one UID',
+    'profile_account': 'Account', 'profile_uid': 'UID', 'profile_password': 'Password',
+    'profile_role': 'Role', 'profile_created': 'Registered',
+    'profile_edit_nickname': 'Edit Nickname', 'profile_select_avatar': 'Select Avatar',
+    'profile_upload_img': '📷 Upload Image', 'profile_save': 'Save Changes',
+    'profile_img_too_big': 'Image cannot exceed 5MB', 'profile_img_loaded': 'Image loaded, click Save to apply',
+    'profile_avatar_too_big': 'Avatar image too large, please choose a smaller one',
+    'profile_input_nickname': 'Enter new nickname',
+    'role_admin': 'Admin', 'role_user': 'User',
+    'st_brand_new': 'Brand New', 'st_good': 'Good', 'st_testing': 'Pending Test', 'st_faulty': 'Faulty',
+    'st_normal': 'Normal', 'st_low': 'Low', 'st_critical': 'Critical',
+    'corridor': 'Corridor', 'door_label': '🚪 Main Entrance',
+    'req_title': 'Submit Authorization Request', 'req_type': 'Operation Type', 'req_target': 'Target',
+    'req_detail': 'Details', 'req_submit': 'Submit Request',
+    'req_panel_title': 'Authorization Request Management', 'req_pending': 'Pending', 'req_approved': 'Approved',
+    'req_denied': 'Denied', 'req_approve': 'Approve', 'req_deny': 'Deny',
+    'req_target_placeholder': 'e.g. PLA White / Inductor / Arduino Uno',
+    'req_detail_placeholder': 'Describe the operation you want to perform...',
+    'req_submitter': 'Requester', 'req_submit_time': 'Submitted', 'req_reviewer': 'Reviewer',
+    'req_review_time': 'Reviewed', 'req_admin_note': 'Note',
+    'req_type_material_add': '3D Material - Add', 'req_type_material_edit': '3D Material - Edit',
+    'req_type_material_del': '3D Material - Delete', 'req_type_comp_add': 'Component - Add',
+    'req_type_comp_edit': 'Component - Edit', 'req_type_comp_del': 'Component - Delete',
+    'req_type_board_add': 'Board - Add', 'req_type_board_edit': 'Board - Edit',
+    'req_type_board_del': 'Board - Delete', 'req_type_light': 'Light Control', 'req_type_other': 'Other',
+    'sensor_temp': 'Temp', 'sensor_humi': 'Humidity', 'sensor_light': 'Light',
+    'sensor_aqi': 'Air Quality', 'sensor_tvoc': 'TVOC', 'sensor_eco2': 'eCO2',
+    'mat_resin': 'Resin', 'mat_nylon': 'Nylon', 'mat_other': 'Other',
+    'cat_resistor': 'Resistor', 'cat_capacitor': 'Capacitor', 'cat_inductor': 'Inductor',
+    'cat_diode': 'Diode', 'cat_transistor': 'Transistor/MOS', 'cat_ic': 'Chip/IC',
+    'cat_sensor_module': 'Sensor Module', 'cat_connector': 'Connector', 'cat_dupont': 'Dupont Wire',
+    'cat_power_module': 'Power Module', 'cat_other': 'Other',
+    'board_rpi_pico': 'Raspberry Pi Pico', 'board_rpi_4b': 'Raspberry Pi 4B', 'board_rpi_5': 'Raspberry Pi 5',
+    'room_chuangzao': 'Create Room', 'room_chuangxin': 'Innovate Room', 'room_chuangzhi': 'Smart Room',
+    'room_chuangyi': 'Ideate Room', 'room_xiuxi': 'Lounge', 'room_bangong': 'Office',
+    'room_3d': '3D Print · Workshop · Storage',
+  }
+};
+
+let currentLang = localStorage.getItem('lab_lang') || 'zh-CN';
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || (I18N['zh-CN'][key]) || key; }
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lab_lang', lang);
+  applyI18n();
+}
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (key) el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.dataset.i18nPh;
+    if (key) el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    if (key) el.dataset.title = t(key);
+  });
+  // Update lang selector label
+  const lbl = document.getElementById('langLabel');
+  if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
+  // Update document title
+  document.title = t('app_name') + ' [v1.9]';
+}
+</script>
 </head>
 <body>
 <div class="scanline"></div>
@@ -254,13 +596,18 @@
       <div class="login-logo">
         <div class="logo-icon">S</div>
         <h1>SparkMinds Lab</h1>
-        <p>实验室物联网监控平台</p>
+        <p data-i18n="app_subtitle">实验室物联网监控平台</p>
       </div>
-      <div class="prompt-line"><span class="prompt">用户名</span><input type="text" id="loginUser" placeholder="admin / user" autocomplete="off"></div>
-      <div class="prompt-line"><span class="prompt">密码</span><input type="password" id="loginPass" placeholder="********" autocomplete="off"></div>
-      <div class="prompt-line"><button class="login-btn" id="loginBtn">登 录</button></div>
+      <div class="prompt-line"><span class="prompt" data-i18n="username">用户名</span><input type="text" id="loginUser" placeholder="admin / user" autocomplete="off"></div>
+      <div class="prompt-line"><span class="prompt" data-i18n="password">密码</span><input type="password" id="loginPass" placeholder="********" autocomplete="off"></div>
+      <div class="prompt-line"><button class="login-btn" id="loginBtn" data-i18n="login">登 录</button></div>
       <div class="error-msg" id="loginError"></div>
-      <div class="hint">默认账号：admin / admin123 &nbsp;|&nbsp; user / user123</div>
+      <div class="hint" data-i18n="login_hint">默认账号：admin / admin123 &nbsp;|&nbsp; user / user123</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+        <button class="lang-pill" onclick="setLang('zh-CN')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);cursor:pointer;font-size:12px;transition:var(--transition)">简体中文</button>
+        <button class="lang-pill" onclick="setLang('zh-TW')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);cursor:pointer;font-size:12px;transition:var(--transition)">繁體中文</button>
+        <button class="lang-pill" onclick="setLang('en')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);cursor:pointer;font-size:12px;transition:var(--transition)">English</button>
+      </div>
     </div>
   </div>
 </div>
@@ -270,47 +617,55 @@
   <header class="term-header">
     <span class="brand glow">SparkMinds Lab v1.9</span>
     <nav class="term-nav">
-      <button class="nav-btn active" data-panel="lab">实验室监控</button>
-      <button class="nav-btn" data-panel="print3d">3D材料</button>
-      <button class="nav-btn" data-panel="warehouse">元器件仓库</button>
-      <button class="nav-btn admin-only" data-panel="users">用户管理</button>
-      <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative">审批<span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
-      <button class="nav-btn" id="myReqBtn">我的申请</button>
-      <button class="nav-btn" data-panel="profile">个人主页</button>
-      <button class="nav-btn" id="msgBtn" style="position:relative">站内信<span id="msgBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
-      <button class="nav-btn" id="logoutBtn">退出</button>
+      <button class="nav-btn active" data-panel="lab" data-i18n="nav_lab">实验室监控</button>
+      <button class="nav-btn" data-panel="print3d" data-i18n="nav_3d">3D材料</button>
+      <button class="nav-btn" data-panel="warehouse" data-i18n="nav_warehouse">元器件仓库</button>
+      <button class="nav-btn admin-only" data-panel="users" data-i18n="nav_users">用户管理</button>
+      <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative"><span data-i18n="nav_approval">审批</span><span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
+      <button class="nav-btn" id="myReqBtn" data-i18n="nav_my_req">我的申请</button>
+      <button class="nav-btn" data-panel="profile" data-i18n="nav_profile">个人主页</button>
+      <button class="nav-btn" id="msgBtn" style="position:relative"><span data-i18n="nav_messages">站内信</span><span id="msgBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
+      <button class="nav-btn" id="logoutBtn" data-i18n="nav_logout">退出</button>
     </nav>
-    <span class="conn-status" id="connStatus">● 离线</span>
-    <button class="nav-btn" id="simBtn" style="border-color:var(--warning);color:var(--warning)">模拟:关</button>
+    <span class="conn-status" id="connStatus" data-i18n="conn_offline">● 离线</span>
+    <button class="nav-btn" id="simBtn" style="border-color:var(--warning);color:var(--warning)" data-i18n="sim_off">模拟:关</button>
+    <div style="position:relative;display:inline-flex;align-items:center">
+      <button class="nav-btn" id="langBtn" style="padding:5px 10px;font-size:12px;min-width:50px;justify-content:center" title="Language"><span id="langLabel">简中</span> ▾</button>
+      <div id="langDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);box-shadow:var(--shadow-lg);z-index:100;overflow:hidden;min-width:120px">
+        <div class="lang-option" data-lang="zh-CN" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">简体中文</div>
+        <div class="lang-option" data-lang="zh-TW" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">繁體中文</div>
+        <div class="lang-option" data-lang="en" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">English</div>
+      </div>
+    </div>
   </header>
 
   <!-- LAB MONITOR -->
   <div id="panel-lab" class="panel active">
-    <div class="panel-title">实时传感器监控</div>
+    <div class="panel-title" data-i18n="panel_sensor">实时传感器监控</div>
     <div class="lab-map" id="roomGrid"></div>
   </div>
 
   <!-- 3D PRINT MATERIALS -->
   <div id="panel-print3d" class="panel">
-    <div class="panel-title">3D 打印材料管理</div>
-    <div class="term-box" data-title="添加材料">
+    <div class="panel-title" data-i18n="panel_3d">3D 打印材料管理</div>
+    <div class="term-box" data-title="添加材料" data-i18n-title="add_material">
       <div class="term-form" id="materialForm">
-        <div><label>类型</label><select id="mType"><option>PLA</option><option>ABS</option><option>PETG</option><option>TPU</option><option>树脂</option><option>尼龙</option><option>其他</option></select></div>
-        <div><label>颜色</label><input type="text" id="mColor" placeholder="白色"></div>
-        <div><label>直径</label><select id="mDia"><option>1.75mm</option><option>2.85mm</option></select></div>
-        <div><label>重量(g)</label><input type="number" id="mWeight" placeholder="1000"></div>
-        <div><label>剩余(%)</label><input type="number" id="mRemain" placeholder="100" min="0" max="100"></div>
-        <div><label>备注</label><input type="text" id="mNote" placeholder="品牌"></div>
+        <div><label data-i18n="type">类型</label><select id="mType"><option>PLA</option><option>ABS</option><option>PETG</option><option>TPU</option><option>树脂</option><option>尼龙</option><option>其他</option></select></div>
+        <div><label data-i18n="color">颜色</label><input type="text" id="mColor" placeholder="白色"></div>
+        <div><label data-i18n="diameter">直径</label><select id="mDia"><option>1.75mm</option><option>2.85mm</option></select></div>
+        <div><label data-i18n="weight">重量(g)</label><input type="number" id="mWeight" placeholder="1000"></div>
+        <div><label data-i18n="remain">剩余(%)</label><input type="number" id="mRemain" placeholder="100" min="0" max="100"></div>
+        <div><label data-i18n="note">备注</label><input type="text" id="mNote" placeholder="品牌"></div>
       </div>
-      <button class="term-btn-sm" id="addMaterialBtn">添加</button>
-      <button class="term-btn-sm info" id="resetMaterialBtn">重置</button>
+      <button class="term-btn-sm" id="addMaterialBtn" data-i18n="add">添加</button>
+      <button class="term-btn-sm info" id="resetMaterialBtn" data-i18n="reset">重置</button>
     </div>
     <div class="card-stack" id="materialCards"></div>
     <div class="detail-panel" id="materialDetail">
-      <div class="detail-header"><h3 id="materialDetailTitle">材料详情</h3><button class="detail-close" id="materialDetailClose">&times;</button></div>
+      <div class="detail-header"><h3 id="materialDetailTitle" data-i18n="material_detail">材料详情</h3><button class="detail-close" id="materialDetailClose">&times;</button></div>
       <div class="detail-body">
         <table class="term-table" id="materialTable">
-          <thead><tr><th>#</th><th>类型</th><th>颜色</th><th>直径</th><th>重量</th><th>剩余</th><th>状态</th><th>备注</th><th>操作</th></tr></thead>
+          <thead><tr><th data-i18n="th_id">#</th><th data-i18n="th_type">类型</th><th data-i18n="th_color">颜色</th><th data-i18n="th_diameter">直径</th><th data-i18n="th_weight">重量</th><th data-i18n="th_remain">剩余</th><th data-i18n="th_status">状态</th><th data-i18n="th_note">备注</th><th data-i18n="th_action">操作</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -319,31 +674,31 @@
 
   <!-- WAREHOUSE -->
   <div id="panel-warehouse" class="panel">
-    <div class="panel-title">仓库库存管理</div>
+    <div class="panel-title" data-i18n="panel_warehouse">仓库库存管理</div>
     <div class="term-tabs">
-      <button class="term-tab active" data-wh="components">元器件</button>
-      <button class="term-tab" data-wh="boards">主板</button>
+      <button class="term-tab active" data-wh="components" data-i18n="tab_components">元器件</button>
+      <button class="term-tab" data-wh="boards" data-i18n="tab_boards">主板</button>
     </div>
 
     <!-- Components -->
     <div id="wh-components" class="wh-panel">
-      <div class="term-box" data-title="添加元器件">
+      <div class="term-box" data-title="添加元器件" data-i18n-title="add_component">
         <div class="term-form" id="componentForm">
-          <div><label>种类</label><select id="cCat"><option>电阻</option><option>电容</option><option>电感</option><option>二极管</option><option>三极管/MOS</option><option>芯片/IC</option><option>传感器模块</option><option>连接器</option><option>杜邦线</option><option>电源模块</option><option>其他</option></select></div>
-          <div><label>名称</label><input type="text" id="cCustomName" placeholder="10k 电阻 1/4W"></div>
-          <div><label>型号</label><input type="text" id="cSpec" placeholder="0603 / 1%"></div>
-          <div><label>数量</label><input type="number" id="cQty" placeholder="100" min="0"></div>
-          <div><label>位置</label><input type="text" id="cLoc" placeholder="A-12-3"></div>
-          <div><label>备注</label><input type="text" id="cNote" placeholder=""></div>
+          <div><label data-i18n="category">种类</label><select id="cCat"><option>电阻</option><option>电容</option><option>电感</option><option>二极管</option><option>三极管/MOS</option><option>芯片/IC</option><option>传感器模块</option><option>连接器</option><option>杜邦线</option><option>电源模块</option><option>其他</option></select></div>
+          <div><label data-i18n="name">名称</label><input type="text" id="cCustomName" placeholder="10k 电阻 1/4W"></div>
+          <div><label data-i18n="spec">型号</label><input type="text" id="cSpec" placeholder="0603 / 1%"></div>
+          <div><label data-i18n="qty">数量</label><input type="number" id="cQty" placeholder="100" min="0"></div>
+          <div><label data-i18n="location">位置</label><input type="text" id="cLoc" placeholder="A-12-3"></div>
+          <div><label data-i18n="note">备注</label><input type="text" id="cNote" placeholder=""></div>
         </div>
-        <button class="term-btn-sm" id="addCompBtn">添加</button>
+        <button class="term-btn-sm" id="addCompBtn" data-i18n="add">添加</button>
       </div>
       <div class="card-stack" id="compCards"></div>
       <div class="detail-panel" id="compDetail">
-        <div class="detail-header"><h3 id="compDetailTitle">元器件详情</h3><button class="detail-close" id="compDetailClose">&times;</button></div>
+        <div class="detail-header"><h3 id="compDetailTitle" data-i18n="comp_detail">元器件详情</h3><button class="detail-close" id="compDetailClose">&times;</button></div>
         <div class="detail-body">
           <table class="term-table" id="compTable">
-            <thead><tr><th>#</th><th>种类</th><th>名称</th><th>型号</th><th>数量</th><th>位置</th><th>备注</th><th>操作</th></tr></thead>
+            <thead><tr><th data-i18n="th_id">#</th><th data-i18n="th_category">种类</th><th data-i18n="th_name">名称</th><th data-i18n="th_spec">型号</th><th data-i18n="th_qty">数量</th><th data-i18n="th_location">位置</th><th data-i18n="th_note">备注</th><th data-i18n="th_action">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -352,23 +707,23 @@
 
     <!-- Mainboards -->
     <div id="wh-boards" class="wh-panel" style="display:none">
-      <div class="term-box" data-title="添加主板">
+      <div class="term-box" data-title="添加主板" data-i18n-title="add_board">
         <div class="term-form" id="boardForm">
-          <div><label>类型</label><select id="bType"><option>ESP32</option><option>ESP32-C3</option><option>ESP32-S3</option><option>Arduino Uno</option><option>Arduino Mega</option><option>Arduino Nano</option><option>树莓派 Pico</option><option>树莓派 4B</option><option>树莓派 5</option><option>STM32</option><option>其他</option></select></div>
-          <div><label>型号</label><input type="text" id="bModel" placeholder="NodeMCU-32S"></div>
-          <div><label>数量</label><input type="number" id="bQty" placeholder="5" min="0"></div>
-          <div><label>位置</label><input type="text" id="bLoc" placeholder="B-05-1"></div>
-          <div><label>状态</label><select id="bStatus"><option>全新</option><option>良好</option><option>待测试</option><option>故障</option></select></div>
-          <div><label>备注</label><input type="text" id="bNote" placeholder=""></div>
+          <div><label data-i18n="type">类型</label><select id="bType"><option>ESP32</option><option>ESP32-C3</option><option>ESP32-S3</option><option>Arduino Uno</option><option>Arduino Mega</option><option>Arduino Nano</option><option>树莓派 Pico</option><option>树莓派 4B</option><option>树莓派 5</option><option>STM32</option><option>其他</option></select></div>
+          <div><label data-i18n="model">型号</label><input type="text" id="bModel" placeholder="NodeMCU-32S"></div>
+          <div><label data-i18n="qty">数量</label><input type="number" id="bQty" placeholder="5" min="0"></div>
+          <div><label data-i18n="location">位置</label><input type="text" id="bLoc" placeholder="B-05-1"></div>
+          <div><label data-i18n="status">状态</label><select id="bStatus"><option>全新</option><option>良好</option><option>待测试</option><option>故障</option></select></div>
+          <div><label data-i18n="note">备注</label><input type="text" id="bNote" placeholder=""></div>
         </div>
-        <button class="term-btn-sm" id="addBoardBtn">添加</button>
+        <button class="term-btn-sm" id="addBoardBtn" data-i18n="add">添加</button>
       </div>
       <div class="card-stack" id="boardCards"></div>
       <div class="detail-panel" id="boardDetail">
-        <div class="detail-header"><h3 id="boardDetailTitle">主板详情</h3><button class="detail-close" id="boardDetailClose">&times;</button></div>
+        <div class="detail-header"><h3 id="boardDetailTitle" data-i18n="board_detail">主板详情</h3><button class="detail-close" id="boardDetailClose">&times;</button></div>
         <div class="detail-body">
           <table class="term-table" id="boardTable">
-            <thead><tr><th>#</th><th>类型</th><th>型号</th><th>数量</th><th>位置</th><th>状态</th><th>备注</th><th>操作</th></tr></thead>
+            <thead><tr><th data-i18n="th_id">#</th><th data-i18n="th_type">类型</th><th data-i18n="th_model">型号</th><th data-i18n="th_qty">数量</th><th data-i18n="th_location">位置</th><th data-i18n="th_status">状态</th><th data-i18n="th_note">备注</th><th data-i18n="th_action">操作</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -378,18 +733,18 @@
 
   <!-- USER MANAGEMENT -->
   <div id="panel-users" class="panel">
-    <div class="panel-title">用户管理</div>
-    <div class="term-box" data-title="添加用户">
+    <div class="panel-title" data-i18n="panel_users">用户管理</div>
+    <div class="term-box" data-title="添加用户" data-i18n-title="add_user">
       <div class="term-form" id="userForm">
-        <div><label>用户名</label><input type="text" id="uName" placeholder="新用户"></div>
-        <div><label>密码</label><input type="password" id="uPass" placeholder="********"></div>
-        <div><label>角色</label><select id="uRole"><option value="admin">管理员</option><option value="user">普通用户</option></select></div>
+        <div><label data-i18n="th_username">用户名</label><input type="text" id="uName" placeholder="新用户"></div>
+        <div><label data-i18n="password">密码</label><input type="password" id="uPass" placeholder="********"></div>
+        <div><label data-i18n="role">角色</label><select id="uRole"><option value="admin" data-i18n="role_admin">管理员</option><option value="user" data-i18n="role_user">普通用户</option></select></div>
       </div>
-      <button class="term-btn-sm" id="addUserBtn">添加用户</button>
+      <button class="term-btn-sm" id="addUserBtn" data-i18n="add_user">添加用户</button>
     </div>
-    <div class="term-box" data-title="用户列表">
+    <div class="term-box" data-title="用户列表" data-i18n-title="user_list">
       <table class="term-table" id="userTable">
-        <thead><tr><th>用户名</th><th>UID</th><th>昵称</th><th>密码</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>
+        <thead><tr><th data-i18n="th_username">用户名</th><th>UID</th><th data-i18n="th_nickname">昵称</th><th data-i18n="th_password">密码</th><th data-i18n="th_role">角色</th><th data-i18n="th_created">创建时间</th><th data-i18n="th_action">操作</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -397,31 +752,31 @@
 
   <!-- 个人主页面板 -->
   <div id="panel-profile" class="panel">
-    <div class="panel-title">个人主页</div>
+    <div class="panel-title" data-i18n="panel_profile">个人主页</div>
     <div id="profileContent" style="max-width:600px"></div>
   </div>
 
   <!-- 站内信面板 -->
   <div id="panel-messages" class="panel">
-    <div class="panel-title">站内信</div>
+    <div class="panel-title" data-i18n="panel_messages">站内信</div>
     <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 160px);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
       <div style="width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-soft)">
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
-          <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
-          <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px">搜索</button>
+          <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" data-i18n-ph="msg_add_friend_hint" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
+          <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px" data-i18n="search">搜索</button>
         </div>
         <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
         <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
         <div style="padding:8px 12px;border-top:1px solid var(--border)">
-          <button class="nav-btn admin-only flex" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
+          <button class="nav-btn admin-only flex" id="broadcastBtn" style="width:100%;justify-content:center" data-i18n="msg_broadcast">📢 群发消息</button>
         </div>
       </div>
       <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
-        <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-soft);font-weight:600;font-size:14px;color:var(--fg)">选择一个联系人开始聊天</div>
+        <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-soft);font-weight:600;font-size:14px;color:var(--fg)" data-i18n="msg_select_contact">选择一个联系人开始聊天</div>
         <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
         <div id="chatInputBar" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
-          <input id="chatInput" type="text" placeholder="输入消息..." style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;outline:none" disabled>
-          <button class="nav-btn active" id="sendMsgBtn" disabled>发送</button>
+          <input id="chatInput" type="text" placeholder="输入消息..." data-i18n-ph="msg_input_placeholder" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;outline:none" disabled>
+          <button class="nav-btn active" id="sendMsgBtn" disabled data-i18n="send">发送</button>
         </div>
       </div>
     </div>
@@ -431,9 +786,9 @@
 <!-- 申请弹窗 -->
 <div id="reqModal" class="modal-overlay" style="display:none">
   <div class="modal-card">
-    <div class="modal-title">提交授权申请</div>
+    <div class="modal-title" data-i18n="req_title">提交授权申请</div>
     <div class="modal-field">
-      <label>操作类型</label>
+      <label data-i18n="req_type">操作类型</label>
       <select id="reqType">
         <option value="material_add">3D材料 - 新增</option>
         <option value="material_edit">3D材料 - 修改</option>
@@ -449,16 +804,16 @@
       </select>
     </div>
     <div class="modal-field">
-      <label>操作目标</label>
-      <input id="reqTarget" type="text" placeholder="例如：PLA白色 / 电感 / Arduino Uno">
+      <label data-i18n="req_target">操作目标</label>
+      <input id="reqTarget" type="text" placeholder="例如：PLA白色 / 电感 / Arduino Uno" data-i18n-ph="req_target_placeholder">
     </div>
     <div class="modal-field">
-      <label>详细说明</label>
-      <textarea id="reqDetail" rows="3" placeholder="请描述你要进行的操作..."></textarea>
+      <label data-i18n="req_detail">详细说明</label>
+      <textarea id="reqDetail" rows="3" placeholder="请描述你要进行的操作..." data-i18n-ph="req_detail_placeholder"></textarea>
     </div>
     <div class="modal-actions">
-      <button class="nav-btn" id="reqCancel">取消</button>
-      <button class="nav-btn active" id="reqSubmit">提交申请</button>
+      <button class="nav-btn" id="reqCancel" data-i18n="cancel">取消</button>
+      <button class="nav-btn active" id="reqSubmit" data-i18n="req_submit">提交申请</button>
     </div>
   </div>
 </div>
@@ -467,8 +822,8 @@
 <div id="reqPanel" class="modal-overlay" style="display:none">
   <div class="modal-card" style="max-width:720px;width:92%;max-height:80vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <div class="modal-title" id="reqPanelTitle" style="margin-bottom:0">授权申请管理</div>
-      <button class="nav-btn" id="reqPanelClose">关闭</button>
+      <div class="modal-title" id="reqPanelTitle" style="margin-bottom:0" data-i18n="req_panel_title">授权申请管理</div>
+      <button class="nav-btn" id="reqPanelClose" data-i18n="close">关闭</button>
     </div>
     <div id="reqListBody"></div>
   </div>
@@ -477,26 +832,26 @@
 <!-- 广播弹窗 -->
 <div id="broadcastModal" class="modal-overlay" style="display:none">
   <div class="modal-card">
-    <div class="modal-title">群发消息</div>
+    <div class="modal-title" data-i18n="msg_broadcast_title">群发消息</div>
     <div class="modal-field">
-      <label>发送方式</label>
+      <label data-i18n="msg_broadcast_mode">发送方式</label>
       <select id="broadcastMode">
-        <option value="all_including_admin">全体用户（含管理员）</option>
-        <option value="all_users">全体普通用户</option>
-        <option value="custom">指定 UID（逗号分隔）</option>
+        <option value="all_including_admin" data-i18n="msg_broadcast_all_admin">全体用户（含管理员）</option>
+        <option value="all_users" data-i18n="msg_broadcast_all_users">全体普通用户</option>
+        <option value="custom" data-i18n="msg_broadcast_custom">指定 UID（逗号分隔）</option>
       </select>
     </div>
     <div class="modal-field" id="customUidField" style="display:none">
-      <label>目标 UID（多个用逗号分隔）</label>
+      <label data-i18n="msg_broadcast_target_uid">目标 UID（多个用逗号分隔）</label>
       <input id="customUids" type="text" placeholder="例如: 10002, 10003, 10005">
     </div>
     <div class="modal-field">
-      <label>消息内容</label>
-      <textarea id="broadcastContent" rows="3" placeholder="输入要广播的消息..."></textarea>
+      <label data-i18n="msg_broadcast_content">消息内容</label>
+      <textarea id="broadcastContent" rows="3" placeholder="输入要广播的消息..." data-i18n-ph="msg_broadcast_placeholder"></textarea>
     </div>
     <div class="modal-actions">
-      <button class="nav-btn" id="broadcastCancel">取消</button>
-      <button class="nav-btn active" id="broadcastSend">发送</button>
+      <button class="nav-btn" id="broadcastCancel" data-i18n="cancel">取消</button>
+      <button class="nav-btn active" id="broadcastSend" data-i18n="send">发送</button>
     </div>
   </div>
 </div>
@@ -509,6 +864,21 @@
     <div class="modal-actions">
       <button class="nav-btn" id="searchUserClose">关闭</button>
     </div>
+  </div>
+</div>
+
+<!-- 广播横幅 -->
+<div id="broadcastBanner" style="display:none;position:fixed;top:0;left:0;width:100%;z-index:9998;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:12px 24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);align-items:center;justify-content:space-between;gap:16px">
+  <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+    <span style="font-size:20px;flex-shrink:0">📢</span>
+    <div style="min-width:0;flex:1">
+      <div id="bannerSender" style="font-size:12px;opacity:0.85;font-weight:500">管理员</div>
+      <div id="bannerContent" style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+    <span id="bannerCountdown" style="font-size:12px;opacity:0.9;font-weight:500;white-space:nowrap"></span>
+    <button id="bannerClose" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s">×</button>
   </div>
 </div>
 
@@ -558,13 +928,13 @@
       clearInterval(simInterval);
       simInterval = null;
       const btn = $('#simBtn');
-      btn.textContent = '模拟:关';
+      btn.textContent = t('sim_off');
       btn.style.borderColor = 'var(--warning)';
       btn.style.color = 'var(--warning)';
       toast('模拟数据已关闭');
     } else {
       const btn = $('#simBtn');
-      btn.textContent = '模拟:开';
+      btn.textContent = t('sim_on');
       btn.style.borderColor = 'var(--success)';
       btn.style.color = 'var(--success)';
       toast('模拟数据已开启（无真实设备时用于测试）');
@@ -764,7 +1134,7 @@
     renderProfile();
     initMessaging();
     startPolling();
-    toast(`欢迎，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
+    toast(`${t('t_welcome')}，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? t('t_readonly') : ''}`);
   }
 
   $('#logoutBtn').addEventListener('click', () => {
@@ -838,7 +1208,7 @@
     // Row 2: corridor spanning 4 columns
     const corridor = document.createElement('div');
     corridor.className = 'lab-corridor';
-    corridor.textContent = '走 廊';
+    corridor.textContent = t('corridor');
     grid.appendChild(corridor);
 
     // Row 3: bottom areas (休息区, 办公区, 3D打印·操作·仓库区)
@@ -853,7 +1223,7 @@
     // 大门入口标签（底部独立行）
     const doorLabel = document.createElement('div');
     doorLabel.style.cssText = 'grid-column:1/-1;text-align:center;padding:8px 16px;background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-sm);color:var(--warning);font-size:13px;font-weight:600;letter-spacing:2px;box-shadow:var(--shadow-xs)';
-    doorLabel.textContent = '🚪 大门入口';
+    doorLabel.textContent = t('door_label');
     grid.appendChild(doorLabel);
 
     // Build light bars for all rooms
@@ -869,7 +1239,7 @@
       const tag = document.createElement('span');
       tag.className = 'light-tag off';
       tag.id = `tag-${r.id}${count===1?'':'-'+i}`;
-      tag.textContent = count === 1 ? '灯光:关' : `灯${i}:关`;
+      tag.textContent = count === 1 ? t('t_light')+':'+t('light_off') : t('t_light')+i+':'+t('light_off');
       bar.appendChild(tag);
 
       if (isAdmin) {
@@ -877,7 +1247,7 @@
         btn.className = 'light-btn-term';
         btn.dataset.room = r.id;
         if (count > 1) btn.dataset.light = i;
-        btn.textContent = count === 1 ? '开关' : `灯${i}`;
+        btn.textContent = count === 1 ? t('light_switch') : t('t_light')+i;
         btn.addEventListener('click', () => sendLightCmd(r.id, count > 1 ? i : 1));
         bar.appendChild(btn);
       }
@@ -898,7 +1268,7 @@
     if (client && client.connected) {
       client.publish(TOPIC_OUT, JSON.stringify(cmd));
     }
-    toast(`${rm ? rm.name : roomId} 灯${lightIdx} -> ${isOn?'关':'开'}`);
+    toast(`${rm ? rm.name : roomId} ${t('t_light')}${lightIdx} -> ${isOn?t('light_off'):t('light_on')}`);
     // optimistic toggle
     updateLightUI(roomId, lightIdx, !isOn);
   }
@@ -911,7 +1281,7 @@
     const tag = document.getElementById(tagId);
     if (tag) {
       tag.className = 'light-tag ' + (isOn ? 'on' : 'off');
-      tag.textContent = count === 1 ? (isOn ? '灯光:开' : '灯光:关') : `灯${lightIdx}:${isOn?'开':'关'}`;
+      tag.textContent = count === 1 ? (isOn ? t('t_light')+':'+t('light_on') : t('t_light')+':'+t('light_off')) : t('t_light')+lightIdx+':'+(isOn?t('light_on'):t('light_off'));
     }
     const key = count === 1 ? roomId : roomId + '_' + lightIdx;
     lightState[key] = isOn;
@@ -986,10 +1356,10 @@
     client = mqtt.connect(BROKER, { clientId: CLIENT_ID, clean: true, reconnectPeriod: 3000 });
 
     client.on('connect', () => {
-      $('#connStatus').textContent = '● 在线';
+      $('#connStatus').textContent = t('conn_online');
       $('#connStatus').classList.add('online');
       client.subscribe(TOPIC_IN, { qos: 0 }, err => {
-        if (!err) toast('MQTT 已订阅: ' + TOPIC_IN);
+        if (!err) toast(t('t_mqtt_subscribed') + TOPIC_IN);
       });
     });
 
@@ -1014,7 +1384,7 @@
       $('#connStatus').classList.remove('online');
     });
     client.on('close', () => {
-      $('#connStatus').textContent = '● 离线';
+      $('#connStatus').textContent = t('conn_offline');
       $('#connStatus').classList.remove('online');
     });
     client.on('reconnect', () => {
@@ -1138,7 +1508,7 @@
     tbody.innerHTML = items.map((m, i) => {
       let status = 'OK'; if (m.remain <= 0) status = 'EMPTY'; else if (m.remain < 15) status = 'LOW';
       const sc = status === 'EMPTY' ? 'color:var(--danger)' : status === 'LOW' ? 'color:var(--accent)' : 'color:var(--fg)';
-      return `<tr><td>${i+1}</td><td>${m.type}</td><td>${m.color}</td><td>${m.diameter}</td><td>${m.weight}g</td><td>${m.remain}%</td><td style="${sc}">${status}</td><td>${m.note||'-'}</td><td><button class="term-btn-sm" onclick="editMaterial(${m.id})">编辑</button><button class="term-btn-sm danger" onclick="deleteMaterial(${m.id})">删除</button></td></tr>`;
+      return `<tr><td>${i+1}</td><td>${m.type}</td><td>${m.color}</td><td>${m.diameter}</td><td>${m.weight}g</td><td>${m.remain}%</td><td style="${sc}">${status}</td><td>${m.note||'-'}</td><td><button class="term-btn-sm" onclick="editMaterial(${m.id})">${t('edit')}</button><button class="term-btn-sm danger" onclick="deleteMaterial(${m.id})">${t('delete')}</button></td></tr>`;
     }).join('');
   }
   $('#materialDetailClose').addEventListener('click', () => {
@@ -1162,7 +1532,7 @@
     $('#mRemain').value = m.remain;
     $('#mNote').value = m.note;
     editingMaterialId = id;
-    toast('已加载材料数据，修改后点击「添加」保存');
+    toast(t('t_loaded_edit'));
   };
 
   window.deleteMaterial = function(id) {
@@ -1179,7 +1549,7 @@
     } else {
       $('#materialDetail').classList.remove('open');
     }
-    toast('材料已删除');
+    toast(t('t_material_deleted'));
   };
 
   $('#addMaterialBtn').addEventListener('click', () => {
@@ -1195,10 +1565,10 @@
       const m = items.find(x => x.id === editingMaterialId);
       if (m) { Object.assign(m, { type, color, diameter, weight, remain, note }); }
       editingMaterialId = null;
-      toast('材料已更新');
+      toast(t('t_material_updated'));
     } else {
       items.push({ id: Date.now(), type, color, diameter, weight, remain, note, created: Date.now() });
-      toast('材料已添加');
+      toast(t('t_material_added'));
     }
     saveMaterials(items);
     renderMaterialCards();
@@ -1350,7 +1720,7 @@
     const tbody = $('#compTable tbody');
     const items = getComponents().filter(c => c.category === category);
     tbody.innerHTML = items.map((c, i) => {
-      return `<tr><td>${i+1}</td><td>${c.category}</td><td>${c.customName||'-'}</td><td>${c.spec||'-'}</td><td><input type="number" class="qty-inline" value="${c.qty}" min="0" data-id="${c.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${c.location||'-'}</td><td>${c.note||'-'}</td><td><button class="term-btn-sm" onclick="editComponent(${c.id})">编辑</button><button class="term-btn-sm danger" onclick="deleteComponent(${c.id})">删除</button></td></tr>`;
+      return `<tr><td>${i+1}</td><td>${c.category}</td><td>${c.customName||'-'}</td><td>${c.spec||'-'}</td><td><input type="number" class="qty-inline" value="${c.qty}" min="0" data-id="${c.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${c.location||'-'}</td><td>${c.note||'-'}</td><td><button class="term-btn-sm" onclick="editComponent(${c.id})">${t('edit')}</button><button class="term-btn-sm danger" onclick="deleteComponent(${c.id})">${t('delete')}</button></td></tr>`;
     }).join('');
   }
   $('#compDetailClose').addEventListener('click', () => {
@@ -1373,7 +1743,7 @@
     $('#cLoc').value = c.location;
     $('#cNote').value = c.note;
     editingComponentId = id;
-    toast('已加载元器件数据，修改后点击「添加」保存');
+    toast(t('t_loaded_edit'));
   };
 
   window.deleteComponent = function(id) {
@@ -1389,7 +1759,7 @@
     } else {
       $('#compDetail').classList.remove('open');
     }
-    toast('元器件已删除');
+    toast(t('t_comp_deleted'));
   };
 
   $('#addCompBtn').addEventListener('click', () => {
@@ -1406,10 +1776,10 @@
       const c = items.find(x => x.id === editingComponentId);
       if (c) { Object.assign(c, { category, customName, spec, qty, location, note }); }
       editingComponentId = null;
-      toast('元器件已更新');
+      toast(t('t_comp_updated'));
     } else {
       items.push({ id: Date.now(), category, customName, spec, qty, location, note, created: Date.now() });
-      toast('元器件已添加');
+      toast(t('t_comp_added'));
     }
     saveComponents(items);
     renderCompCards();
@@ -1541,7 +1911,7 @@
     const items = getBoards().filter(b => b.type === type);
     tbody.innerHTML = items.map((b, i) => {
       const sc = b.status === '故障' ? 'color:var(--danger)' : b.status === '待测试' ? 'color:var(--warning)' : b.status === '全新' ? 'color:var(--success)' : 'color:var(--fg)';
-      return `<tr><td>${i+1}</td><td>${b.type}</td><td>${b.model||'-'}</td><td><input type="number" class="qty-inline" value="${b.qty}" min="0" data-id="${b.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${b.location||'-'}</td><td style="${sc}">${b.status}</td><td>${b.note||'-'}</td><td><button class="term-btn-sm" onclick="editBoard(${b.id})">编辑</button><button class="term-btn-sm danger" onclick="deleteBoard(${b.id})">删除</button></td></tr>`;
+      return `<tr><td>${i+1}</td><td>${b.type}</td><td>${b.model||'-'}</td><td><input type="number" class="qty-inline" value="${b.qty}" min="0" data-id="${b.id}" style="width:50px;text-align:center;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px;" onchange="updateItemQty(this)"></td><td>${b.location||'-'}</td><td style="${sc}">${b.status}</td><td>${b.note||'-'}</td><td><button class="term-btn-sm" onclick="editBoard(${b.id})">${t('edit')}</button><button class="term-btn-sm danger" onclick="deleteBoard(${b.id})">${t('delete')}</button></td></tr>`;
     }).join('');
   }
   $('#boardDetailClose').addEventListener('click', () => {
@@ -1564,7 +1934,7 @@
     $('#bStatus').value = b.status;
     $('#bNote').value = b.note;
     editingBoardId = id;
-    toast('已加载主板数据，修改后点击「添加」保存');
+    toast(t('t_loaded_edit'));
   };
 
   window.deleteBoard = function(id) {
@@ -1580,7 +1950,7 @@
     } else {
       $('#boardDetail').classList.remove('open');
     }
-    toast('主板已删除');
+    toast(t('t_board_deleted'));
   };
 
   window.updateItemQty = function(el) {
@@ -1614,10 +1984,10 @@
       const b = items.find(x => x.id === editingBoardId);
       if (b) { Object.assign(b, { type, model, qty, location, status, note }); }
       editingBoardId = null;
-      toast('主板已更新');
+      toast(t('t_board_updated'));
     } else {
       items.push({ id: Date.now(), type, model, qty, location, status, note, created: Date.now() });
-      toast('主板已添加');
+      toast(t('t_board_added'));
     }
     saveBoards(items);
     renderBoardCards();
@@ -1632,28 +2002,28 @@
     tbody.innerHTML = users.map(u => `<tr>
       <td>${u.name}</td>
       <td><span style="font-family:monospace;color:var(--accent);font-weight:600">${u.uid || '-'}</span></td>
-      <td>${u.avatar || '👤'} ${u.nickname || u.name}</td>
+      <td>${u.avatar && u.avatar.startsWith('data:') ? `<img src="${u.avatar}" style="width:24px;height:24px;border-radius:6px;object-fit:cover;vertical-align:middle">` : (u.avatar || '👤')} ${u.nickname || u.name}</td>
       <td>${isAdmin ? `<span style="font-family:monospace;color:var(--accent)">${u.pass || '-'}</span>` : '<span style="color:var(--muted)">******</span>'}</td>
-      <td>${u.role === 'admin' ? '管理员' : '普通用户'}</td>
+      <td>${u.role === 'admin' ? t('role_admin') : t('role_user')}</td>
       <td>${fmtDate(u.created)}</td>
       <td>
-        ${isAdmin ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="editPass('${u.name}')">改密</button>` : ''}
-        ${u.name === 'admin' ? '<span style="color:var(--muted)">受保护</span>' : `<button class="term-btn-sm danger" onclick="deleteUser('${u.name}')">删除</button>`}
+        ${isAdmin ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="editPass('${u.name}')">${t('change_pass')}</button>` : ''}
+        ${u.name === 'admin' ? `<span style="color:var(--muted)">${t('protected')}</span>` : `<button class="term-btn-sm danger" onclick="deleteUser('${u.name}')">${t('delete')}</button>`}
       </td>
     </tr>`).join('');
   }
 
   window.deleteUser = async function(name) {
-    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
-    if (name === 'admin') { toast('不能删除 admin 账号'); return; }
+    if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
+    if (name === 'admin') { toast(t('t_cannot_delete_admin')); return; }
     const res = await apiDeleteUser(name);
     if (!res.ok) { toast('删除失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
-    toast('用户已删除');
+    toast(t('t_user_deleted'));
   };
 
   window.editPass = async function(name) {
-    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
+    if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
     const newPass = prompt(`修改 ${name} 的密码：`, '');
     if (!newPass || newPass.trim() === '') return;
     const res = await apiUpdatePass(name, newPass.trim());
@@ -1663,25 +2033,25 @@
   };
 
   $('#addUserBtn').addEventListener('click', async () => {
-    if (currentUser.role !== 'admin') { toast('权限不足'); return; }
+    if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
     const name = $('#uName').value.trim();
     const pass = $('#uPass').value.trim();
     const role = $('#uRole').value;
-    if (!name || !pass) { toast('用户名和密码不能为空'); return; }
+    if (!name || !pass) { toast(t('t_user_pass_required')); return; }
     const res = await apiAddUser(name, pass, role);
     if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
     $('#uName').value = '';
     $('#uPass').value = '';
-    toast('用户已创建');
+    toast(t('t_user_created'));
   });
 
   // ===================== 申请授权系统 =====================
   const REQ_TYPE_LABELS = {
-    material_add: '3D材料-新增', material_edit: '3D材料-修改', material_del: '3D材料-删除',
-    comp_add: '元器件-新增', comp_edit: '元器件-修改', comp_del: '元器件-删除',
-    board_add: '主板-新增', board_edit: '主板-修改', board_del: '主板-删除',
-    light_control: '灯光控制', other: '其他操作'
+    material_add: t('req_type_material_add'), material_edit: t('req_type_material_edit'), material_del: t('req_type_material_del'),
+    comp_add: t('req_type_comp_add'), comp_edit: t('req_type_comp_edit'), comp_del: t('req_type_comp_del'),
+    board_add: t('req_type_board_add'), board_edit: t('req_type_board_edit'), board_del: t('req_type_board_del'),
+    light_control: t('req_type_light'), other: t('req_type_other')
   };
 
   let pollTimer = null;
@@ -1735,22 +2105,22 @@
     }
     body.innerHTML = reqs.reverse().map(r => {
       const statusColor = r.status === 'pending' ? 'var(--warning)' : r.status === 'approved' ? 'var(--success)' : 'var(--danger)';
-      const statusText = r.status === 'pending' ? '待审批' : r.status === 'approved' ? '已批准' : '已拒绝';
+      const statusText = r.status === 'pending' ? t('req_pending') : r.status === 'approved' ? t('req_approved') : t('req_denied');
       const adminActions = (isAdmin && r.status === 'pending')
         ? `<div style="display:flex;gap:8px;margin-top:10px">
-             <button class="term-btn-sm" style="border-color:var(--success);color:var(--success)" onclick="approveReq(${r.id})">批准</button>
-             <button class="term-btn-sm danger" onclick="denyReq(${r.id})">拒绝</button>
+             <button class="term-btn-sm" style="border-color:var(--success);color:var(--success)" onclick="approveReq(${r.id})">${t('req_approve')}</button>
+             <button class="term-btn-sm danger" onclick="denyReq(${r.id})">${t('req_deny')}</button>
            </div>` : '';
       const reviewInfo = r.status !== 'pending'
-        ? `<div style="font-size:12px;color:var(--fg-light);margin-top:6px">审批人: ${r.reviewedBy} | ${r.reviewedAt ? fmtDate(r.reviewedAt) : '-'}${r.adminNote ? ' | 备注: ' + r.adminNote : ''}</div>` : '';
+        ? `<div style="font-size:12px;color:var(--fg-light);margin-top:6px">${t('req_reviewer')+':'} ${r.reviewedBy} | ${r.reviewedAt ? fmtDate(r.reviewedAt) : '-'}${r.adminNote ? ' | '+t('req_admin_note')+': ' + r.adminNote : ''}</div>` : '';
       return `<div class="req-item">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-weight:600;color:var(--accent)">${REQ_TYPE_LABELS[r.type] || r.type}</span>
           <span style="color:${statusColor};font-size:12px;font-weight:600">${statusText}</span>
         </div>
-        <div style="font-size:13px;color:var(--fg)">目标: ${r.target || '-'} | 申请人: ${r.user}</div>
+        <div style="font-size:13px;color:var(--fg)">${t('req_target')}: ${r.target || '-'} | ${t('req_submitter')}: ${r.user}</div>
         <div style="font-size:13px;color:var(--fg-light);margin-top:4px">${r.detail}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">提交时间: ${fmtDate(r.created)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${t('req_submit_time')+':'} ${fmtDate(r.created)}</div>
         ${reviewInfo}
         ${adminActions}
       </div>`;
@@ -1849,48 +2219,86 @@
     const c = $('#profileContent');
     const isAdmin = currentUser.role === 'admin';
     selectedAvatar = currentUser.avatar || '😀';
-    let avatarHtml = AVATAR_LIST.map(a => `<div class="avatar-option ${a===selectedAvatar?'selected':''}" data-avatar="${a}">${a}</div>`).join('');
+    // 判断当前头像是否是图片（以 data: 开头）
+    const isImgAvatar = selectedAvatar.startsWith('data:');
+    const avatarDisplay = isImgAvatar
+      ? `<img src="${selectedAvatar}" style="width:100%;height:100%;border-radius:20px;object-fit:cover">`
+      : selectedAvatar;
+    let avatarHtml = AVATAR_LIST.map(a => `<div class="avatar-option ${!isImgAvatar && a===selectedAvatar?'selected':''}" data-avatar="${a}">${a}</div>`).join('');
     c.innerHTML = `<div class="profile-card">
       <div class="profile-header">
-        <div class="profile-avatar" id="profileAvatarDisplay">${selectedAvatar}</div>
+        <div class="profile-avatar" id="profileAvatarDisplay">${avatarDisplay}</div>
         <div class="profile-info">
           <h2 id="profileNicknameDisplay">${currentUser.nickname || currentUser.name}</h2>
           <span class="uid">UID: ${currentUser.uid}</span>
-          <div class="role">角色: ${isAdmin ? '管理员' : '普通用户'} · 账号: ${currentUser.name}</div>
+          <div class="role">${t('profile_role')}: ${isAdmin ? t('role_admin') : t('role_user')} · 账号: ${currentUser.name}</div>
         </div>
       </div>
-      <div class="profile-row"><span class="label">账号名</span><span class="value">${currentUser.name}</span></div>
-      <div class="profile-row"><span class="label">UID</span><span class="value">${currentUser.uid}</span></div>
-      <div class="profile-row"><span class="label">密码</span><span class="value">${currentUser.pass || '******'}</span></div>
-      <div class="profile-row"><span class="label">角色</span><span class="value">${isAdmin ? '管理员' : '普通用户'}</span></div>
-      <div class="profile-row"><span class="label">注册时间</span><span class="value">${fmtDate(currentUser.created)}</span></div>
+      <div class="profile-row"><span class="label">${t('profile_account')}</span><span class="value">${currentUser.name}</span></div>
+      <div class="profile-row"><span class="label">UID</span><span class="value" style="font-family:monospace;color:var(--accent)">${currentUser.uid}</span></div>
+      <div class="profile-row"><span class="label">${t('profile_password')}</span><span class="value">${currentUser.pass || '******'}</span></div>
+      <div class="profile-row"><span class="label">${t('profile_role')}</span><span class="value">${isAdmin ? t('role_admin') : t('role_user')}</span></div>
+      <div class="profile-row"><span class="label">${t('profile_created')}</span><span class="value">${fmtDate(currentUser.created)}</span></div>
       <div style="margin-top:24px">
-        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:10px">编辑昵称</div>
-        <input type="text" id="profileNicknameInput" value="${currentUser.nickname || currentUser.name}" style="width:100%;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:14px;outline:none;margin-bottom:16px" placeholder="输入新昵称">
-        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:10px">选择头像</div>
+        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:10px">${t('profile_edit_nickname')}</div>
+        <input type="text" id="profileNicknameInput" value="${currentUser.nickname || currentUser.name}" style="width:100%;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:14px;outline:none;margin-bottom:20px" placeholder="${t('profile_input_nickname')}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:600;color:var(--fg)">${t('profile_select_avatar')}</div>
+          <label style="cursor:pointer;font-size:12px;color:var(--accent);font-weight:500;padding:4px 12px;border:1px solid var(--accent);border-radius:8px;transition:all .2s" onmouseover="this.style.background='var(--accent-soft)'" onmouseout="this.style.background='transparent'">
+            ${t('profile_upload_img')}
+            <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+          </label>
+        </div>
         <div class="avatar-picker" id="avatarPicker">${avatarHtml}</div>
-        <button class="nav-btn active" id="saveProfileBtn" style="margin-top:20px">保存修改</button>
+        <button class="nav-btn active" id="saveProfileBtn" style="margin-top:20px">${t('profile_save')}</button>
       </div>
     </div>`;
-    // 头像选择
+    // emoji 头像选择
     $('#avatarPicker').querySelectorAll('.avatar-option').forEach(el => {
       el.addEventListener('click', () => {
         $('#avatarPicker').querySelectorAll('.avatar-option').forEach(e => e.classList.remove('selected'));
         el.classList.add('selected');
         selectedAvatar = el.dataset.avatar;
-        $('#profileAvatarDisplay').textContent = selectedAvatar;
+        $('#profileAvatarDisplay').innerHTML = selectedAvatar;
       });
+    });
+    // 图片上传
+    $('#avatarFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { toast(t('profile_img_too_big')); return; }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        // 压缩图片到 128x128
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 128; canvas.height = 128;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 128, 128);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          selectedAvatar = dataUrl;
+          $('#profileAvatarDisplay').innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;border-radius:20px;object-fit:cover">`;
+          // 取消 emoji 选中状态
+          $('#avatarPicker').querySelectorAll('.avatar-option').forEach(e => e.classList.remove('selected'));
+          toast(t('profile_img_loaded'));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
     });
     $('#saveProfileBtn').addEventListener('click', async () => {
       const nickname = $('#profileNicknameInput').value.trim();
-      if (!nickname) { toast('昵称不能为空'); return; }
+      if (!nickname) { toast(t('t_nickname_empty')); return; }
+      // 头像大小检查（base64 图片可能很长）
+      if (selectedAvatar.length > 50000) { toast(t('profile_avatar_too_big')); return; }
       const r = await apiUpdateProfile(currentUser.uid, nickname, selectedAvatar);
       if (r.ok) {
         currentUser.nickname = nickname;
         currentUser.avatar = selectedAvatar;
-        toast('个人资料已更新');
+        toast(t('t_profile_updated'));
         renderProfile();
-      } else { toast(r.msg || '更新失败'); }
+      } else { toast(r.msg || t('t_update_failed')); }
     });
   }
 
@@ -1912,21 +2320,73 @@
       badge.textContent = r.count > 99 ? '99+' : r.count;
       badge.style.display = 'inline-block';
     } else { badge.style.display = 'none'; }
+    // 检查未读广播消息并显示横幅
+    await checkBroadcastBanner();
   }
+
+  // ===================== 广播横幅 5 分钟倒计时 =====================
+  let broadcastTimer = null;
+  const BROADCAST_DURATION = 5 * 60 * 1000; // 5 分钟
+  const shownBroadcasts = new Set(); // 已展示过的广播消息 ID
+
+  async function checkBroadcastBanner() {
+    if (!currentUser) return;
+    const r = await apiGetMessages(currentUser.uid);
+    if (!r.ok || !r.messages) return;
+    // 找到未读的广播消息（不是自己发的）
+    const unreadBroadcasts = r.messages.filter(m => m.broadcast && !m.read && m.from !== currentUser.uid && !shownBroadcasts.has(m.id));
+    if (unreadBroadcasts.length === 0) return;
+    // 显示最新的一条
+    const msg = unreadBroadcasts[unreadBroadcasts.length - 1];
+    shownBroadcasts.add(msg.id);
+    showBroadcastBanner(msg);
+  }
+
+  function showBroadcastBanner(msg) {
+    // 获取发送者信息
+    fetch('/api/profile?uid=' + msg.from).then(r => r.json()).then(data => {
+      const senderName = data.ok ? data.user.nickname : '管理员';
+      $('#bannerSender').textContent = t('msg_banner_from') + senderName;
+    });
+    $('#bannerContent').textContent = msg.content;
+    const banner = $('#broadcastBanner');
+    banner.style.display = 'flex';
+    // 倒计时
+    const endTime = Date.now() + BROADCAST_DURATION;
+    if (broadcastTimer) clearInterval(broadcastTimer);
+    function tick() {
+      const remaining = endTime - Date.now();
+      if (remaining <= 0) { hideBroadcastBanner(); return; }
+      const min = Math.floor(remaining / 60000);
+      const sec = Math.floor((remaining % 60000) / 1000);
+      $('#bannerCountdown').textContent = `${t('msg_banner_remaining')} ${min}:${String(sec).padStart(2,'0')}`;
+    }
+    tick();
+    broadcastTimer = setInterval(tick, 1000);
+  }
+
+  function hideBroadcastBanner() {
+    $('#broadcastBanner').style.display = 'none';
+    if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
+  }
+
+  // 横幅关闭按钮
+   const closeBtn = document.getElementById('bannerClose');
+   if (closeBtn) closeBtn.addEventListener('click', hideBroadcastBanner);
 
   async function renderContacts() {
     if (!currentUser) return;
     const r = await apiGetContacts(currentUser.uid);
     const list = $('#contactList');
     if (!r.ok || !r.contacts || r.contacts.length === 0) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">暂无联系人<br>通过 UID 添加好友开始聊天</div>';
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">'+t('msg_no_contacts')+'<br>'+t('msg_add_friend_hint')+'</div>';
       return;
     }
     // 按最后消息时间排序
     r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
     list.innerHTML = r.contacts.map(c => `
       <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar}">
-        <div class="c-avatar">${c.avatar}</div>
+        <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : c.avatar}</div>
         <div class="c-info">
           <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">管理员</span>':''}</div>
           <div class="c-last">${c.lastMsg || '点击开始聊天'}</div>
@@ -1946,26 +2406,26 @@
     if (!r.ok || !r.requests || r.requests.length === 0) {
       el.innerHTML = ''; return;
     }
-    el.innerHTML = '<div style="padding:6px 16px;font-size:11px;color:var(--fg-light);font-weight:600;background:var(--warning-soft)">好友请求</div>' +
+    el.innerHTML = '<div style="padding:6px 16px;font-size:11px;color:var(--fg-light);font-weight:600;background:var(--warning-soft)">'+t('msg_friend_req')+'</div>' +
       r.requests.map(req => `
         <div class="friend-req-item">
           <span class="r-avatar">${req.fromAvatar}</span>
           <span class="r-name">${req.fromName}</span>
-          <button class="term-btn-sm" style="border-color:var(--success);color:var(--success);padding:3px 8px" data-accept="${req.id}">接受</button>
-          <button class="term-btn-sm danger" style="padding:3px 8px" data-reject="${req.id}">拒绝</button>
+          <button class="term-btn-sm" style="border-color:var(--success);color:var(--success);padding:3px 8px" data-accept="${req.id}">${t('msg_accept')}</button>
+          <button class="term-btn-sm danger" style="padding:3px 8px" data-reject="${req.id}">${t('msg_reject')}</button>
         </div>
       `).join('');
     el.querySelectorAll('[data-accept]').forEach(b => {
       b.addEventListener('click', async () => {
         await apiAcceptFriend(parseInt(b.dataset.accept));
-        toast('已添加好友');
+        toast(t('msg_friend_added'));
         renderFriendReqs(); renderContacts();
       });
     });
     el.querySelectorAll('[data-reject]').forEach(b => {
       b.addEventListener('click', async () => {
         await apiRejectFriend(parseInt(b.dataset.reject));
-        toast('已拒绝');
+        toast(t('msg_friend_rejected'));
         renderFriendReqs();
       });
     });
@@ -1996,7 +2456,7 @@
   function renderChatMessages(messages, peerUid) {
     const area = $('#chatMessages');
     if (messages.length === 0) {
-      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">暂无消息，发送第一条吧</div>';
+      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">'+t('msg_no_messages')+'</div>';
       return;
     }
     area.innerHTML = messages.map(m => {
@@ -2029,14 +2489,14 @@
     // 添加好友/搜索 UID
     $('#addFriendBtn').addEventListener('click', async () => {
       const uid = $('#addFriendInput').value.trim();
-      if (!uid) { toast('请输入 UID'); return; }
+      if (!uid) { toast(t('msg_enter_uid')); return; }
       const r = await apiGetProfile(uid);
-      if (!r.ok) { toast(r.msg || '用户不存在'); return; }
+      if (!r.ok) { toast(r.msg || t('msg_user_not_found')); return; }
       // 显示搜索结果弹窗
       const isFriend = currentUser.friends && currentUser.friends.includes(uid);
       $('#searchUserResult').innerHTML = `
         <div style="text-align:center;margin-bottom:16px">
-          <div style="font-size:48px;margin-bottom:8px">${r.user.avatar}</div>
+          <div style="margin-bottom:8px">${r.user.avatar && r.user.avatar.startsWith('data:') ? `<img src="${r.user.avatar}" style="width:64px;height:64px;border-radius:16px;object-fit:cover">` : `<div style="font-size:48px">${r.user.avatar}</div>`}</div>
           <div style="font-size:16px;font-weight:700">${r.user.nickname}</div>
           <div style="font-size:12px;color:var(--accent);margin-top:4px">UID: ${r.user.uid}</div>
           <div style="font-size:12px;color:var(--fg-light);margin-top:2px">角色: ${r.user.role === 'admin' ? '管理员' : '普通用户'}</div>
@@ -2051,7 +2511,7 @@
         btn.addEventListener('click', async () => {
           const rr = await apiFriendRequest(currentUser.uid, uid);
           if (rr.ok) {
-            toast('好友请求已发送');
+            toast(t('msg_friend_req_sent'));
             $('#searchUserModal').style.display = 'none';
           } else { toast(rr.msg || '发送失败'); }
         });
@@ -2074,24 +2534,44 @@
     $('#broadcastSend').addEventListener('click', async () => {
       const mode = $('#broadcastMode').value;
       const content = $('#broadcastContent').value.trim();
-      if (!content) { toast('消息内容不能为空'); return; }
+      if (!content) { toast(t('msg_broadcast_content_empty')); return; }
       let target;
       if (mode === 'custom') {
         const uids = $('#customUids').value.split(',').map(s => s.trim()).filter(Boolean);
-        if (uids.length === 0) { toast('请输入至少一个 UID'); return; }
+        if (uids.length === 0) { toast(t('msg_broadcast_uid_empty')); return; }
         target = uids;
       } else {
         target = mode; // 'all_including_admin' 或 'all_users'
       }
       const r = await apiBroadcast(currentUser.uid, target, content);
       if (r.ok) {
-        toast(`已发送给 ${r.count} 个用户`);
+        toast(`${t('msg_broadcast_sent')} ${r.count} ${currentLang === 'en' ? 'users' : '个用户'}`);
         $('#broadcastModal').style.display = 'none';
-      } else { toast(r.msg || '发送失败'); }
+      } else { toast(r.msg || t('t_update_failed')); }
     });
   }
 
   // ===================== INIT =====================
+  // 语言切换器
+  const langBtn = document.getElementById('langBtn');
+  const langDropdown = document.getElementById('langDropdown');
+  if (langBtn) {
+    langBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.style.display = langDropdown.style.display === 'none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', () => { langDropdown.style.display = 'none'; });
+    langDropdown.querySelectorAll('.lang-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        setLang(opt.dataset.lang);
+        langDropdown.style.display = 'none';
+      });
+      opt.addEventListener('mouseenter', () => { opt.style.background = 'var(--accent-soft)'; });
+      opt.addEventListener('mouseleave', () => { opt.style.background = 'transparent'; });
+    });
+  }
+  // 初始化语言
+  applyI18n();
   initLogin();
 })();
 </script>
