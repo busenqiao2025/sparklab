@@ -329,6 +329,7 @@ const I18N = {
     'msg_broadcast_placeholder': '输入要广播的消息...', 'msg_broadcast_sent': '已发送给',
     'msg_broadcast_content_empty': '消息内容不能为空', 'msg_broadcast_uid_empty': '请输入至少一个 UID',
     'msg_banner_from': '来自: ', 'msg_banner_remaining': '剩余',
+    'msg_mark_read': '已读',
     'msg_send_friend_req': '发送好友请求', 'msg_user_not_found': '用户不存在',
     'msg_enter_uid': '请输入 UID', 'msg_uid_enter_uid': '请输入至少一个 UID',
     // Profile
@@ -428,6 +429,7 @@ const I18N = {
     'msg_broadcast_placeholder': '輸入要廣播的訊息...', 'msg_broadcast_sent': '已發送給',
     'msg_broadcast_content_empty': '訊息內容不能為空', 'msg_broadcast_uid_empty': '請輸入至少一個 UID',
     'msg_banner_from': '來自: ', 'msg_banner_remaining': '剩餘',
+    'msg_mark_read': '已讀',
     'msg_send_friend_req': '發送好友請求', 'msg_user_not_found': '用戶不存在',
     'msg_enter_uid': '請輸入 UID', 'msg_uid_enter_uid': '請輸入至少一個 UID',
     'profile_account': '帳號名', 'profile_uid': 'UID', 'profile_password': '密碼',
@@ -518,6 +520,7 @@ const I18N = {
     'msg_broadcast_placeholder': 'Enter broadcast message...', 'msg_broadcast_sent': 'Sent to',
     'msg_broadcast_content_empty': 'Message cannot be empty', 'msg_broadcast_uid_empty': 'Please enter at least one UID',
     'msg_banner_from': 'From: ', 'msg_banner_remaining': 'Remaining',
+    'msg_mark_read': 'Mark as Read',
     'msg_send_friend_req': 'Send Friend Request', 'msg_user_not_found': 'User not found',
     'msg_enter_uid': 'Please enter UID', 'msg_uid_enter_uid': 'Please enter at least one UID',
     'profile_account': 'Account', 'profile_uid': 'UID', 'profile_password': 'Password',
@@ -877,8 +880,7 @@ function applyI18n() {
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
-    <span id="bannerCountdown" style="font-size:12px;opacity:0.9;font-weight:500;white-space:nowrap"></span>
-    <button id="bannerClose" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s">×</button>
+    <button id="bannerReadBtn" data-i18n="msg_mark_read" style="background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">已读</button>
   </div>
 </div>
 
@@ -2324,10 +2326,9 @@ function applyI18n() {
     await checkBroadcastBanner();
   }
 
-  // ===================== 广播横幅 5 分钟倒计时 =====================
-  let broadcastTimer = null;
-  const BROADCAST_DURATION = 5 * 60 * 1000; // 5 分钟
+  // ===================== 广播横幅 =====================
   const shownBroadcasts = new Set(); // 已展示过的广播消息 ID
+  let currentBannerMsgId = null;
 
   async function checkBroadcastBanner() {
     if (!currentUser) return;
@@ -2343,36 +2344,33 @@ function applyI18n() {
   }
 
   function showBroadcastBanner(msg) {
+    currentBannerMsgId = msg.id;
     // 获取发送者信息
     fetch('/api/profile?uid=' + msg.from).then(r => r.json()).then(data => {
-      const senderName = data.ok ? data.user.nickname : '管理员';
+      const senderName = data.ok ? data.user.nickname : t('role_admin');
       $('#bannerSender').textContent = t('msg_banner_from') + senderName;
     });
     $('#bannerContent').textContent = msg.content;
-    const banner = $('#broadcastBanner');
-    banner.style.display = 'flex';
-    // 倒计时
-    const endTime = Date.now() + BROADCAST_DURATION;
-    if (broadcastTimer) clearInterval(broadcastTimer);
-    function tick() {
-      const remaining = endTime - Date.now();
-      if (remaining <= 0) { hideBroadcastBanner(); return; }
-      const min = Math.floor(remaining / 60000);
-      const sec = Math.floor((remaining % 60000) / 1000);
-      $('#bannerCountdown').textContent = `${t('msg_banner_remaining')} ${min}:${String(sec).padStart(2,'0')}`;
-    }
-    tick();
-    broadcastTimer = setInterval(tick, 1000);
+    $('#broadcastBanner').style.display = 'flex';
   }
 
   function hideBroadcastBanner() {
     $('#broadcastBanner').style.display = 'none';
-    if (broadcastTimer) { clearInterval(broadcastTimer); broadcastTimer = null; }
+    currentBannerMsgId = null;
   }
 
-  // 横幅关闭按钮
-   const closeBtn = document.getElementById('bannerClose');
-   if (closeBtn) closeBtn.addEventListener('click', hideBroadcastBanner);
+  // 横幅「已读」按钮 — 标记消息为已读并关闭
+  const readBtn = document.getElementById('bannerReadBtn');
+  if (readBtn) {
+    readBtn.addEventListener('click', async () => {
+      // 调用 API 标记已读（通过获取消息接口自动标记）
+      if (currentBannerMsgId && currentUser) {
+        await apiGetMessages(currentUser.uid);
+      }
+      hideBroadcastBanner();
+      updateMsgBadge();
+    });
+  }
 
   async function renderContacts() {
     if (!currentUser) return;
@@ -2496,14 +2494,14 @@ function applyI18n() {
       const isFriend = currentUser.friends && currentUser.friends.includes(uid);
       $('#searchUserResult').innerHTML = `
         <div style="text-align:center;margin-bottom:16px">
-          <div style="margin-bottom:8px">${r.user.avatar && r.user.avatar.startsWith('data:') ? `<img src="${r.user.avatar}" style="width:64px;height:64px;border-radius:16px;object-fit:cover">` : `<div style="font-size:48px">${r.user.avatar}</div>`}</div>
+          <div style="margin-bottom:8px">${r.user.avatar && (r.user.avatar.startsWith('data:') || r.user.avatar.length > 100) ? `<img src="${r.user.avatar.startsWith('data:') ? r.user.avatar : 'data:image/jpeg;base64,' + r.user.avatar}" style="width:64px;height:64px;border-radius:16px;object-fit:cover" onerror="this.style.display='none';this.parentNode.innerHTML='<div style=&quot;font-size:48px&quot;>👤</div>'">` : `<div style="font-size:48px">${r.user.avatar || '👤'}</div>`}</div>
           <div style="font-size:16px;font-weight:700">${r.user.nickname}</div>
           <div style="font-size:12px;color:var(--accent);margin-top:4px">UID: ${r.user.uid}</div>
-          <div style="font-size:12px;color:var(--fg-light);margin-top:2px">角色: ${r.user.role === 'admin' ? '管理员' : '普通用户'}</div>
+          <div style="font-size:12px;color:var(--fg-light);margin-top:2px">${t('profile_role')}: ${r.user.role === 'admin' ? t('role_admin') : t('role_user')}</div>
         </div>
-        ${isFriend ? '<div style="text-align:center;color:var(--success);font-size:13px">已经是好友</div>' :
-          r.user.uid === currentUser.uid ? '<div style="text-align:center;color:var(--muted);font-size:13px">这是你自己</div>' :
-          `<button class="nav-btn active" id="sendFriendReqBtn" style="width:100%;justify-content:center">发送好友请求</button>`}
+        ${isFriend ? `<div style="text-align:center;color:var(--success);font-size:13px">${t('msg_already_friend')}</div>` :
+          r.user.uid === currentUser.uid ? `<div style="text-align:center;color:var(--muted);font-size:13px">${t('msg_self')}</div>` :
+          `<button class="nav-btn active" id="sendFriendReqBtn" style="width:100%;justify-content:center">${t('msg_send_friend_req')}</button>`}
       `;
       $('#searchUserModal').style.display = 'flex';
       const btn = $('#sendFriendReqBtn');
