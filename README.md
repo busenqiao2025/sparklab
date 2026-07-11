@@ -1,44 +1,42 @@
-# SparkMinds Lab v1.8 — Cloudflare Workers 版
+# SparkMinds Lab v1.9 — Cloudflare Workers 版
 
 实验室物联网监控平台，部署在 Cloudflare 边缘网络。
 
-## v1.8 更新：UI 全面优化
+## v1.9 新增：用户社交系统
 
-- 登录页：移除 ASCII art，改用渐变背景 + 现代卡片 + Logo 图标
-- 配色：更柔和自然的 Tailwind 风格调色板，统一 accent/danger/success/warning 色系
-- 阴影：多层次阴影系统（xs/sm/md/lg/xl），营造自然深度感
-- 间距：增大卡片内边距和组件间距，提升呼吸感
-- 导航：去掉终端风格 `[BRACKETS]`，改用中文标签
-- 弹窗：修复未定义 CSS 变量（`--rule`/`--ink`/`--accent2`），统一 modal 样式
-- 表格/按钮：统一圆角和 hover 效果，更柔和的交互反馈
-- Toast 通知：改为深色背景，更醒目
+### 用户 UID
+- 每个用户自动分配唯一 UID（10001 起）
+- 管理员可在用户管理表格中查看所有用户的 UID 和昵称
+- 通过 UID 可查询用户公开信息
 
-## v1.7 功能：申请授权系统
+### 个人主页
+- 查看自己的账号名、UID、密码、角色、注册时间
+- 自定义昵称（30 个 emoji 头像可选）
+- 自定义头像
 
-普通用户无法直接修改数据（灯光控制、3D材料、元器件、主板），但可以提交授权申请，管理员收到通知后审批。
+### 好友系统
+- 输入 UID 搜索用户，发送好友请求
+- 收到好友请求时站内信面板顶部显示通知
+- 接受/拒绝好友请求
+- 好友列表显示在站内信面板左侧
 
-### 工作流程
-1. 普通用户点击修改操作 → 自动弹出申请窗口（预填操作类型和目标）
-2. 用户填写详细说明并提交
-3. 管理员导航栏「审批」按钮出现红色通知徽标（每 10 秒轮询）
-4. 管理员打开审批面板，查看申请详情，选择批准或拒绝
-5. 用户可在「我的申请」中查看审批状态
+### 站内信
+- 左侧联系人列表（好友 + 管理员），显示最后消息和未读数
+- 右侧聊天窗口，支持实时收发消息（5 秒轮询）
+- 消息气泡区分自己/对方/广播
+- 导航栏站内信按钮显示未读消息红色徽标
 
-### 申请类型
-| 类型 | 说明 |
-|------|------|
-| material_add/edit/del | 3D材料 增/改/删 |
-| comp_add/edit/del | 元器件 增/改/删 |
-| board_add/edit/del | 主板 增/改/删 |
-| light_control | 灯光控制 |
+### 管理员广播
+- 管理员可向全体用户或指定用户群发消息
+- 广播消息在聊天窗口中以黄色气泡居中显示
 
 ## 仓库结构
 
 ```
 ├── public/
-│   └── index.html        前端页面（静态资源）
+│   └── index.html        前端页面
 ├── src/
-│   └── worker.js         Cloudflare Worker（API 逻辑 + 申请授权 API）
+│   └── worker.js         Cloudflare Worker（API 逻辑）
 ├── wrangler.toml         Cloudflare 配置
 ├── package.json          依赖与脚本
 └── .gitignore
@@ -46,6 +44,7 @@
 
 ## API 路由
 
+### 用户认证
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | /api/login | 登录 |
@@ -53,11 +52,40 @@
 | POST | /api/users | 新增用户 |
 | DELETE | /api/users?name=xxx | 删除用户 |
 | PUT | /api/users | 修改密码 |
+
+### 个人主页
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/profile?uid=xxx | 按 UID 查询用户 |
+| PUT | /api/profile | 更新昵称/头像 |
+
+### 好友系统
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/friends?uid=xxx | 获取好友列表 |
+| POST | /api/friends/request | 发送好友请求 |
+| POST | /api/friends/accept | 接受好友请求 |
+| POST | /api/friends/reject | 拒绝好友请求 |
+| GET | /api/friends/requests?uid=xxx | 获取收到的好友请求 |
+| POST | /api/friends/remove | 删除好友 |
+
+### 站内信
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/messages?uid=xxx&peerUid=yyy | 获取聊天记录 |
+| POST | /api/messages | 发送私聊消息 |
+| POST | /api/messages/broadcast | 管理员广播 |
+| GET | /api/messages/unread?uid=xxx | 未读消息数 |
+| GET | /api/messages/contacts?uid=xxx | 联系人列表 |
+
+### 申请授权系统
+| 方法 | 路径 | 说明 |
+|------|------|------|
 | GET | /api/requests | 获取申请列表 |
 | POST | /api/requests | 提交申请 |
 | POST | /api/requests/approve | 管理员批准 |
 | POST | /api/requests/deny | 管理员拒绝 |
-| GET | /api/requests/pending | 待处理数量（轮询） |
+| GET | /api/requests/pending | 待处理数量 |
 
 ## Cloudflare Pages Git 部署配置
 
@@ -76,7 +104,16 @@
 
 ## 默认账号
 
-| 用户名 | 密码 | 角色 |
-|--------|------|------|
-| admin | admin123 | admin |
-| user | user123 | user |
+| 用户名 | 密码 | UID | 角色 |
+|--------|------|-----|------|
+| admin | admin123 | 10001 | admin |
+| user | user123 | 10002 | user |
+
+## KV 存储键
+
+| 键 | 内容 |
+|----|------|
+| users | 用户数组（含 uid/nickname/avatar/friends） |
+| messages | 站内信数组 |
+| friend_requests | 好友请求数组 |
+| requests | 授权申请数组 |

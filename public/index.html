@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v1.7]</title>
+<title>SparkMinds Lab [v1.9]</title>
 <style>
   :root{
     --bg:#eef2f7;
@@ -208,6 +208,40 @@
   /* Request item card */
   .req-item{background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;transition:var(--transition)}
   .req-item:hover{border-color:var(--accent-light);box-shadow:var(--shadow-xs)}
+
+  /* Profile page */
+  .profile-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+  .profile-header{display:flex;align-items:center;gap:20px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border-light)}
+  .profile-avatar{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--accent-soft),var(--accent));display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:var(--shadow-md)}
+  .profile-info h2{font-size:20px;font-weight:700;color:var(--fg);margin-bottom:4px}
+  .profile-info .uid{font-size:13px;color:var(--accent);font-weight:600;background:var(--accent-soft);padding:3px 10px;border-radius:6px;display:inline-block}
+  .profile-info .role{font-size:12px;color:var(--fg-light);margin-top:6px}
+  .profile-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-light)}
+  .profile-row:last-child{border-bottom:none}
+  .profile-row .label{color:var(--fg-light);font-size:13px;font-weight:500}
+  .profile-row .value{color:var(--fg);font-size:14px;font-weight:600}
+  .avatar-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .avatar-option{width:40px;height:40px;border-radius:10px;border:2px solid var(--border);background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:var(--transition)}
+  .avatar-option:hover{border-color:var(--accent-light);transform:scale(1.1)}
+  .avatar-option.selected{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+
+  /* Chat */
+  .contact-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:var(--transition);border-left:3px solid transparent}
+  .contact-item:hover{background:var(--accent-soft)}
+  .contact-item.active{background:var(--accent-soft);border-left-color:var(--accent)}
+  .contact-item .c-avatar{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .contact-item .c-info{flex:1;min-width:0}
+  .contact-item .c-name{font-size:13px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .contact-item .c-last{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .contact-item .c-badge{background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center;flex-shrink:0}
+  .chat-bubble{max-width:70%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word}
+  .chat-bubble.me{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+  .chat-bubble.other{background:#fff;border:1px solid var(--border);color:var(--fg);border-bottom-left-radius:4px;align-self:flex-start}
+  .chat-bubble.broadcast{background:var(--warning-soft);border:1px solid var(--warning);color:var(--fg);align-self:center;border-radius:10px;text-align:center;max-width:85%}
+  .chat-time{font-size:10px;color:var(--muted);margin-top:2px}
+  .friend-req-item{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--border-light);font-size:12px}
+  .friend-req-item .r-avatar{font-size:16px}
+  .friend-req-item .r-name{flex:1;color:var(--fg);font-weight:500}
 </style>
 </head>
 <body>
@@ -234,7 +268,7 @@
 <!-- ========== MAIN SCREEN ========== -->
 <div id="mainScreen" class="screen">
   <header class="term-header">
-    <span class="brand glow">SparkMinds Lab v1.8</span>
+    <span class="brand glow">SparkMinds Lab v1.9</span>
     <nav class="term-nav">
       <button class="nav-btn active" data-panel="lab">实验室监控</button>
       <button class="nav-btn" data-panel="print3d">3D材料</button>
@@ -242,6 +276,8 @@
       <button class="nav-btn admin-only" data-panel="users">用户管理</button>
       <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative">审批<span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
       <button class="nav-btn" id="myReqBtn">我的申请</button>
+      <button class="nav-btn" data-panel="profile">个人主页</button>
+      <button class="nav-btn" id="msgBtn" style="position:relative">站内信<span id="msgBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
       <button class="nav-btn" id="logoutBtn">退出</button>
     </nav>
     <span class="conn-status" id="connStatus">● 离线</span>
@@ -353,7 +389,7 @@
     </div>
     <div class="term-box" data-title="用户列表">
       <table class="term-table" id="userTable">
-        <thead><tr><th>用户名</th><th>密码</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>
+        <thead><tr><th>用户名</th><th>UID</th><th>昵称</th><th>密码</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -403,6 +439,72 @@
       <button class="nav-btn" id="reqPanelClose">关闭</button>
     </div>
     <div id="reqListBody"></div>
+  </div>
+</div>
+
+<!-- 个人主页面板 -->
+<div id="panel-profile" class="panel">
+  <div class="panel-title">个人主页</div>
+  <div id="profileContent" style="max-width:600px"></div>
+</div>
+
+<!-- 站内信面板 -->
+<div id="panel-messages" class="panel">
+  <div class="panel-title">站内信</div>
+  <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 160px);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+    <!-- 左侧联系人列表 -->
+    <div style="width:280px;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg-soft)">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
+        <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px">搜索</button>
+      </div>
+      <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
+      <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
+      <div style="padding:8px 12px;border-top:1px solid var(--border)">
+        <button class="nav-btn admin-only" id="broadcastBtn" style="width:100%;justify-content:center">📢 群发消息</button>
+      </div>
+    </div>
+    <!-- 右侧聊天区 -->
+    <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
+      <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-soft);font-weight:600;font-size:14px;color:var(--fg)">选择一个联系人开始聊天</div>
+      <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
+      <div id="chatInputBar" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+        <input id="chatInput" type="text" placeholder="输入消息..." style="flex:1;background:#fff;border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:13px;outline:none" disabled>
+        <button class="nav-btn active" id="sendMsgBtn" disabled>发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 广播弹窗 -->
+<div id="broadcastModal" class="modal-overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">群发消息</div>
+    <div class="modal-field">
+      <label>收件人</label>
+      <select id="broadcastTarget">
+        <option value="all">全体用户</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>消息内容</label>
+      <textarea id="broadcastContent" rows="3" placeholder="输入要广播的消息..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="nav-btn" id="broadcastCancel">取消</button>
+      <button class="nav-btn active" id="broadcastSend">发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- 搜索用户弹窗 -->
+<div id="searchUserModal" class="modal-overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-title">用户信息</div>
+    <div id="searchUserResult"></div>
+    <div class="modal-actions">
+      <button class="nav-btn" id="searchUserClose">关闭</button>
+    </div>
   </div>
 </div>
 
@@ -629,7 +731,18 @@
       return;
     }
     currentUser = res.user;
-    sessionStorage.setItem('lab_session', JSON.stringify(res.user));
+    // 个人主页需要密码，管理员可通过 with_pass 获取
+    if (currentUser.role === 'admin') {
+      try {
+        const r2 = await fetch('/api/users?with_pass=1');
+        const d2 = await r2.json();
+        if (d2.ok) {
+          const full = d2.users.find(u => u.name === currentUser.name);
+          if (full) { currentUser.pass = full.pass; currentUser.friends = full.friends; }
+        }
+      } catch(e) {}
+    }
+    sessionStorage.setItem('lab_session', JSON.stringify(currentUser));
     $('#loginError').textContent = '';
     await enterApp();
   }
@@ -644,8 +757,10 @@
     renderCompCards();
     renderBoardCards();
     await renderUsers();
+    renderProfile();
+    initMessaging();
     startPolling();
-    toast(`欢迎，${currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
+    toast(`欢迎，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? ' · 只读模式：仅可查看数据' : ''}`);
   }
 
   $('#logoutBtn').addEventListener('click', () => {
@@ -657,6 +772,8 @@
     if (client) { client.end(); client = null; }
     if (simInterval) { clearInterval(simInterval); simInterval = null; }
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
+    currentChatPeer = null;
   });
 
   // 模拟数据开关
@@ -670,7 +787,20 @@
       btn.classList.add('active');
       $$('.panel').forEach(pa => pa.classList.remove('active'));
       $('#panel-' + p).classList.add('active');
+      // 切换到站内信时刷新联系人
+      if (p === 'messages') { renderContacts(); renderFriendReqs(); }
+      // 切换到个人主页时重新渲染
+      if (p === 'profile') renderProfile();
     });
+  });
+
+  // 站内信按钮点击
+  $('#msgBtn').addEventListener('click', () => {
+    $$('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('#msgBtn').classList.add('active');
+    $$('.panel').forEach(pa => pa.classList.remove('active'));
+    $('#panel-messages').classList.add('active');
+    renderContacts(); renderFriendReqs();
   });
 
   // ===================== ROOMS & SENSORS =====================
@@ -1497,8 +1627,10 @@
     const users = await apiGetUsers(isAdmin);
     tbody.innerHTML = users.map(u => `<tr>
       <td>${u.name}</td>
+      <td><span style="font-family:monospace;color:var(--accent);font-weight:600">${u.uid || '-'}</span></td>
+      <td>${u.avatar || '👤'} ${u.nickname || u.name}</td>
       <td>${isAdmin ? `<span style="font-family:monospace;color:var(--accent)">${u.pass || '-'}</span>` : '<span style="color:var(--muted)">******</span>'}</td>
-      <td>${u.role}</td>
+      <td>${u.role === 'admin' ? '管理员' : '普通用户'}</td>
       <td>${fmtDate(u.created)}</td>
       <td>
         ${isAdmin ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="editPass('${u.name}')">改密</button>` : ''}
@@ -1656,8 +1788,296 @@
     if (pollTimer) clearInterval(pollTimer);
     if (currentUser.role === 'admin') {
       updateReqBadge();
-      pollTimer = setInterval(updateReqBadge, 10000);
     }
+    updateMsgBadge();
+    pollTimer = setInterval(() => {
+      if (currentUser.role === 'admin') updateReqBadge();
+      updateMsgBadge();
+    }, 10000);
+  }
+
+  // ===================== 个人主页 =====================
+  const AVATAR_LIST = ['😀','😎','🤓','🧑‍💻','👨‍🔬','👩‍🔬','🧑‍🔧','👷','👨‍💼','👩‍💼','🦊','🐱','🐧','🤖','🦉','🐯','🐨','🦁','🐸','🐙','🦄','🐲','🌟','⚡','🔥','🎯','🎨','🚀','💡','🧩'];
+  let selectedAvatar = '';
+
+  async function apiGetProfile(uid) {
+    try { const r = await fetch(`/api/profile?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiUpdateProfile(uid, nickname, avatar) {
+    try { const r = await fetch('/api/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, nickname, avatar }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetFriends(uid) {
+    try { const r = await fetch(`/api/friends?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, friends:[] }; }
+  }
+  async function apiFriendRequest(fromUid, toUid) {
+    try { const r = await fetch('/api/friends/request', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ fromUid, toUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiAcceptFriend(reqId) {
+    try { const r = await fetch('/api/friends/accept', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reqId }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiRejectFriend(reqId) {
+    try { const r = await fetch('/api/friends/reject', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reqId }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetFriendReqs(uid) {
+    try { const r = await fetch(`/api/friends/requests?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, requests:[] }; }
+  }
+  async function apiGetMessages(uid, peerUid) {
+    try { const r = await fetch(`/api/messages?uid=${uid}&peerUid=${peerUid||''}`); return await r.json(); } catch(e) { return { ok:false, messages:[] }; }
+  }
+  async function apiSendMessage(from, to, content) {
+    try { const r = await fetch('/api/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiBroadcast(from, to, content) {
+    try { const r = await fetch('/api/messages/broadcast', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetContacts(uid) {
+    try { const r = await fetch(`/api/messages/contacts?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, contacts:[] }; }
+  }
+  async function apiGetUnread(uid) {
+    try { const r = await fetch(`/api/messages/unread?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, count:0 }; }
+  }
+  async function apiRemoveFriend(uid, friendUid) {
+    try { const r = await fetch('/api/friends/remove', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, friendUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+
+  function renderProfile() {
+    if (!currentUser) return;
+    const c = $('#profileContent');
+    const isAdmin = currentUser.role === 'admin';
+    selectedAvatar = currentUser.avatar || '😀';
+    let avatarHtml = AVATAR_LIST.map(a => `<div class="avatar-option ${a===selectedAvatar?'selected':''}" data-avatar="${a}">${a}</div>`).join('');
+    c.innerHTML = `<div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatarDisplay">${selectedAvatar}</div>
+        <div class="profile-info">
+          <h2 id="profileNicknameDisplay">${currentUser.nickname || currentUser.name}</h2>
+          <span class="uid">UID: ${currentUser.uid}</span>
+          <div class="role">角色: ${isAdmin ? '管理员' : '普通用户'} · 账号: ${currentUser.name}</div>
+        </div>
+      </div>
+      <div class="profile-row"><span class="label">账号名</span><span class="value">${currentUser.name}</span></div>
+      <div class="profile-row"><span class="label">UID</span><span class="value">${currentUser.uid}</span></div>
+      <div class="profile-row"><span class="label">密码</span><span class="value">${currentUser.pass || '******'}</span></div>
+      <div class="profile-row"><span class="label">角色</span><span class="value">${isAdmin ? '管理员' : '普通用户'}</span></div>
+      <div class="profile-row"><span class="label">注册时间</span><span class="value">${fmtDate(currentUser.created)}</span></div>
+      <div style="margin-top:24px">
+        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:10px">编辑昵称</div>
+        <input type="text" id="profileNicknameInput" value="${currentUser.nickname || currentUser.name}" style="width:100%;background:var(--bg-soft);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:10px 14px;font-size:14px;outline:none;margin-bottom:16px" placeholder="输入新昵称">
+        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:10px">选择头像</div>
+        <div class="avatar-picker" id="avatarPicker">${avatarHtml}</div>
+        <button class="nav-btn active" id="saveProfileBtn" style="margin-top:20px">保存修改</button>
+      </div>
+    </div>`;
+    // 头像选择
+    $('#avatarPicker').querySelectorAll('.avatar-option').forEach(el => {
+      el.addEventListener('click', () => {
+        $('#avatarPicker').querySelectorAll('.avatar-option').forEach(e => e.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedAvatar = el.dataset.avatar;
+        $('#profileAvatarDisplay').textContent = selectedAvatar;
+      });
+    });
+    $('#saveProfileBtn').addEventListener('click', async () => {
+      const nickname = $('#profileNicknameInput').value.trim();
+      if (!nickname) { toast('昵称不能为空'); return; }
+      const r = await apiUpdateProfile(currentUser.uid, nickname, selectedAvatar);
+      if (r.ok) {
+        currentUser.nickname = nickname;
+        currentUser.avatar = selectedAvatar;
+        toast('个人资料已更新');
+        renderProfile();
+      } else { toast(r.msg || '更新失败'); }
+    });
+  }
+
+  // ===================== 站内信 =====================
+  let currentChatPeer = null; // 当前聊天对象 UID
+  let msgPollTimer = null;
+
+  function fmtTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  async function updateMsgBadge() {
+    if (!currentUser) return;
+    const r = await apiGetUnread(currentUser.uid);
+    const badge = $('#msgBadge');
+    if (r.ok && r.count > 0) {
+      badge.textContent = r.count > 99 ? '99+' : r.count;
+      badge.style.display = 'inline-block';
+    } else { badge.style.display = 'none'; }
+  }
+
+  async function renderContacts() {
+    if (!currentUser) return;
+    const r = await apiGetContacts(currentUser.uid);
+    const list = $('#contactList');
+    if (!r.ok || !r.contacts || r.contacts.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">暂无联系人<br>通过 UID 添加好友开始聊天</div>';
+      return;
+    }
+    // 按最后消息时间排序
+    r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+    list.innerHTML = r.contacts.map(c => `
+      <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar}">
+        <div class="c-avatar">${c.avatar}</div>
+        <div class="c-info">
+          <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">管理员</span>':''}</div>
+          <div class="c-last">${c.lastMsg || '点击开始聊天'}</div>
+        </div>
+        ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
+      </div>
+    `).join('');
+    list.querySelectorAll('.contact-item').forEach(el => {
+      el.addEventListener('click', () => openChat(el.dataset.uid, el.dataset.name, el.dataset.avatar));
+    });
+  }
+
+  async function renderFriendReqs() {
+    if (!currentUser) return;
+    const r = await apiGetFriendReqs(currentUser.uid);
+    const el = $('#friendReqList');
+    if (!r.ok || !r.requests || r.requests.length === 0) {
+      el.innerHTML = ''; return;
+    }
+    el.innerHTML = '<div style="padding:6px 16px;font-size:11px;color:var(--fg-light);font-weight:600;background:var(--warning-soft)">好友请求</div>' +
+      r.requests.map(req => `
+        <div class="friend-req-item">
+          <span class="r-avatar">${req.fromAvatar}</span>
+          <span class="r-name">${req.fromName}</span>
+          <button class="term-btn-sm" style="border-color:var(--success);color:var(--success);padding:3px 8px" data-accept="${req.id}">接受</button>
+          <button class="term-btn-sm danger" style="padding:3px 8px" data-reject="${req.id}">拒绝</button>
+        </div>
+      `).join('');
+    el.querySelectorAll('[data-accept]').forEach(b => {
+      b.addEventListener('click', async () => {
+        await apiAcceptFriend(parseInt(b.dataset.accept));
+        toast('已添加好友');
+        renderFriendReqs(); renderContacts();
+      });
+    });
+    el.querySelectorAll('[data-reject]').forEach(b => {
+      b.addEventListener('click', async () => {
+        await apiRejectFriend(parseInt(b.dataset.reject));
+        toast('已拒绝');
+        renderFriendReqs();
+      });
+    });
+  }
+
+  async function openChat(peerUid, peerName, peerAvatar) {
+    currentChatPeer = peerUid;
+    $('#chatHeader').innerHTML = `${peerAvatar||'👤'} ${peerName||peerUid}`;
+    $('#chatInput').disabled = false;
+    $('#sendMsgBtn').disabled = false;
+    $('#chatInput').focus();
+    // 加载消息
+    const r = await apiGetMessages(currentUser.uid, peerUid);
+    renderChatMessages(r.messages || [], peerUid);
+    // 刷新联系人列表高亮
+    renderContacts();
+    renderFriendReqs();
+    // 启动消息轮询
+    if (msgPollTimer) clearInterval(msgPollTimer);
+    msgPollTimer = setInterval(async () => {
+      if (currentChatPeer === peerUid) {
+        const r2 = await apiGetMessages(currentUser.uid, peerUid);
+        renderChatMessages(r2.messages || [], peerUid);
+      }
+    }, 5000);
+  }
+
+  function renderChatMessages(messages, peerUid) {
+    const area = $('#chatMessages');
+    if (messages.length === 0) {
+      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">暂无消息，发送第一条吧</div>';
+      return;
+    }
+    area.innerHTML = messages.map(m => {
+      if (m.broadcast) {
+        return `<div class="chat-bubble broadcast">📢 ${m.content}<div class="chat-time" style="text-align:center">${fmtTime(m.created)}</div></div>`;
+      }
+      const isMe = m.from === currentUser.uid;
+      return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
+        <div class="chat-bubble ${isMe?'me':'other'}">${m.content}</div>
+        <div class="chat-time">${fmtTime(m.created)}</div>
+      </div>`;
+    }).join('');
+    area.scrollTop = area.scrollHeight;
+  }
+
+  async function sendChatMessage() {
+    const input = $('#chatInput');
+    const content = input.value.trim();
+    if (!content || !currentChatPeer) return;
+    input.value = '';
+    await apiSendMessage(currentUser.uid, currentChatPeer, content);
+    const r = await apiGetMessages(currentUser.uid, currentChatPeer);
+    renderChatMessages(r.messages || [], currentChatPeer);
+    renderContacts();
+  }
+
+  function initMessaging() {
+    $('#sendMsgBtn').addEventListener('click', sendChatMessage);
+    $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+    // 添加好友/搜索 UID
+    $('#addFriendBtn').addEventListener('click', async () => {
+      const uid = $('#addFriendInput').value.trim();
+      if (!uid) { toast('请输入 UID'); return; }
+      const r = await apiGetProfile(uid);
+      if (!r.ok) { toast(r.msg || '用户不存在'); return; }
+      // 显示搜索结果弹窗
+      const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+      $('#searchUserResult').innerHTML = `
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:48px;margin-bottom:8px">${r.user.avatar}</div>
+          <div style="font-size:16px;font-weight:700">${r.user.nickname}</div>
+          <div style="font-size:12px;color:var(--accent);margin-top:4px">UID: ${r.user.uid}</div>
+          <div style="font-size:12px;color:var(--fg-light);margin-top:2px">角色: ${r.user.role === 'admin' ? '管理员' : '普通用户'}</div>
+        </div>
+        ${isFriend ? '<div style="text-align:center;color:var(--success);font-size:13px">已经是好友</div>' :
+          r.user.uid === currentUser.uid ? '<div style="text-align:center;color:var(--muted);font-size:13px">这是你自己</div>' :
+          `<button class="nav-btn active" id="sendFriendReqBtn" style="width:100%;justify-content:center">发送好友请求</button>`}
+      `;
+      $('#searchUserModal').style.display = 'flex';
+      const btn = $('#sendFriendReqBtn');
+      if (btn) {
+        btn.addEventListener('click', async () => {
+          const rr = await apiFriendRequest(currentUser.uid, uid);
+          if (rr.ok) {
+            toast('好友请求已发送');
+            $('#searchUserModal').style.display = 'none';
+          } else { toast(rr.msg || '发送失败'); }
+        });
+      }
+    });
+    // 搜索弹窗关闭
+    $('#searchUserClose').addEventListener('click', () => { $('#searchUserModal').style.display = 'none'; });
+    // 广播按钮
+    $('#broadcastBtn').addEventListener('click', async () => {
+      // 加载用户列表填充下拉
+      const r = await fetch('/api/users'); const data = await r.json();
+      if (data.ok) {
+        const sel = $('#broadcastTarget');
+        sel.innerHTML = '<option value="all">全体用户</option>' +
+          data.users.filter(u => u.uid !== currentUser.uid).map(u => `<option value="${u.uid}">${u.nickname} (${u.uid})</option>`).join('');
+      }
+      $('#broadcastContent').value = '';
+      $('#broadcastModal').style.display = 'flex';
+    });
+    $('#broadcastCancel').addEventListener('click', () => { $('#broadcastModal').style.display = 'none'; });
+    $('#broadcastSend').addEventListener('click', async () => {
+      const target = $('#broadcastTarget').value;
+      const content = $('#broadcastContent').value.trim();
+      if (!content) { toast('消息内容不能为空'); return; }
+      const r = await apiBroadcast(currentUser.uid, target, content);
+      if (r.ok) {
+        toast(`已发送给 ${r.count} 个目标`);
+        $('#broadcastModal').style.display = 'none';
+      } else { toast('发送失败'); }
+    });
   }
 
   // ===================== INIT =====================
