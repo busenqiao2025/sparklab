@@ -358,6 +358,30 @@ export default {
           return json({ ok: true, count });
         }
 
+        // GET /api/messages/broadcasts?uid=xxx — 获取未读广播消息（不标记已读）
+        if (url.pathname === '/api/messages/broadcasts' && request.method === 'GET') {
+          const uid = url.searchParams.get('uid');
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          let msgs = await loadMessages(env);
+          const broadcasts = msgs.filter(m => m.broadcast && m.to === uid && !m.read && m.from !== uid)
+            .map(m => ({ id: m.id, from: m.from, content: m.content, created: m.created }));
+          return json({ ok: true, broadcasts });
+        }
+
+        // POST /api/messages/mark-read — 标记指定消息为已读
+        if (url.pathname === '/api/messages/mark-read' && request.method === 'POST') {
+          const { uid, msgIds } = await readBody(request);
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          let msgs = await loadMessages(env);
+          let changed = false;
+          const idSet = new Set(Array.isArray(msgIds) ? msgIds : [msgIds]);
+          for (const m of msgs) {
+            if (m.to === uid && idSet.has(m.id) && !m.read) { m.read = true; changed = true; }
+          }
+          if (changed) await saveMessages(env, msgs);
+          return json({ ok: true });
+        }
+
         // GET /api/messages/contacts?uid=xxx — 获取联系人列表（好友+有过私聊的人+广播）
         if (url.pathname === '/api/messages/contacts' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');

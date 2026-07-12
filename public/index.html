@@ -2212,6 +2212,12 @@ function applyI18n() {
   async function apiGetUnread(uid) {
     try { const r = await fetch(`/api/messages/unread?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, count:0 }; }
   }
+  async function apiGetBroadcasts(uid) {
+    try { const r = await fetch(`/api/messages/broadcasts?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, broadcasts:[] }; }
+  }
+  async function apiMarkRead(uid, msgIds) {
+    try { const r = await fetch('/api/messages/mark-read', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, msgIds }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
   async function apiRemoveFriend(uid, friendUid) {
     try { const r = await fetch('/api/friends/remove', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, friendUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
@@ -2327,25 +2333,35 @@ function applyI18n() {
   }
 
   // ===================== 广播横幅 =====================
-  const shownBroadcasts = new Set(); // 已展示过的广播消息 ID
+  // 完全用 localStorage 控制已读，不依赖服务端 read 状态（避免 KV 最终一致性问题）
   let currentBannerMsgId = null;
+  function getReadBroadcasts() {
+    try { return new Set(JSON.parse(localStorage.getItem('lab_read_broadcasts') || '[]')); }
+    catch(e) { return new Set(); }
+  }
+  function saveReadBroadcasts(ids) {
+    const s = getReadBroadcasts();
+    for (const id of ids) s.add(id);
+    const arr = [...s];
+    if (arr.length > 200) arr.splice(0, arr.length - 200);
+    localStorage.setItem('lab_read_broadcasts', JSON.stringify(arr));
+  }
 
   async function checkBroadcastBanner() {
     if (!currentUser) return;
-    const r = await apiGetMessages(currentUser.uid);
-    if (!r.ok || !r.messages) return;
-    // 找到未读的广播消息（不是自己发的）
-    const unreadBroadcasts = r.messages.filter(m => m.broadcast && !m.read && m.from !== currentUser.uid && !shownBroadcasts.has(m.id));
-    if (unreadBroadcasts.length === 0) return;
+    const r = await apiGetBroadcasts(currentUser.uid);
+    if (!r.ok || !r.broadcasts || r.broadcasts.length === 0) return;
+    const readSet = getReadBroadcasts();
+    // 只显示本地 localStorage 中未记录已读的广播
+    const unread = r.broadcasts.filter(m => !readSet.has(m.id));
+    if (unread.length === 0) return;
     // 显示最新的一条
-    const msg = unreadBroadcasts[unreadBroadcasts.length - 1];
-    shownBroadcasts.add(msg.id);
+    const msg = unread[unread.length - 1];
     showBroadcastBanner(msg);
   }
 
   function showBroadcastBanner(msg) {
     currentBannerMsgId = msg.id;
-    // 获取发送者信息
     fetch('/api/profile?uid=' + msg.from).then(r => r.json()).then(data => {
       const senderName = data.ok ? data.user.nickname : t('role_admin');
       $('#bannerSender').textContent = t('msg_banner_from') + senderName;
@@ -2359,13 +2375,15 @@ function applyI18n() {
     currentBannerMsgId = null;
   }
 
-  // 横幅「已读」按钮 — 标记消息为已读并关闭
+  // 横幅「已读」按钮 — 立即写 localStorage 关闭，后台标记服务端
   const readBtn = document.getElementById('bannerReadBtn');
   if (readBtn) {
     readBtn.addEventListener('click', async () => {
-      // 调用 API 标记已读（通过获取消息接口自动标记）
-      if (currentBannerMsgId && currentUser) {
-        await apiGetMessages(currentUser.uid);
+      if (currentBannerMsgId) {
+        // 1. 立即写 localStorage（防刷新重复弹）
+        saveReadBroadcasts([currentBannerMsgId]);
+        // 2. 后台标记服务端已读（不阻塞 UI）
+        apiMarkRead(currentUser.uid, [currentBannerMsgId]);
       }
       hideBroadcastBanner();
       updateMsgBadge();
@@ -2431,7 +2449,11 @@ function applyI18n() {
 
   async function openChat(peerUid, peerName, peerAvatar) {
     currentChatPeer = peerUid;
-    $('#chatHeader').innerHTML = `${peerAvatar||'👤'} ${peerName||peerUid}`;
+    const avatarHtml = peerAvatar ? (peerAvatar.startsWith('data:') || peerAvatar.length > 100
+      ? `<img src="${peerAvatar.startsWith('data:') ? peerAvatar : 'data:image/jpeg;base64,' + peerAvatar}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;vertical-align:middle">`
+      : peerAvatar)
+      : '👤';
+    $('#chatHeader').innerHTML = `${avatarHtml} ${peerName||peerUid}`;
     $('#chatInput').disabled = false;
     $('#sendMsgBtn').disabled = false;
     $('#chatInput').focus();
