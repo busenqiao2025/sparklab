@@ -66,8 +66,45 @@
   .glow{text-shadow:none}
 
   /* screens */
-  .screen{display:none;flex-direction:column;height:100vh;width:100vw;padding:20px}
+  .screen{display:none;flex-direction:column;height:100vh;width:100vw;padding:0}
   .screen.active{display:flex}
+
+  /* TRAE-style layout */
+  #mainScreen{flex-direction:column;overflow:hidden}
+  .trae-topbar{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;z-index:50}
+  .trae-topbar-left{display:flex;align-items:center;gap:4px}
+  .trae-brand{font-size:14px;font-weight:700;color:var(--fg);letter-spacing:-.3px;display:flex;align-items:center;gap:8px;margin-right:16px;white-space:nowrap}
+  .trae-brand::before{content:'';width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:inline-block}
+  .trae-cat{background:transparent;border:none;color:var(--fg-dim);font-family:var(--font);font-size:12px;padding:6px 14px;cursor:pointer;transition:var(--transition);border-radius:6px;font-weight:500;white-space:nowrap;position:relative}
+  .trae-cat:hover{background:var(--accent-soft);color:var(--accent)}
+  .trae-cat.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .trae-topbar-right{display:flex;align-items:center;gap:8px}
+  .trae-icon-btn{background:transparent;border:none;color:var(--fg-dim);cursor:pointer;padding:5px 8px;border-radius:6px;transition:var(--transition);font-size:13px;font-family:var(--font);font-weight:500;display:flex;align-items:center;gap:4px;white-space:nowrap;position:relative}
+  .trae-icon-btn:hover{background:var(--accent-soft);color:var(--accent)}
+
+  .trae-body{display:flex;flex:1;overflow:hidden}
+  .trae-sidebar{width:200px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+  .trae-sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+  .trae-sidebar-group{padding:4px 0}
+  .trae-sidebar-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:8px 16px 4px}
+  .trae-sidebar-item{display:flex;align-items:center;gap:10px;padding:7px 16px;cursor:pointer;font-size:12px;color:var(--fg-dim);transition:var(--transition);border-left:2px solid transparent;white-space:nowrap}
+  .trae-sidebar-item:hover{background:var(--accent-soft);color:var(--fg)}
+  .trae-sidebar-item.active{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+  .trae-sidebar-item .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+  .trae-sidebar-item .badge{margin-left:auto;background:var(--danger);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;min-width:12px;text-align:center}
+
+  .trae-user{padding:10px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:var(--transition);background:var(--bg-soft)}
+  .trae-user:hover{background:var(--accent-soft)}
+  .trae-user-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent-soft),var(--accent));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden}
+  .trae-user-avatar img{width:100%;height:100%;object-fit:cover}
+  .trae-user-info{flex:1;min-width:0}
+  .trae-user-name{font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .trae-user-uid{font-size:10px;color:var(--muted);font-family:monospace}
+  .trae-user-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+  .trae-user-btn{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px;transition:var(--transition);border-radius:4px}
+  .trae-user-btn:hover{color:var(--danger);background:rgba(239,68,68,0.1)}
+
+  .trae-content{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
 
   /* card box */
   .term-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;position:relative;box-shadow:var(--shadow)}
@@ -92,19 +129,16 @@
   .error-msg{color:var(--danger);font-size:12px;margin-top:8px;min-height:16px}
   .hint{color:var(--fg-light);font-size:11px;margin-top:14px;text-align:center}
 
-  /* main header */
-  .term-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:14px;margin-bottom:18px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 20px;box-shadow:var(--shadow)}
-  .brand{font-size:17px;font-weight:700;color:var(--fg);letter-spacing:-.5px;display:flex;align-items:center;gap:8px}
-  .brand::before{content:'';width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-dark));display:inline-block;box-shadow:var(--shadow-xs)}
-  .term-nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  /* nav-btn kept for compatibility (modals, forms) */
   .nav-btn{background:var(--bg-soft);border:1px solid var(--border);color:var(--fg-dim);font-family:var(--font);font-size:12px;padding:6px 14px;cursor:pointer;transition:var(--transition);border-radius:8px;font-weight:500;white-space:nowrap}
   .nav-btn:hover{border-color:var(--accent-light);color:var(--accent);background:var(--accent-soft)}
   .nav-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-color:transparent;box-shadow:var(--shadow-xs)}
-  .conn-status{font-size:11px;color:var(--danger);font-weight:600;display:flex;align-items:center;gap:4px}
+  .conn-status{font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px}
   .conn-status.online{color:var(--success)}
+  .conn-status:not(.online){color:var(--danger)}
 
   /* panels */
-  .panel{display:none;flex:1;overflow-y:auto;gap:14px;flex-direction:column}
+  .panel{display:none;flex:1;flex-direction:column;gap:14px}
   .panel.active{display:flex}
   .panel-title{color:var(--fg-light);font-size:13px;margin-bottom:4px;font-weight:500;display:flex;align-items:center;gap:6px}
   .panel-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;display:inline-block}
@@ -178,6 +212,7 @@
   body.is-admin .admin-only{display:inline-flex}
   body.is-admin .admin-only.block{display:block}
   body.is-admin .admin-only.flex{display:flex}
+  body.is-admin .trae-cat.admin-only{display:inline-flex}
 
   /* responsive */
   @media(max-width:600px){
@@ -277,6 +312,7 @@ const I18N = {
     'nav_lab': '实验室监控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件仓库',
     'nav_users': '用户管理', 'nav_approval': '审批', 'nav_my_req': '我的申请',
     'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_backup': '数据回滚', 'nav_transactions': '库存流水', 'nav_logout': '退出',
+    'nav_inventory': '库存管理', 'nav_user_center': '用户中心', 'nav_admin': '管理后台',
     'conn_online': '● 在线', 'conn_offline': '● 离线',
     'sim_on': '模拟:开', 'sim_off': '模拟:关',
     // Panels
@@ -386,6 +422,7 @@ const I18N = {
     'nav_lab': '實驗室監控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件倉庫',
     'nav_users': '用戶管理', 'nav_approval': '審批', 'nav_my_req': '我的申請',
     'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_backup': '數據回滾', 'nav_transactions': '庫存流水', 'nav_logout': '退出',
+    'nav_inventory': '庫存管理', 'nav_user_center': '用戶中心', 'nav_admin': '管理後台',
     'conn_online': '● 在線', 'conn_offline': '● 離線',
     'sim_on': '模擬:開', 'sim_off': '模擬:關',
     'panel_sensor': '即時感測器監控', 'panel_3d': '3D 列印材料管理',
@@ -478,6 +515,7 @@ const I18N = {
     'nav_lab': 'Lab Monitor', 'nav_3d': '3D Materials', 'nav_warehouse': 'Components',
     'nav_users': 'User Mgmt', 'nav_approval': 'Approvals', 'nav_my_req': 'My Requests',
     'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_backup': 'Backup', 'nav_transactions': 'Transactions', 'nav_logout': 'Logout',
+    'nav_inventory': 'Inventory', 'nav_user_center': 'User Center', 'nav_admin': 'Admin',
     'conn_online': '● Online', 'conn_offline': '● Offline',
     'sim_on': 'Sim:ON', 'sim_off': 'Sim:OFF',
     'panel_sensor': 'Real-time Sensor Monitor', 'panel_3d': '3D Printing Materials',
@@ -572,24 +610,26 @@ function setLang(lang) {
   applyI18n();
 }
 function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (key) el.textContent = t(key);
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    const key = el.dataset.i18nPh;
-    if (key) el.placeholder = t(key);
-  });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    const key = el.dataset.i18nTitle;
-    if (key) el.dataset.title = t(key);
-  });
-  // Update lang selector label
-  const lbl = document.getElementById('langLabel');
-  if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
-  // Update document title
-  document.title = t('app_name') + ' [v1.9]';
-}
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (key) el.textContent = t(key);
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const key = el.dataset.i18nPh;
+      if (key) el.placeholder = t(key);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.dataset.i18nTitle;
+      if (key) el.dataset.title = t(key);
+    });
+    // Update lang selector label
+    const lbl = document.getElementById('langLabel');
+    if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
+    // Update document title
+    document.title = t('app_name') + ' [v1.9]';
+    // Re-render sidebar for language update
+    if (typeof renderSidebar === 'function') renderSidebar();
+  }
 </script>
 </head>
 <body>
@@ -620,32 +660,53 @@ function applyI18n() {
 
 <!-- ========== MAIN SCREEN ========== -->
 <div id="mainScreen" class="screen">
-  <header class="term-header">
-    <span class="brand glow">SparkMinds Lab v1.9</span>
-    <nav class="term-nav">
-      <button class="nav-btn active" data-panel="lab" data-i18n="nav_lab">实验室监控</button>
-      <button class="nav-btn" data-panel="print3d" data-i18n="nav_3d">3D材料</button>
-      <button class="nav-btn" data-panel="warehouse" data-i18n="nav_warehouse">元器件仓库</button>
-      <button class="nav-btn admin-only" data-panel="users" data-i18n="nav_users">用户管理</button>
-      <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative"><span data-i18n="nav_approval">审批</span><span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
-      <button class="nav-btn admin-only" data-panel="backup" data-i18n="nav_backup">数据回滚</button>
-      <button class="nav-btn admin-only" data-panel="transactions" data-i18n="nav_transactions">库存流水</button>
-      <button class="nav-btn" id="myReqBtn" data-i18n="nav_my_req">我的申请</button>
-      <button class="nav-btn" data-panel="profile" data-i18n="nav_profile">个人主页</button>
-      <button class="nav-btn" id="msgBtn" style="position:relative"><span data-i18n="nav_messages">站内信</span><span id="msgBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
-      <button class="nav-btn" id="logoutBtn" data-i18n="nav_logout">退出</button>
-    </nav>
-    <span class="conn-status" id="connStatus" data-i18n="conn_offline">● 离线</span>
-    <button class="nav-btn" id="simBtn" style="border-color:var(--warning);color:var(--warning)" data-i18n="sim_off">模拟:关</button>
-    <div style="position:relative;display:inline-flex;align-items:center">
-      <button class="nav-btn" id="langBtn" style="padding:5px 10px;font-size:12px;min-width:50px;justify-content:center" title="Language"><span id="langLabel">简中</span> ▾</button>
-      <div id="langDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);box-shadow:var(--shadow-lg);z-index:100;overflow:hidden;min-width:120px">
-        <div class="lang-option" data-lang="zh-CN" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">简体中文</div>
-        <div class="lang-option" data-lang="zh-TW" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">繁體中文</div>
-        <div class="lang-option" data-lang="en" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">English</div>
+  <!-- Top Bar -->
+  <div class="trae-topbar">
+    <div class="trae-topbar-left">
+      <span class="trae-brand">SparkMinds Lab v1.9</span>
+      <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
+      <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
+      <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
+      <button class="trae-cat admin-only" data-cat="admin" data-i18n="nav_admin">管理后台</button>
+    </div>
+    <div class="trae-topbar-right">
+      <span class="conn-status" id="connStatus" data-i18n="conn_offline">● 离线</span>
+      <button class="trae-icon-btn" id="simBtn" style="color:var(--warning)"><span data-i18n="sim_off">模拟:关</span></button>
+      <button class="trae-icon-btn" id="msgBtn"><span data-i18n="nav_messages">站内信</span><span id="msgBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;min-width:12px;text-align:center">0</span></button>
+      <button class="trae-icon-btn" id="myReqBtn" data-i18n="nav_my_req">我的申请</button>
+      <div style="position:relative;display:inline-flex;align-items:center">
+        <button class="trae-icon-btn" id="langBtn" style="min-width:50px;justify-content:center"><span id="langLabel">简中</span> ▾</button>
+        <div id="langDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);box-shadow:var(--shadow-lg);z-index:100;overflow:hidden;min-width:120px">
+          <div class="lang-option" data-lang="zh-CN" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">简体中文</div>
+          <div class="lang-option" data-lang="zh-TW" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">繁體中文</div>
+          <div class="lang-option" data-lang="en" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">English</div>
+        </div>
       </div>
     </div>
-  </header>
+  </div>
+
+  <!-- Body: Sidebar + Content -->
+  <div class="trae-body">
+    <!-- Sidebar -->
+    <div class="trae-sidebar">
+      <div class="trae-sidebar-nav" id="sidebarNav">
+        <!-- Dynamically populated -->
+      </div>
+      <!-- User info bottom-left -->
+      <div class="trae-user" id="traeUser">
+        <div class="trae-user-avatar" id="traeUserAvatar">👤</div>
+        <div class="trae-user-info">
+          <div class="trae-user-name" id="traeUserName">User</div>
+          <div class="trae-user-uid" id="traeUserUid">UID: -----</div>
+        </div>
+        <div class="trae-user-actions">
+          <button class="trae-user-btn" id="logoutBtn" title="退出" data-i18n-title="nav_logout">⏻</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="trae-content">
 
   <!-- LAB MONITOR -->
   <div id="panel-lab" class="panel active">
@@ -811,6 +872,8 @@ function applyI18n() {
     </div>
     <div id="txnList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
   </div>
+    </div><!-- /.trae-content -->
+  </div><!-- /.trae-body -->
 </div>
 
 <!-- 申请弹窗 -->
@@ -1161,8 +1224,10 @@ function applyI18n() {
     renderBoardCards();
     await renderUsers();
     renderProfile();
-    initBackupAndTxn();
     initMessaging();
+    initBackupAndTxn();
+    renderSidebar();
+    updateTraeUser();
     startPolling();
     toast(`${t('t_welcome')}，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? t('t_readonly') : ''}`);
   }
@@ -1183,31 +1248,122 @@ function applyI18n() {
   // 模拟数据开关
   $('#simBtn').addEventListener('click', toggleSimulation);
 
-  // ===================== NAVIGATION =====================
-  $$('.nav-btn[data-panel]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const p = btn.dataset.panel;
-      $$('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      $$('.panel').forEach(pa => pa.classList.remove('active'));
-      $('#panel-' + p).classList.add('active');
-      // 切换到站内信时刷新联系人
-      if (p === 'messages') { renderContacts(); renderFriendReqs(); }
-      // 切换到个人主页时重新渲染
-      if (p === 'profile') renderProfile();
-      if (p === 'backup') renderBackups();
-      if (p === 'transactions') renderTransactions();
+  // ===================== TRAE-STYLE NAVIGATION =====================
+  const SIDEBAR_CONFIG = {
+    lab: [
+      { id: 'lab', icon: '🏠', label: 'nav_lab' },
+    ],
+    inventory: [
+      { id: 'print3d', icon: '🧵', label: 'nav_3d' },
+      { id: 'warehouse', icon: '📦', label: 'nav_warehouse' },
+    ],
+    user: [
+      { id: 'profile', icon: '👤', label: 'nav_profile' },
+      { id: 'messages', icon: '💬', label: 'nav_messages', badgeId: 'msgBadge' },
+    ],
+    admin: [
+      { id: 'users', icon: '👥', label: 'nav_users' },
+      { id: 'approval', icon: '✅', label: 'nav_approval', badgeId: 'reqBadge' },
+      { id: 'backup', icon: '💾', label: 'nav_backup' },
+      { id: 'transactions', icon: '📋', label: 'nav_transactions' },
+    ],
+  };
+
+  let currentCat = 'lab';
+  let currentPanel = 'lab';
+
+  function renderSidebar() {
+    const nav = $('#sidebarNav');
+    const items = SIDEBAR_CONFIG[currentCat] || [];
+    nav.innerHTML = items.map(item => {
+      const isActive = currentPanel === item.id;
+      let badgeHtml = '';
+      if (item.badgeId) {
+        badgeHtml = `<span class="badge" id="sidebar_${item.badgeId}" style="display:none">0</span>`;
+      }
+      return `<div class="trae-sidebar-item ${isActive?'active':''}" data-panel="${item.id}" data-is-btn="${item.isBtn||false}" data-btn-id="${item.btnId||''}">
+        <span class="icon">${item.icon}</span>
+        <span data-i18n="${item.label}">${t(item.label)}</span>
+        ${badgeHtml}
+      </div>`;
+    }).join('');
+    // Bind clicks
+    nav.querySelectorAll('.trae-sidebar-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const p = el.dataset.panel;
+        const isBtn = el.dataset.isBtn === 'true';
+        const btnId = el.dataset.btnId;
+        if (isBtn && btnId) {
+          // For button-type items like approval
+          document.getElementById(btnId).click();
+          return;
+        }
+        switchPanel(p);
+      });
     });
+  }
+
+  function switchPanel(p) {
+    // Approval opens as modal, not panel
+    if (p === 'approval') {
+      if (currentUser.role === 'admin') {
+        $('#reqPanelTitle').textContent = t('req_panel_title');
+        $('#reqPanel').style.display = 'flex';
+        renderReqList(true);
+      }
+      return;
+    }
+    currentPanel = p;
+    $$('.trae-sidebar-item').forEach(b => b.classList.remove('active'));
+    $$('.panel').forEach(pa => pa.classList.remove('active'));
+    const item = document.querySelector(`.trae-sidebar-item[data-panel="${p}"]`);
+    if (item) item.classList.add('active');
+    const panel = $('#panel-' + p);
+    if (panel) panel.classList.add('active');
+    // Panel-specific rendering
+    if (p === 'messages') { renderContacts(); renderFriendReqs(); }
+    if (p === 'profile') renderProfile();
+    if (p === 'backup') renderBackups();
+    if (p === 'transactions') renderTransactions();
+  }
+
+  function switchCategory(cat) {
+    currentCat = cat;
+    $$('.trae-cat').forEach(b => b.classList.remove('active'));
+    const catBtn = document.querySelector(`.trae-cat[data-cat="${cat}"]`);
+    if (catBtn) catBtn.classList.add('active');
+    renderSidebar();
+    // Auto-select first item in category
+    const items = SIDEBAR_CONFIG[cat] || [];
+    if (items.length > 0) {
+      switchPanel(items[0].id);
+    }
+  }
+
+  // Bind category clicks
+  $$('.trae-cat').forEach(btn => {
+    btn.addEventListener('click', () => switchCategory(btn.dataset.cat));
   });
 
   // 站内信按钮点击
   $('#msgBtn').addEventListener('click', () => {
-    $$('.nav-btn').forEach(b => b.classList.remove('active'));
-    $('#msgBtn').classList.add('active');
-    $$('.panel').forEach(pa => pa.classList.remove('active'));
-    $('#panel-messages').classList.add('active');
-    renderContacts(); renderFriendReqs();
+    switchCategory('user');
+    switchPanel('messages');
   });
+
+  // Update user info in sidebar
+  function updateTraeUser() {
+    if (!currentUser) return;
+    const avatarEl = $('#traeUserAvatar');
+    const isImg = currentUser.avatar && (currentUser.avatar.startsWith('data:') || currentUser.avatar.length > 100);
+    if (isImg) {
+      avatarEl.innerHTML = `<img src="${currentUser.avatar.startsWith('data:') ? currentUser.avatar : 'data:image/jpeg;base64,' + currentUser.avatar}" alt="">`;
+    } else {
+      avatarEl.textContent = currentUser.avatar || '👤';
+    }
+    $('#traeUserName').textContent = currentUser.nickname || currentUser.name;
+    $('#traeUserUid').textContent = 'UID: ' + currentUser.uid;
+  }
 
   // ===================== ROOMS & SENSORS =====================
   function createRoomElement(r) {
@@ -2207,11 +2363,14 @@ function applyI18n() {
     if (currentUser.role !== 'admin') return;
     const count = await apiPendingCount();
     const badge = $('#reqBadge');
-    if (count > 0) {
-      badge.textContent = count;
-      badge.style.display = 'inline-block';
-    } else {
-      badge.style.display = 'none';
+    const sidebarBadge = $('#sidebar_reqBadge');
+    if (badge) {
+      if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
+      else { badge.style.display = 'none'; }
+    }
+    if (sidebarBadge) {
+      if (count > 0) { sidebarBadge.textContent = count; sidebarBadge.style.display = 'inline-block'; }
+      else { sidebarBadge.style.display = 'none'; }
     }
   }
 
@@ -2398,10 +2557,11 @@ function applyI18n() {
     if (!currentUser) return;
     const r = await apiGetUnread(currentUser.uid);
     const badge = $('#msgBadge');
-    if (r.ok && r.count > 0) {
-      badge.textContent = r.count > 99 ? '99+' : r.count;
-      badge.style.display = 'inline-block';
-    } else { badge.style.display = 'none'; }
+    const sidebarBadge = $('#sidebar_msgBadge');
+    const show = r.ok && r.count > 0;
+    const text = r.count > 99 ? '99+' : r.count;
+    if (badge) { if (show) { badge.textContent = text; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; } }
+    if (sidebarBadge) { if (show) { sidebarBadge.textContent = text; sidebarBadge.style.display = 'inline-block'; } else { sidebarBadge.style.display = 'none'; } }
     // 检查未读广播消息并显示横幅
     await checkBroadcastBanner();
   }
