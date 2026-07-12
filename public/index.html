@@ -276,13 +276,14 @@ const I18N = {
     // Nav
     'nav_lab': '实验室监控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件仓库',
     'nav_users': '用户管理', 'nav_approval': '审批', 'nav_my_req': '我的申请',
-    'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_logout': '退出',
+    'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_backup': '数据回滚', 'nav_transactions': '库存流水', 'nav_logout': '退出',
     'conn_online': '● 在线', 'conn_offline': '● 离线',
     'sim_on': '模拟:开', 'sim_off': '模拟:关',
     // Panels
     'panel_sensor': '实时传感器监控', 'panel_3d': '3D 打印材料管理',
     'panel_warehouse': '仓库库存管理', 'panel_users': '用户管理',
-    'panel_profile': '个人主页', 'panel_messages': '站内信',
+    'panel_profile': '个人主页', 'panel_messages': '站内信', 'panel_backup': '数据回滚管理', 'panel_transactions': '库存流水记录',
+    'txn_no_data': '暂无流水记录', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入库', 'txn_consume': '出库', 'txn_edit': '修改', 'txn_delete': '删除', 'txn_create': '新建', 'backup_no_data': '暂无备份记录', 'backup_create': '创建备份', 'backup_refresh': '刷新列表', 'backup_restore': '恢复', 'backup_confirm_restore': '确定要恢复到此备份吗？当前数据将被覆盖（会自动创建恢复前备份）', 'backup_restored': '数据已恢复，正在刷新...', 'backup_restore_failed': '恢复失败', 'backup_delete_confirm': '确定要删除此备份吗？', 'backup_deleted': '备份已删除', 'backup_created': '备份已创建', 'backup_failed': '备份失败', 'backup_prompt_note': '请输入备份备注（可选）：', 'backup_manual': '手动备份', 'backup_auto': '自动', 'backup_no_note': '无备注',
     // Forms
     'type': '类型', 'color': '颜色', 'diameter': '直径', 'weight': '重量(g)',
     'remain': '剩余(%)', 'note': '备注', 'add': '添加', 'reset': '重置',
@@ -384,12 +385,13 @@ const I18N = {
     'login_error_user_pass': '請輸入用戶名和密碼', 'login_error_wrong': '用戶名或密碼錯誤',
     'nav_lab': '實驗室監控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件倉庫',
     'nav_users': '用戶管理', 'nav_approval': '審批', 'nav_my_req': '我的申請',
-    'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_logout': '退出',
+    'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_backup': '數據回滾', 'nav_transactions': '庫存流水', 'nav_logout': '退出',
     'conn_online': '● 在線', 'conn_offline': '● 離線',
     'sim_on': '模擬:開', 'sim_off': '模擬:關',
     'panel_sensor': '即時感測器監控', 'panel_3d': '3D 列印材料管理',
     'panel_warehouse': '倉庫庫存管理', 'panel_users': '用戶管理',
-    'panel_profile': '個人主頁', 'panel_messages': '站內信',
+    'panel_profile': '個人主頁', 'panel_messages': '站內信', 'panel_backup': '數據回滾管理', 'panel_transactions': '庫存流水記錄',
+    'txn_no_data': '暫無流水記錄', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入庫', 'txn_consume': '出庫', 'txn_edit': '修改', 'txn_delete': '刪除', 'txn_create': '新建', 'backup_no_data': '暫無備份記錄', 'backup_create': '建立備份', 'backup_refresh': '刷新列表', 'backup_restore': '恢復', 'backup_confirm_restore': '確定要恢復到此備份嗎？當前數據將被覆蓋（會自動建立恢復前備份）', 'backup_restored': '數據已恢復，正在刷新...', 'backup_restore_failed': '恢復失敗', 'backup_delete_confirm': '確定要刪除此備份嗎？', 'backup_deleted': '備份已刪除', 'backup_created': '備份已建立', 'backup_failed': '備份失敗', 'backup_prompt_note': '請輸入備份備註（可選）：', 'backup_manual': '手動備份', 'backup_auto': '自動', 'backup_no_note': '無備註',
     'type': '類型', 'color': '顏色', 'diameter': '直徑', 'weight': '重量(g)',
     'remain': '剩餘(%)', 'note': '備註', 'add': '添加', 'reset': '重置',
     'category': '種類', 'name': '名稱', 'spec': '型號', 'qty': '數量',
@@ -475,12 +477,13 @@ const I18N = {
     'login_error_user_pass': 'Please enter username and password', 'login_error_wrong': 'Invalid username or password',
     'nav_lab': 'Lab Monitor', 'nav_3d': '3D Materials', 'nav_warehouse': 'Components',
     'nav_users': 'User Mgmt', 'nav_approval': 'Approvals', 'nav_my_req': 'My Requests',
-    'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_logout': 'Logout',
+    'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_backup': 'Backup', 'nav_transactions': 'Transactions', 'nav_logout': 'Logout',
     'conn_online': '● Online', 'conn_offline': '● Offline',
     'sim_on': 'Sim:ON', 'sim_off': 'Sim:OFF',
     'panel_sensor': 'Real-time Sensor Monitor', 'panel_3d': '3D Printing Materials',
     'panel_warehouse': 'Warehouse Inventory', 'panel_users': 'User Management',
-    'panel_profile': 'Profile', 'panel_messages': 'Messages',
+    'panel_profile': 'Profile', 'panel_messages': 'Messages', 'panel_backup': 'Data Backup & Restore', 'panel_transactions': 'Inventory Transactions',
+    'txn_no_data': 'No transactions', 'txn_all': 'All', 'txn_material': '3D Material', 'txn_component': 'Components', 'txn_board': 'Boards', 'txn_add': 'Stock In', 'txn_consume': 'Stock Out', 'txn_edit': 'Edit', 'txn_delete': 'Delete', 'txn_create': 'Create', 'backup_no_data': 'No backups', 'backup_create': 'Create Backup', 'backup_refresh': 'Refresh', 'backup_restore': 'Restore', 'backup_confirm_restore': 'Restore to this backup? Current data will be overwritten (auto backup created first)', 'backup_restored': 'Data restored, refreshing...', 'backup_restore_failed': 'Restore failed', 'backup_delete_confirm': 'Delete this backup?', 'backup_deleted': 'Backup deleted', 'backup_created': 'Backup created', 'backup_failed': 'Backup failed', 'backup_prompt_note': 'Enter backup note (optional):', 'backup_manual': 'Manual', 'backup_auto': 'Auto', 'backup_no_note': 'No note',
     'type': 'Type', 'color': 'Color', 'diameter': 'Diameter', 'weight': 'Weight(g)',
     'remain': 'Remaining(%)', 'note': 'Note', 'add': 'Add', 'reset': 'Reset',
     'category': 'Category', 'name': 'Name', 'spec': 'Spec', 'qty': 'Qty',
@@ -625,6 +628,8 @@ function applyI18n() {
       <button class="nav-btn" data-panel="warehouse" data-i18n="nav_warehouse">元器件仓库</button>
       <button class="nav-btn admin-only" data-panel="users" data-i18n="nav_users">用户管理</button>
       <button class="nav-btn admin-only" id="adminReqBtn" style="position:relative"><span data-i18n="nav_approval">审批</span><span id="reqBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
+      <button class="nav-btn admin-only" data-panel="backup" data-i18n="nav_backup">数据回滚</button>
+      <button class="nav-btn admin-only" data-panel="transactions" data-i18n="nav_transactions">库存流水</button>
       <button class="nav-btn" id="myReqBtn" data-i18n="nav_my_req">我的申请</button>
       <button class="nav-btn" data-panel="profile" data-i18n="nav_profile">个人主页</button>
       <button class="nav-btn" id="msgBtn" style="position:relative"><span data-i18n="nav_messages">站内信</span><span id="msgBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center">0</span></button>
@@ -783,6 +788,28 @@ function applyI18n() {
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- 数据回滚面板 -->
+  <div id="panel-backup" class="panel">
+    <div class="panel-title" data-i18n="panel_backup">数据回滚管理</div>
+    <div style="margin-bottom:16px;display:flex;gap:8px">
+      <button class="nav-btn active" id="createBackupBtn" data-i18n="backup_create">创建备份</button>
+      <button class="nav-btn" id="refreshBackupBtn" data-i18n="backup_refresh">刷新列表</button>
+    </div>
+    <div id="backupList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
+  </div>
+
+  <!-- 库存流水面板 -->
+  <div id="panel-transactions" class="panel">
+    <div class="panel-title" data-i18n="panel_transactions">库存流水记录</div>
+    <div style="margin-bottom:16px;display:flex;gap:8px">
+      <button class="nav-btn active" data-txn-type="all" id="txnFilterAll" data-i18n="txn_all">全部</button>
+      <button class="nav-btn" data-txn-type="material" data-i18n="txn_material">3D耗材</button>
+      <button class="nav-btn" data-txn-type="component" data-i18n="txn_component">元器件</button>
+      <button class="nav-btn" data-txn-type="board" data-i18n="txn_board">主板</button>
+    </div>
+    <div id="txnList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
   </div>
 </div>
 
@@ -1134,6 +1161,7 @@ function applyI18n() {
     renderBoardCards();
     await renderUsers();
     renderProfile();
+    initBackupAndTxn();
     initMessaging();
     startPolling();
     toast(`${t('t_welcome')}，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? t('t_readonly') : ''}`);
@@ -1167,6 +1195,8 @@ function applyI18n() {
       if (p === 'messages') { renderContacts(); renderFriendReqs(); }
       // 切换到个人主页时重新渲染
       if (p === 'profile') renderProfile();
+      if (p === 'backup') renderBackups();
+      if (p === 'transactions') renderTransactions();
     });
   });
 
@@ -1508,9 +1538,11 @@ function applyI18n() {
     const tbody = $('#materialTable tbody');
     const items = getMaterials().filter(m => m.type === type);
     tbody.innerHTML = items.map((m, i) => {
-      let status = 'OK'; if (m.remain <= 0) status = 'EMPTY'; else if (m.remain < 15) status = 'LOW';
-      const sc = status === 'EMPTY' ? 'color:var(--danger)' : status === 'LOW' ? 'color:var(--accent)' : 'color:var(--fg)';
-      return `<tr><td>${i+1}</td><td>${m.type}</td><td>${m.color}</td><td>${m.diameter}</td><td>${m.weight}g</td><td>${m.remain}%</td><td style="${sc}">${status}</td><td>${m.note||'-'}</td><td><button class="term-btn-sm" onclick="editMaterial(${m.id})">${t('edit')}</button><button class="term-btn-sm danger" onclick="deleteMaterial(${m.id})">${t('delete')}</button></td></tr>`;
+      let status = t('st_normal'); if (m.remain <= 0) status = t('st_critical'); else if (m.remain < 15) status = t('st_low');
+      const sc = m.remain <= 0 ? 'color:var(--danger)' : m.remain < 15 ? 'color:var(--warning)' : 'color:var(--success)';
+      const barColor = m.remain <= 0 ? 'var(--danger)' : m.remain < 15 ? 'var(--warning)' : 'var(--success)';
+      const remainBar = `<div style="display:flex;align-items:center;gap:6px"><div style="width:60px;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="width:${Math.max(0,Math.min(100,m.remain))}%;height:100%;background:${barColor};transition:width .3s"></div></div><span style="${sc};font-weight:600;min-width:36px">${m.remain}%</span></div>`;
+      return `<tr><td>${i+1}</td><td>${m.type}</td><td>${m.color}</td><td>${m.diameter}</td><td>${m.weight}g</td><td>${remainBar}</td><td style="${sc}">${status}</td><td>${m.note||'-'}</td><td><button class="term-btn-sm" onclick="editMaterial(${m.id})">${t('edit')}</button><button class="term-btn-sm danger" onclick="deleteMaterial(${m.id})">${t('delete')}</button></td></tr>`;
     }).join('');
   }
   $('#materialDetailClose').addEventListener('click', () => {
@@ -1540,10 +1572,11 @@ function applyI18n() {
   window.deleteMaterial = function(id) {
     if (currentUser.role !== 'admin') { openRequestModal('material_del', ''); return; }
     let items = getMaterials();
+    const m = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
     saveMaterials(items);
     renderMaterialCards();
-    // If detail panel is open, check if we need to refresh or close it
+    if (m) apiAddTransaction({ category:'material', itemId:id, itemName:`${m.type}-${m.color}`, action:'delete', change:0, before:m.remain+'%', after:0, operator:currentUser.name, note:`删除 ${m.type} ${m.color}` });
     const openType = $('#materialDetailTitle').textContent;
     const remaining = items.filter(x => x.type === openType);
     if (remaining.length > 0) {
@@ -1565,11 +1598,17 @@ function applyI18n() {
     const items = getMaterials();
     if (editingMaterialId) {
       const m = items.find(x => x.id === editingMaterialId);
-      if (m) { Object.assign(m, { type, color, diameter, weight, remain, note }); }
+      if (m) {
+        const oldRemain = m.remain;
+        Object.assign(m, { type, color, diameter, weight, remain, note });
+        apiAddTransaction({ category:'material', itemId:editingMaterialId, itemName:`${type}-${color}`, action:'edit', change:(remain-oldRemain)+'%', before:oldRemain+'%', after:remain+'%', operator:currentUser.name, note:'修改材料' });
+      }
       editingMaterialId = null;
       toast(t('t_material_updated'));
     } else {
-      items.push({ id: Date.now(), type, color, diameter, weight, remain, note, created: Date.now() });
+      const newId = Date.now();
+      items.push({ id: newId, type, color, diameter, weight, remain, note, created: Date.now() });
+      apiAddTransaction({ category:'material', itemId:newId, itemName:`${type}-${color}`, action:'create', change:remain+'%', before:0, after:remain+'%', operator:currentUser.name, note:`新建 ${type} ${color} ${diameter}mm` });
       toast(t('t_material_added'));
     }
     saveMaterials(items);
@@ -1751,9 +1790,11 @@ function applyI18n() {
   window.deleteComponent = function(id) {
     if (currentUser.role !== 'admin') { openRequestModal('comp_del', ''); return; }
     let items = getComponents();
+    const c = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
     saveComponents(items);
     renderCompCards();
+    if (c) apiAddTransaction({ category:'component', itemId:id, itemName:c.customName, action:'delete', change:0, before:c.qty, after:0, operator:currentUser.name, note:`删除 ${c.customName}` });
     const openCat = $('#compDetailTitle').textContent;
     const remaining = items.filter(x => x.category === openCat);
     if (remaining.length > 0) {
@@ -1776,11 +1817,17 @@ function applyI18n() {
     const items = getComponents();
     if (editingComponentId) {
       const c = items.find(x => x.id === editingComponentId);
-      if (c) { Object.assign(c, { category, customName, spec, qty, location, note }); }
+      if (c) {
+        const oldQty = c.qty;
+        Object.assign(c, { category, customName, spec, qty, location, note });
+        apiAddTransaction({ category:'component', itemId:editingComponentId, itemName:customName, action:'edit', change:(qty-oldQty), before:oldQty, after:qty, operator:currentUser.name, note:'修改元器件' });
+      }
       editingComponentId = null;
       toast(t('t_comp_updated'));
     } else {
-      items.push({ id: Date.now(), category, customName, spec, qty, location, note, created: Date.now() });
+      const newId = Date.now();
+      items.push({ id: newId, category, customName, spec, qty, location, note, created: Date.now() });
+      apiAddTransaction({ category:'component', itemId:newId, itemName:customName, action:'create', change:qty, before:0, after:qty, operator:currentUser.name, note:`新建 ${customName}` });
       toast(t('t_comp_added'));
     }
     saveComponents(items);
@@ -1942,9 +1989,11 @@ function applyI18n() {
   window.deleteBoard = function(id) {
     if (currentUser.role !== 'admin') { openRequestModal('board_del', ''); return; }
     let items = getBoards();
+    const b = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
     saveBoards(items);
     renderBoardCards();
+    if (b) apiAddTransaction({ category:'board', itemId:id, itemName:b.model, action:'delete', change:0, before:b.qty, after:0, operator:currentUser.name, note:`删除 ${b.model}` });
     const openType = $('#boardDetailTitle').textContent;
     const remaining = items.filter(x => x.type === openType);
     if (remaining.length > 0) {
@@ -1984,11 +2033,17 @@ function applyI18n() {
     const items = getBoards();
     if (editingBoardId) {
       const b = items.find(x => x.id === editingBoardId);
-      if (b) { Object.assign(b, { type, model, qty, location, status, note }); }
+      if (b) {
+        const oldQty = b.qty;
+        Object.assign(b, { type, model, qty, location, status, note });
+        apiAddTransaction({ category:'board', itemId:editingBoardId, itemName:model, action:'edit', change:(qty-oldQty), before:oldQty, after:qty, operator:currentUser.name, note:'修改主板' });
+      }
       editingBoardId = null;
       toast(t('t_board_updated'));
     } else {
-      items.push({ id: Date.now(), type, model, qty, location, status, note, created: Date.now() });
+      const newId = Date.now();
+      items.push({ id: newId, type, model, qty, location, status, note, created: Date.now() });
+      apiAddTransaction({ category:'board', itemId:newId, itemName:model, action:'create', change:qty, before:0, after:qty, operator:currentUser.name, note:`新建 ${model}` });
       toast(t('t_board_added'));
     }
     saveBoards(items);
@@ -2220,6 +2275,25 @@ function applyI18n() {
   }
   async function apiRemoveFriend(uid, friendUid) {
     try { const r = await fetch('/api/friends/remove', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, friendUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  // ===================== 数据备份 API =====================
+  async function apiGetBackups() {
+    try { const r = await fetch('/api/backup'); return await r.json(); } catch(e) { return { ok:false, backups:[] }; }
+  }
+  async function apiCreateBackup(operator, note) {
+    try { const r = await fetch('/api/backup', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ operator, note }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiRestoreBackup(backupId, operator) {
+    try { const r = await fetch('/api/backup/restore', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ backupId, operator }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiDeleteBackup(id) {
+    try { const r = await fetch(`/api/backup?id=${id}`, { method:'DELETE' }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetTransactions(type) {
+    try { const r = await fetch(`/api/transactions?type=${type||'all'}`); return await r.json(); } catch(e) { return { ok:false, transactions:[] }; }
+  }
+  async function apiAddTransaction(data) {
+    try { const r = await fetch('/api/transactions', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
 
   function renderProfile() {
@@ -2501,6 +2575,107 @@ function applyI18n() {
     const r = await apiGetMessages(currentUser.uid, currentChatPeer);
     renderChatMessages(r.messages || [], currentChatPeer);
     renderContacts();
+  }
+
+  // ===================== 数据回滚 =====================
+  async function renderBackups() {
+    const r = await apiGetBackups();
+    const list = $('#backupList');
+    if (!r.ok || !r.backups || r.backups.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0">' + t('backup_no_data') + '</div>';
+      return;
+    }
+    list.innerHTML = r.backups.map(b => {
+      const typeColor = b.type === 'auto' ? 'var(--warning)' : 'var(--success)';
+      const typeLabel = b.type === 'auto' ? t('backup_auto') : t('backup_manual');
+      return `<div class="req-item" style="display:flex;justify-content:space-between;align-items:center">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${typeColor === 'var(--warning)' ? 'var(--warning-soft)' : 'rgba(34,197,94,0.1)'};color:${typeColor};font-weight:600">${typeLabel}</span>
+            <span style="font-size:13px;font-weight:600">${b.note || t('backup_no_note')}</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted)">${fmtDate(b.created)} · ${t('role')}: ${b.operator}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent)" data-restore="${b.id}" data-i18n="backup_restore">恢复</button>
+          <button class="term-btn-sm danger" data-del-backup="${b.id}">删除</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-restore]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(t('backup_confirm_restore'))) return;
+        const r = await apiRestoreBackup(parseInt(btn.dataset.restore), currentUser.name);
+        if (r.ok) {
+          toast(t('backup_restored'));
+          setTimeout(() => location.reload(), 1500);
+        } else { toast(r.msg || t('backup_restore_failed')); }
+      });
+    });
+    list.querySelectorAll('[data-del-backup]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(t('backup_delete_confirm'))) return;
+        await apiDeleteBackup(parseInt(btn.dataset.delBackup));
+        toast(t('backup_deleted'));
+        renderBackups();
+      });
+    });
+  }
+
+  // ===================== 库存流水 =====================
+  let currentTxnType = 'all';
+  async function renderTransactions(type) {
+    if (type) currentTxnType = type;
+    const r = await apiGetTransactions(currentTxnType);
+    const list = $('#txnList');
+    if (!r.ok || !r.transactions || r.transactions.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0">' + t('txn_no_data') + '</div>';
+      return;
+    }
+    const categoryLabel = { material: t('txn_material'), component: t('txn_component'), board: t('txn_board') };
+    const actionLabel = { add: t('txn_add'), consume: t('txn_consume'), edit: t('txn_edit'), delete: t('txn_delete'), create: t('txn_create') };
+    const actionColor = { add: 'var(--success)', consume: 'var(--warning)', edit: 'var(--accent)', delete: 'var(--danger)', create: 'var(--success)' };
+    list.innerHTML = r.transactions.map(txn => {
+      const cat = categoryLabel[txn.category] || txn.category;
+      const act = actionLabel[txn.action] || txn.action;
+      const color = actionColor[txn.action] || 'var(--fg)';
+      return `<div class="req-item" style="padding:10px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--bg-soft);color:var(--fg-light);font-weight:600">${cat}</span>
+            <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${color === 'var(--success)' ? 'rgba(34,197,94,0.1)' : color === 'var(--warning)' ? 'var(--warning-soft)' : color === 'var(--danger)' ? 'rgba(239,68,68,0.1)' : 'var(--accent-soft)'};color:${color};font-weight:600">${act}</span>
+            <span style="font-size:13px;font-weight:500">${txn.itemName || '-'}</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;font-family:monospace">${txn.before !== null && txn.before !== undefined ? `${txn.before} → ${txn.after}` : (txn.change || '')}</div>
+            <div style="font-size:10px;color:var(--muted)">${fmtDate(txn.created)} · ${txn.operator}</div>
+          </div>
+        </div>
+        ${txn.note ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${txn.note}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function initBackupAndTxn() {
+    // 备份按钮
+    const createBtn = document.getElementById('createBackupBtn');
+    if (createBtn) createBtn.addEventListener('click', async () => {
+      const note = prompt(t('backup_prompt_note'), t('backup_manual'));
+      if (note === null) return;
+      const r = await apiCreateBackup(currentUser.name, note || t('backup_manual'));
+      if (r.ok) { toast(t('backup_created')); renderBackups(); }
+      else { toast(t('backup_failed')); }
+    });
+    const refreshBtn = document.getElementById('refreshBackupBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', renderBackups);
+    // 流水筛选按钮
+    document.querySelectorAll('[data-txn-type]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-txn-type]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderTransactions(btn.dataset.txnType);
+      });
+    });
   }
 
   function initMessaging() {

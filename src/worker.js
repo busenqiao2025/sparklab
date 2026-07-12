@@ -358,12 +358,12 @@ export default {
           return json({ ok: true, count });
         }
 
-        // GET /api/messages/broadcasts?uid=xxx — 获取未读广播消息（不标记已读）
+        // GET /api/messages/broadcasts?uid=xxx — 获取所有广播消息（不标记已读，客户端用 localStorage 控制已读）
         if (url.pathname === '/api/messages/broadcasts' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           let msgs = await loadMessages(env);
-          const broadcasts = msgs.filter(m => m.broadcast && m.to === uid && !m.read && m.from !== uid)
+          const broadcasts = msgs.filter(m => m.broadcast && m.to === uid && m.from !== uid)
             .map(m => ({ id: m.id, from: m.from, content: m.content, created: m.created }));
           return json({ ok: true, broadcasts });
         }
@@ -427,6 +427,131 @@ export default {
             }
           }
           return json({ ok: true, contacts });
+        }
+
+        // ========== 数据快照/回滚系统 ==========
+        // GET /api/backup — 获取备份列表
+        if (url.pathname === '/api/backup' && request.method === 'GET') {
+          const raw = await env.USERS.get('backups');
+          let backups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(backups)) backups = [];
+          // 按时间倒序
+          backups.sort((a,b) => b.created - a.created);
+          return json({ ok: true, backups });
+        }
+
+        // POST /api/backup — 创建手动备份
+        if (url.pathname === '/api/backup' && request.method === 'POST') {
+          const { operator, note } = await readBody(request);
+          const users = await loadUsers(env);
+          const messages = await loadMessages(env);
+          const requestsRaw = await env.USERS.get('requests');
+          const snapshot = {
+            id: Date.now(),
+            created: Date.now(),
+            operator: operator || 'admin',
+            note: note || '手动备份',
+            type: 'manual',
+            data: {
+              users: JSON.parse(JSON.stringify(users)),
+              messages: JSON.parse(JSON.stringify(messages)),
+              requests: requestsRaw ? JSON.parse(requestsRaw) : [],
+            }
+          };
+          const raw = await env.USERS.get('backups');
+          let backups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(backups)) backups = [];
+          backups.push(snapshot);
+          // 最多保留 30 个备份
+          if (backups.length > 30) backups = backups.slice(-30);
+          await env.USERS.put('backups', JSON.stringify(backups));
+          return json({ ok: true, backup: { id: snapshot.id, created: snapshot.created, note: snapshot.note, type: snapshot.type } });
+        }
+
+        // POST /api/backup/restore — 从备份恢复数据
+        if (url.pathname === '/api/backup/restore' && request.method === 'POST') {
+          const { backupId, operator } = await readBody(request);
+          const raw = await env.USERS.get('backups');
+          let backups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(backups)) backups = [];
+          const backup = backups.find(b => b.id === backupId);
+          if (!backup) return json({ ok: false, msg: '备份不存在' });
+          // 恢复前先创建一个当前状态的备份
+          const users = await loadUsers(env);
+          const messages = await loadMessages(env);
+          const requestsRaw = await env.USERS.get('requests');
+          const preRestore = {
+            id: Date.now(),
+            created: Date.now(),
+            operator: operator || 'admin',
+            note: `恢复前自动备份 (恢复到: ${new Date(backup.created).toLocaleString()})`,
+            type: 'auto',
+            data: {
+              users: JSON.parse(JSON.stringify(users)),
+              messages: JSON.parse(JSON.stringify(messages)),
+              requests: requestsRaw ? JSON.parse(requestsRaw) : [],
+            }
+          };
+          backups.push(preRestore);
+          if (backups.length > 30) backups = backups.slice(-30);
+          await env.USERS.put('backups', JSON.stringify(backups));
+          // 执行恢复
+          await saveUsers(env, backup.data.users);
+          await saveMessages(env, backup.data.messages);
+          await env.USERS.put('requests', JSON.stringify(backup.data.requests));
+          return json({ ok: true, msg: '数据已恢复' });
+        }
+
+        // DELETE /api/backup?id=xxx — 删除备份
+        if (url.pathname === '/api/backup' && request.method === 'DELETE') {
+          const backupId = parseInt(url.searchParams.get('id'));
+          const raw = await env.USERS.get('backups');
+          let backups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(backups)) backups = [];
+          backups = backups.filter(b => b.id !== backupId);
+          await env.USERS.put('backups', JSON.stringify(backups));
+          return json({ ok: true });
+        }
+
+        // ========== 库存流水记录系统 ==========
+        // GET /api/transactions?type=material|component|board — 获取流水记录
+        if (url.pathname === '/api/transactions' && request.method === 'GET') {
+          const type = url.searchParams.get('type') || 'all';
+          const raw = await env.USERS.get('transactions');
+          let txns = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(txns)) txns = [];
+          let result = txns;
+          if (type !== 'all') result = txns.filter(t => t.category === type);
+          // 按时间倒序
+          result.sort((a,b) => b.created - a.created);
+          return json({ ok: true, transactions: result });
+        }
+
+        // POST /api/transactions — 记录一条库存变动
+        if (url.pathname === '/api/transactions' && request.method === 'POST') {
+          const { category, itemId, itemName, action, change, before, after, operator, note } = await readBody(request);
+          if (!category || !action) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('transactions');
+          let txns = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(txns)) txns = [];
+          const txn = {
+            id: Date.now(),
+            category,       // 'material' | 'component' | 'board'
+            itemId,         // 项目 ID
+            itemName,       // 项目名称
+            action,         // 'add' | 'consume' | 'edit' | 'delete' | 'create'
+            change,         // 变化量（如 +5, -3, 或百分比变化）
+            before,         // 变化前值
+            after,          // 变化后值
+            operator: operator || 'unknown',
+            note: note || '',
+            created: Date.now()
+          };
+          txns.push(txn);
+          // 最多保留 500 条
+          if (txns.length > 500) txns = txns.slice(-500);
+          await env.USERS.put('transactions', JSON.stringify(txns));
+          return json({ ok: true, transaction: txn });
         }
 
         // ========== 申请授权系统（v1.7 保留） ==========
