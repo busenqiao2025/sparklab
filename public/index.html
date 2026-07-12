@@ -627,8 +627,8 @@ function applyI18n() {
     if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
     document.title = t('app_name') + ' [v1.9]';
-    // Re-render sidebar for language update
-    if (typeof renderSidebar === 'function') renderSidebar();
+    // Re-render sidebar for language update (if in main app)
+    if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
 </script>
 </head>
@@ -1274,6 +1274,7 @@ function applyI18n() {
 
   function renderSidebar() {
     const nav = $('#sidebarNav');
+    if (!nav) return; // Not in main screen yet
     const items = SIDEBAR_CONFIG[currentCat] || [];
     nav.innerHTML = items.map(item => {
       const isActive = currentPanel === item.id;
@@ -1344,6 +1345,8 @@ function applyI18n() {
   $$('.trae-cat').forEach(btn => {
     btn.addEventListener('click', () => switchCategory(btn.dataset.cat));
   });
+  // Expose for external i18n calls
+  window.__renderSidebar = renderSidebar;
 
   // 站内信按钮点击
   $('#msgBtn').addEventListener('click', () => {
