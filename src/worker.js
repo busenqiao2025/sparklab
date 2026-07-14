@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SparkMinds Lab v1.9 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
@@ -329,7 +329,7 @@ export default {
           if (to === 'all_including_admin') {
             // 全体用户（含管理员自己）
             targets = users.map(u => u.uid);
-          } else if (to === 'all_users') {
+          } if (to === 'all_users') {
             // 仅普通用户
             targets = users.filter(u => u.role !== 'admin').map(u => u.uid);
           } else {
@@ -606,6 +606,244 @@ export default {
           if (!Array.isArray(requests)) requests = [];
           const count = requests.filter(r => r.status === 'pending').length;
           return json({ ok: true, count });
+        }
+
+        // ========== 文件传输 ==========
+        // POST /api/upload — 上传文件（base64），返回 fileId
+        if (url.pathname === '/api/upload' && request.method === 'POST') {
+          const { name, size, type, data, from } = await readBody(request);
+          if (!data || !name) return json({ ok: false, msg: '缺少文件数据' });
+          if (size > 5 * 1024 * 1024) return json({ ok: false, msg: '文件不能超过5MB' });
+          const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+          const fileRecord = { id: fileId, name, size, type, data, from: from || 'unknown', created: Date.now() };
+          const raw = await env.USERS.get('files');
+          let files = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(files)) files = [];
+          files.push(fileRecord);
+          // 最多保留 200 个文件
+          if (files.length > 200) files = files.slice(-200);
+          await env.USERS.put('files', JSON.stringify(files));
+          return json({ ok: true, fileId, name, size });
+        }
+
+        // GET /api/download?id=xxx — 下载文件
+        if (url.pathname === '/api/download' && request.method === 'GET') {
+          const fileId = url.searchParams.get('id');
+          if (!fileId) return json({ ok: false, msg: '缺少 id' });
+          const raw = await env.USERS.get('files');
+          let files = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(files)) files = [];
+          const file = files.find(f => f.id === fileId);
+          if (!file) return json({ ok: false, msg: '文件不存在' }, 404);
+          return json({ ok: true, file });
+        }
+
+        // ========== 群组系统 ==========
+        // GET /api/groups?uid=xxx — 获取用户所在群组
+        if (url.pathname === '/api/groups' && request.method === 'GET') {
+          const uid = url.searchParams.get('uid');
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const myGroups = groups.filter(g => g.members.includes(uid));
+          return json({ ok: true, groups: myGroups });
+        }
+
+        // POST /api/groups — 创建群组
+        if (url.pathname === '/api/groups' && request.method === 'POST') {
+          const { name, type, creator, description } = await readBody(request);
+          if (!name || !creator) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const gid = 'grp_' + Date.now();
+          const group = { id: gid, name, type: type || 'normal', creator, description: description || '', members: [creator], created: Date.now() };
+          groups.push(group);
+          await env.USERS.put('groups', JSON.stringify(groups));
+          return json({ ok: true, group });
+        }
+
+        // POST /api/groups/join — 加入群组
+        if (url.pathname === '/api/groups/join' && request.method === 'POST') {
+          const { gid, uid } = await readBody(request);
+          if (!gid || !uid) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const group = groups.find(g => g.id === gid);
+          if (!group) return json({ ok: false, msg: '群组不存在' });
+          if (!group.members.includes(uid)) group.members.push(uid);
+          await env.USERS.put('groups', JSON.stringify(groups));
+          return json({ ok: true, group });
+        }
+
+        // POST /api/groups/leave — 离开群组
+        if (url.pathname === '/api/groups/leave' && request.method === 'POST') {
+          const { gid, uid } = await readBody(request);
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const group = groups.find(g => g.id === gid);
+          if (!group) return json({ ok: false, msg: '群组不存在' });
+          group.members = group.members.filter(m => m !== uid);
+          await env.USERS.put('groups', JSON.stringify(groups));
+          return json({ ok: true });
+        }
+
+        // GET /api/groups/search?q=xxx — 搜索群组
+        if (url.pathname === '/api/groups/search' && request.method === 'GET') {
+          const q = (url.searchParams.get('q') || '').toLowerCase();
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const result = q ? groups.filter(g => g.name.toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)) : groups.slice(-20);
+          return json({ ok: true, groups: result });
+        }
+
+        // GET /api/groups/messages?gid=xxx — 获取群组消息
+        if (url.pathname === '/api/groups/messages' && request.method === 'GET') {
+          const gid = url.searchParams.get('gid');
+          if (!gid) return json({ ok: false, msg: '缺少 gid' });
+          const raw = await env.USERS.get('group_messages');
+          let gmsgs = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(gmsgs)) gmsgs = [];
+          const msgs = gmsgs.filter(m => m.gid === gid).sort((a,b) => a.created - b.created).slice(-100);
+          return json({ ok: true, messages: msgs });
+        }
+
+        // POST /api/groups/messages — 发送群组消息
+        if (url.pathname === '/api/groups/messages' && request.method === 'POST') {
+          const { gid, from, fromName, content, fileId, fileName } = await readBody(request);
+          if (!gid || !from || !content) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('group_messages');
+          let gmsgs = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(gmsgs)) gmsgs = [];
+          const msg = { id: 'gm_' + Date.now(), gid, from, fromName, content, fileId, fileName, created: Date.now() };
+          gmsgs.push(msg);
+          if (gmsgs.length > 1000) gmsgs = gmsgs.slice(-1000);
+          await env.USERS.put('group_messages', JSON.stringify(gmsgs));
+          return json({ ok: true, message: msg });
+        }
+
+        // ========== 用户举报 ==========
+        // POST /api/report — 提交举报
+        if (url.pathname === '/api/report' && request.method === 'POST') {
+          const { reporter, target, targetUid, reason, detail } = await readBody(request);
+          if (!reporter || !target || !reason) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('reports');
+          let reports = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(reports)) reports = [];
+          const report = { id: 'rpt_' + Date.now(), reporter, target, targetUid, reason, detail: detail || '', status: 'pending', created: Date.now() };
+          reports.push(report);
+          if (reports.length > 500) reports = reports.slice(-500);
+          await env.USERS.put('reports', JSON.stringify(reports));
+          return json({ ok: true, report });
+        }
+
+        // GET /api/report — 获取举报列表（管理员）
+        if (url.pathname === '/api/report' && request.method === 'GET') {
+          const raw = await env.USERS.get('reports');
+          let reports = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(reports)) reports = [];
+          reports.sort((a,b) => b.created - a.created);
+          return json({ ok: true, reports });
+        }
+
+        // POST /api/report/handle — 处理举报（管理员）
+        if (url.pathname === '/api/report/handle' && request.method === 'POST') {
+          const { reportId, action, note } = await readBody(request);
+          const raw = await env.USERS.get('reports');
+          let reports = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(reports)) reports = [];
+          const report = reports.find(r => r.id === reportId);
+          if (!report) return json({ ok: false, msg: '举报不存在' });
+          report.status = action; // 'resolved' | 'dismissed'
+          report.handleNote = note || '';
+          report.handledAt = Date.now();
+          await env.USERS.put('reports', JSON.stringify(reports));
+          return json({ ok: true });
+        }
+
+        // ========== 论坛系统 ==========
+        // GET /api/forum — 获取帖子列表
+        if (url.pathname === '/api/forum' && request.method === 'GET') {
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          posts.sort((a,b) => b.created - a.created);
+          return json({ ok: true, posts });
+        }
+
+        // POST /api/forum — 发帖
+        if (url.pathname === '/api/forum' && request.method === 'POST') {
+          const { author, authorUid, title, content, category } = await readBody(request);
+          if (!author || !title || !content) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          const post = { id: 'post_' + Date.now(), author, authorUid, title, content, category: category || 'general', likes: [], views: 0, comments: [], created: Date.now() };
+          posts.push(post);
+          if (posts.length > 500) posts = posts.slice(-500);
+          await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true, post });
+        }
+
+        // GET /api/forum/post?id=xxx — 获取帖子详情
+        if (url.pathname === '/api/forum/post' && request.method === 'GET') {
+          const postId = url.searchParams.get('id');
+          if (!postId) return json({ ok: false, msg: '缺少 id' });
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          const post = posts.find(p => p.id === postId);
+          if (!post) return json({ ok: false, msg: '帖子不存在' }, 404);
+          post.views = (post.views || 0) + 1;
+          await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true, post });
+        }
+
+        // POST /api/forum/like — 点赞/取消点赞
+        if (url.pathname === '/api/forum/like' && request.method === 'POST') {
+          const { postId, uid } = await readBody(request);
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          const post = posts.find(p => p.id === postId);
+          if (!post) return json({ ok: false, msg: '帖子不存在' });
+          if (!post.likes) post.likes = [];
+          const idx = post.likes.indexOf(uid);
+          if (idx >= 0) post.likes.splice(idx, 1);
+          else post.likes.push(uid);
+          await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true, likes: post.likes });
+        }
+
+        // POST /api/forum/comment — 评论
+        if (url.pathname === '/api/forum/comment' && request.method === 'POST') {
+          const { postId, author, authorUid, content } = await readBody(request);
+          if (!postId || !author || !content) return json({ ok: false, msg: '缺少参数' });
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          const post = posts.find(p => p.id === postId);
+          if (!post) return json({ ok: false, msg: '帖子不存在' });
+          if (!post.comments) post.comments = [];
+          const comment = { id: 'cmt_' + Date.now(), author, authorUid, content, created: Date.now() };
+          post.comments.push(comment);
+          await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true, comment });
+        }
+
+        // DELETE /api/forum/post?id=xxx — 删除帖子
+        if (url.pathname === '/api/forum/post' && request.method === 'DELETE') {
+          const postId = url.searchParams.get('id');
+          const raw = await env.USERS.get('forum_posts');
+          let posts = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(posts)) posts = [];
+          posts = posts.filter(p => p.id !== postId);
+          await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true });
         }
 
         return json({ ok: false, msg: 'not found' }, 404);
