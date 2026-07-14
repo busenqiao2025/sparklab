@@ -38,6 +38,41 @@
     --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
     --transition:all .2s cubic-bezier(.4,0,.2,1);
   }
+  /* Dark mode */
+  [data-theme="dark"]{
+    --bg:#0f172a;
+    --bg2:#1e293b;
+    --bg-soft:#1a2333;
+    --fg:#f1f5f9;
+    --fg-dim:#cbd5e1;
+    --fg-light:#94a3b8;
+    --accent:#3b82f6;
+    --accent-light:#60a5fa;
+    --accent-soft:rgba(59,130,246,0.15);
+    --accent-dark:#2563eb;
+    --danger:#ef4444;
+    --danger-soft:rgba(239,68,68,0.1);
+    --success:#22c55e;
+    --success-soft:rgba(34,197,94,0.1);
+    --warning:#f59e0b;
+    --warning-soft:rgba(245,158,11,0.1);
+    --info:#06b6d4;
+    --info-soft:rgba(6,182,212,0.1);
+    --muted:#64748b;
+    --border:#334155;
+    --border-light:#1e293b;
+    --shadow-xs:0 1px 2px rgba(0,0,0,0.2);
+    --shadow:0 1px 3px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md:0 4px 6px -1px rgba(0,0,0,0.3),0 2px 4px -2px rgba(0,0,0,0.2);
+    --shadow-lg:0 10px 15px -3px rgba(0,0,0,0.4),0 4px 6px -4px rgba(0,0,0,0.3);
+    --shadow-xl:0 20px 25px -5px rgba(0,0,0,0.5),0 8px 10px -6px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] body::before{background:var(--bg)}
+  [data-theme="dark"] body::after{
+    background:
+      radial-gradient(circle at 20% 30%,rgba(59,130,246,0.05) 0%,transparent 40%),
+      radial-gradient(circle at 80% 70%,rgba(168,85,247,0.04) 0%,transparent 40%);
+  }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--fg);overflow:hidden}
 
@@ -358,6 +393,7 @@ const I18N = {
     't_light': '灯光', 'light_off': '关', 'light_on': '开', 'light_switch': '开关',
     // Messaging
     'msg_select_contact': '选择一个联系人开始聊天', 'msg_input_placeholder': '输入消息...',
+    'msg_friends': '好友', 'group_owner': '群主', 'group_dissolve': '解散', 'group_dissolve_confirm': '确定要解散群组吗', 'group_dissolved': '群组已解散', 'group_dissolve_failed': '解散失败',
     'msg_no_contacts': '暂无联系人', 'msg_add_friend_hint': '输入 UID 添加好友',
     'msg_no_messages': '暂无消息，发送第一条吧', 'msg_friend_req': '好友请求',
     'msg_accept': '接受', 'msg_reject': '拒绝', 'msg_friend_added': '已添加好友',
@@ -466,6 +502,7 @@ const I18N = {
     't_mqtt_subscribed': 'MQTT 已訂閱: ', 't_loaded_edit': '已載入資料，修改後點擊「添加」儲存',
     't_light': '燈光', 'light_off': '關', 'light_on': '開', 'light_switch': '開關',
     'msg_select_contact': '選擇一個聯絡人開始聊天', 'msg_input_placeholder': '輸入訊息...',
+    'msg_friends': '好友', 'group_owner': '群主', 'group_dissolve': '解散', 'group_dissolve_confirm': '確定要解散群組嗎', 'group_dissolved': '群組已解散', 'group_dissolve_failed': '解散失敗',
     'msg_no_contacts': '暫無聯絡人', 'msg_add_friend_hint': '輸入 UID 添加好友',
     'msg_no_messages': '暫無訊息，發送第一條吧', 'msg_friend_req': '好友請求',
     'msg_accept': '接受', 'msg_reject': '拒絕', 'msg_friend_added': '已添加好友',
@@ -565,6 +602,7 @@ const I18N = {
     't_mqtt_subscribed': 'MQTT subscribed: ', 't_loaded_edit': 'Data loaded, click Add to save',
     't_light': 'Light', 'light_off': 'OFF', 'light_on': 'ON', 'light_switch': 'Toggle',
     'msg_select_contact': 'Select a contact to start chatting', 'msg_input_placeholder': 'Type a message...',
+    'msg_friends': 'Friends', 'group_owner': 'Owner', 'group_dissolve': 'Dissolve', 'group_dissolve_confirm': 'Dissolve this group?', 'group_dissolved': 'Group dissolved', 'group_dissolve_failed': 'Dissolve failed',
     'msg_no_contacts': 'No contacts', 'msg_add_friend_hint': 'Enter UID to add friend',
     'msg_no_messages': 'No messages yet, send the first one', 'msg_friend_req': 'Friend Requests',
     'msg_accept': 'Accept', 'msg_reject': 'Reject', 'msg_friend_added': 'Friend added',
@@ -864,8 +902,9 @@ function applyI18n() {
         </div>
         <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
         <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
-        <div style="padding:8px 12px;border-top:1px solid var(--border)">
-          <button class="nav-btn admin-only flex" id="broadcastBtn" style="width:100%;justify-content:center" data-i18n="msg_broadcast">📢 群发消息</button>
+        <div style="padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px">
+          <button class="nav-btn admin-only flex" id="broadcastBtn" style="flex:1;justify-content:center" data-i18n="msg_broadcast">📢 群发</button>
+          <button class="nav-btn flex" id="createGroupInlineBtn" style="flex:1;justify-content:center" data-i18n="group_create">+ 群组</button>
         </div>
       </div>
       <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
@@ -1459,7 +1498,6 @@ function applyI18n() {
     user: [
       { id: 'profile', icon: '👤', label: 'nav_profile' },
       { id: 'messages', icon: '💬', label: 'nav_messages', badgeId: 'msgBadge' },
-      { id: 'groups', icon: '👥', label: 'nav_groups' },
       { id: 'forum', icon: '📝', label: 'nav_forum' },
       { id: 'settings', icon: '⚙️', label: 'nav_settings' },
     ],
@@ -2748,6 +2786,9 @@ function applyI18n() {
   async function apiLeaveGroup(gid, uid) {
     try { const r = await fetch('/api/groups/leave', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ gid, uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
+  async function apiDissolveGroup(gid, uid) {
+    try { const r = await fetch('/api/groups/dissolve', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ gid, uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
   async function apiSearchGroups(q) {
     try { const r = await fetch(`/api/groups/search?q=${encodeURIComponent(q)}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
   }
@@ -2936,27 +2977,56 @@ function applyI18n() {
     });
   }
 
+  let currentChatMode = null; // 'friend' | 'group'
+  let currentChatGroupId = null;
+
   async function renderContacts() {
     if (!currentUser) return;
     const r = await apiGetContacts(currentUser.uid);
+    const gr = await apiGetGroups(currentUser.uid);
     const list = $('#contactList');
-    if (!r.ok || !r.contacts || r.contacts.length === 0) {
+    let html = '';
+    // 群组部分
+    if (gr.ok && gr.groups && gr.groups.length > 0) {
+      html += '<div style="padding:6px 16px;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">'+t('panel_groups')+'</div>';
+      html += gr.groups.map(g => {
+        const typeIcon = g.type === 'class' ? '🎓' : '💬';
+        const typeLabel = g.type === 'class' ? t('group_type_class') : t('group_type_normal');
+        return `<div class="contact-item ${currentChatGroupId===g.id?'active':''}" data-gid="${g.id}" data-gname="${g.name.replace(/"/g,'&quot;')}" data-is-owner="${g.creator===currentUser.uid}">
+          <div class="c-avatar" style="background:linear-gradient(135deg,var(--accent-soft),var(--accent))">${typeIcon}</div>
+          <div class="c-info">
+            <div class="c-name">${g.name} <span style="font-size:9px;color:var(--muted)">${typeLabel} · ${g.members.length}${t('group_members')}</span></div>
+            <div class="c-last">${g.creator===currentUser.uid?t('group_owner'):''}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    // 好友部分
+    if (r.ok && r.contacts && r.contacts.length > 0) {
+      r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+      html += '<div style="padding:6px 16px;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">'+t('msg_friends')+'</div>';
+      html += r.contacts.map(c => `
+        <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar||''}">
+          <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : (c.avatar||'👤')}</div>
+          <div class="c-info">
+            <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">管理员</span>':''}</div>
+            <div class="c-last">${c.lastMsg || t('msg_start_chat')}</div>
+          </div>
+          ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
+        </div>
+      `).join('');
+    }
+    if (!html) {
       list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">'+t('msg_no_contacts')+'<br>'+t('msg_add_friend_hint')+'</div>';
       return;
     }
-    // 按最后消息时间排序
-    r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
-    list.innerHTML = r.contacts.map(c => `
-      <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar}">
-        <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : c.avatar}</div>
-        <div class="c-info">
-          <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">管理员</span>':''}</div>
-          <div class="c-last">${c.lastMsg || '点击开始聊天'}</div>
-        </div>
-        ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
-      </div>
-    `).join('');
-    list.querySelectorAll('.contact-item').forEach(el => {
+    list.innerHTML = html;
+    // 绑定群组点击
+    list.querySelectorAll('[data-gid]').forEach(el => {
+      el.addEventListener('click', () => openGroupChatInMain(el.dataset.gid, el.dataset.gname, el.dataset.isOwner === 'true'));
+    });
+    // 绑定好友点击
+    list.querySelectorAll('[data-uid]').forEach(el => {
       el.addEventListener('click', () => openChat(el.dataset.uid, el.dataset.name, el.dataset.avatar));
     });
   }
@@ -2995,6 +3065,8 @@ function applyI18n() {
 
   async function openChat(peerUid, peerName, peerAvatar) {
     currentChatPeer = peerUid;
+    currentChatMode = 'friend';
+    currentChatGroupId = null;
     const avatarHtml = peerAvatar ? (peerAvatar.startsWith('data:') || peerAvatar.length > 100
       ? `<img src="${peerAvatar.startsWith('data:') ? peerAvatar : 'data:image/jpeg;base64,' + peerAvatar}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;vertical-align:middle">`
       : peerAvatar)
@@ -3044,7 +3116,7 @@ function applyI18n() {
     const input = $('#chatInput');
     const content = input.value.trim();
     if (!content && !pendingFile) return;
-    if (!currentChatPeer) return;
+    if (!currentChatPeer && !currentChatGroupId) return;
     let fileId = null, fileName = null;
     if (pendingFile) {
       fileId = pendingFile.fileId;
@@ -3053,11 +3125,96 @@ function applyI18n() {
       input.placeholder = t('msg_input_placeholder') || '输入消息...';
     }
     input.value = '';
-    await apiSendMessage(currentUser.uid, currentChatPeer, content, fileId, fileName);
-    const r = await apiGetMessages(currentUser.uid, currentChatPeer);
-    renderChatMessages(r.messages || [], currentChatPeer);
+    if (currentChatMode === 'group' && currentChatGroupId) {
+      // 群组消息
+      await apiSendGroupMessage(currentChatGroupId, content, fileId, fileName);
+      await loadGroupMessagesInMain(currentChatGroupId);
+    } else if (currentChatPeer) {
+      // 好友消息
+      await apiSendMessage(currentUser.uid, currentChatPeer, content, fileId, fileName);
+      const r = await apiGetMessages(currentUser.uid, currentChatPeer);
+      renderChatMessages(r.messages || [], currentChatPeer);
+    }
     renderContacts();
   }
+
+  // 群组聊天（在主聊天窗口中）
+  async function openGroupChatInMain(gid, gname, isOwner) {
+    currentChatMode = 'group';
+    currentChatGroupId = gid;
+    currentChatPeer = null;
+    // 清除好友轮询
+    if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
+    // 设置头部
+    let headerHtml = `💬 ${gname}`;
+    if (isOwner) {
+      headerHtml += ` <button class="term-btn-sm danger" style="margin-left:8px;font-size:10px;padding:2px 8px" onclick="dissolveGroup('${gid}','${gname.replace(/'/g,"\\'")}')">${t('group_dissolve')}</button>`;
+    } else {
+      headerHtml += ` <button class="term-btn-sm danger" style="margin-left:8px;font-size:10px;padding:2px 8px" onclick="leaveGroupInMain('${gid}')">${t('group_leave')}</button>`;
+    }
+    $('#chatHeader').innerHTML = headerHtml;
+    $('#chatInput').disabled = false;
+    $('#sendMsgBtn').disabled = false;
+    $('#attachFileBtn').disabled = false;
+    $('#chatInput').focus();
+    // 加载群组消息
+    await loadGroupMessagesInMain(gid);
+    renderContacts();
+    // 轮询群组消息
+    if (msgPollTimer) clearInterval(msgPollTimer);
+    msgPollTimer = setInterval(async () => {
+      if (currentChatMode === 'group' && currentChatGroupId === gid) {
+        await loadGroupMessagesInMain(gid);
+      }
+    }, 5000);
+  }
+
+  async function loadGroupMessagesInMain(gid) {
+    const r = await apiGetGroupMessages(gid);
+    const area = $('#chatMessages');
+    if (!r.ok || !r.messages || r.messages.length === 0) {
+      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">'+t('group_no_messages')+'</div>';
+      return;
+    }
+    area.innerHTML = r.messages.map(m => {
+      const isMe = m.from === currentUser.uid;
+      return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:2px">${isMe?'我':m.fromName} · ${new Date(m.created).toLocaleTimeString().slice(0,5)}</div>
+        <div class="chat-bubble ${isMe?'me':'other'}">${m.content}${m.fileId?`<div style="margin-top:4px"><a href="#" onclick="downloadMsgFile('${m.fileId}','${m.fileName||'file'}');return false" style="color:${isMe?'#fff':'var(--accent)'};font-size:11px">📎 ${m.fileName||'文件'}</a></div>`:''}</div>
+      </div>`;
+    }).join('');
+    area.scrollTop = area.scrollHeight;
+  }
+
+  window.dissolveGroup = async function(gid, gname) {
+    if (!confirm(t('group_dissolve_confirm') + ': ' + gname)) return;
+    const r = await apiDissolveGroup(gid, currentUser.uid);
+    if (r.ok) {
+      toast(t('group_dissolved'));
+      currentChatMode = null;
+      currentChatGroupId = null;
+      $('#chatHeader').textContent = t('msg_select_contact');
+      $('#chatInput').disabled = true;
+      $('#sendMsgBtn').disabled = true;
+      $('#attachFileBtn').disabled = true;
+      $('#chatMessages').innerHTML = '';
+      renderContacts();
+    } else { toast(r.msg || t('group_dissolve_failed')); }
+  };
+
+  window.leaveGroupInMain = async function(gid) {
+    if (!confirm(t('group_leave_confirm'))) return;
+    await apiLeaveGroup(gid, currentUser.uid);
+    toast(t('group_left'));
+    currentChatMode = null;
+    currentChatGroupId = null;
+    $('#chatHeader').textContent = t('msg_select_contact');
+    $('#chatInput').disabled = true;
+    $('#sendMsgBtn').disabled = true;
+    $('#attachFileBtn').disabled = true;
+    $('#chatMessages').innerHTML = '';
+    renderContacts();
+  };
   window.downloadMsgFile = async function(fileId, fileName) {
     const r = await apiDownloadFile(fileId);
     if (r.ok && r.file) {
@@ -3328,6 +3485,11 @@ function applyI18n() {
       });
     });
   }
+  // Apply saved theme on page load
+  (function() {
+    const savedTheme = localStorage.getItem('lab_theme');
+    if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  })();
 
   // ===================== 设置 =====================
   function initSettings() {
@@ -3559,6 +3721,17 @@ function applyI18n() {
   function initMessaging() {
     $('#sendMsgBtn').addEventListener('click', sendChatMessage);
     $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+    // 创建群组按钮（站内信内联）
+    const inlineGroupBtn = $('#createGroupInlineBtn');
+    if (inlineGroupBtn) inlineGroupBtn.addEventListener('click', async () => {
+      const name = prompt(t('group_create_name'));
+      if (!name) return;
+      const type = confirm(t('group_is_class')) ? 'class' : 'normal';
+      const desc = prompt(t('group_description'), '') || '';
+      const r = await apiCreateGroup(name, type, currentUser.uid, desc);
+      if (r.ok) { toast(t('group_created')); renderContacts(); }
+      else toast(t('group_create_failed'));
+    });
     // 文件附件按钮
     $('#attachFileBtn').addEventListener('click', () => { $('#chatFileInput').click(); });
     $('#chatFileInput').addEventListener('change', async (e) => {

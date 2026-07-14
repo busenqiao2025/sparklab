@@ -691,6 +691,29 @@ export default {
           return json({ ok: true });
         }
 
+        // POST /api/groups/dissolve — 解散群组（仅群主）
+        if (url.pathname === '/api/groups/dissolve' && request.method === 'POST') {
+          const { gid, uid } = await readBody(request);
+          const raw = await env.USERS.get('groups');
+          let groups = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(groups)) groups = [];
+          const group = groups.find(g => g.id === gid);
+          if (!group) return json({ ok: false, msg: '群组不存在' });
+          if (group.creator !== uid) return json({ ok: false, msg: '只有群主可以解散群组' });
+          groups = groups.filter(g => g.id !== gid);
+          await env.USERS.put('groups', JSON.stringify(groups));
+          // 也删除群组消息
+          const msgRaw = await env.USERS.get('group_messages');
+          if (msgRaw) {
+            let gmsgs = JSON.parse(msgRaw);
+            if (Array.isArray(gmsgs)) {
+              gmsgs = gmsgs.filter(m => m.gid !== gid);
+              await env.USERS.put('group_messages', JSON.stringify(gmsgs));
+            }
+          }
+          return json({ ok: true });
+        }
+
         // GET /api/groups/search?q=xxx — 搜索群组
         if (url.pathname === '/api/groups/search' && request.method === 'GET') {
           const q = (url.searchParams.get('q') || '').toLowerCase();
