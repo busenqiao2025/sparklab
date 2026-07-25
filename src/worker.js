@@ -90,13 +90,20 @@ function sanitize(user) {
   return safe;
 }
 
-function genUid(users) {
-  let max = 0;
+async function genUid(env, users) {
+  // 使用持久化计数器，删除用户后不回退，避免 UID 复用导致历史数据串联
+  let counter = 0;
+  const raw = await env.USERS.get('uid_counter');
+  if (raw) { const n = parseInt(raw); if (!isNaN(n)) counter = n; }
+  // 兼容历史数据：取现有用户中的最大 UID，确保新 UID 不与现存用户冲突
+  let maxExisting = 0;
   for (const u of users) {
     const n = parseInt(u.uid);
-    if (!isNaN(n) && n > max) max = n;
+    if (!isNaN(n) && n > maxExisting) maxExisting = n;
   }
-  return String(max + 1).padStart(5, '0');
+  const next = Math.max(counter, maxExisting) + 1;
+  await env.USERS.put('uid_counter', String(next));
+  return String(next).padStart(5, '0');
 }
 
 export default {
@@ -135,7 +142,7 @@ export default {
           if (!name || !pass) return json({ ok: false, msg: '用户名和密码不能为空' });
           const users = await loadUsers(env);
           if (users.find(u => u.name === name)) return json({ ok: false, msg: '用户已存在' });
-          const uid = genUid(users);
+          const uid = await genUid(env, users);
           const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], created: Date.now() };
           users.push(newUser);
           await saveUsers(env, users);
@@ -147,9 +154,85 @@ export default {
           if (!name) return json({ ok: false, msg: '缺少 name 参数' });
           if (name === 'admin') return json({ ok: false, msg: '不能删除 admin' });
           let users = await loadUsers(env);
+          const target = users.find(u => u.name === name);
+          const removedUid = target ? target.uid : null;
           users = users.filter(u => u.name !== name);
+          // 先从其他用户的好友列表中移除该 UID，再统一保存
+          if (removedUid) {
+            for (const u of users) {
+              if (u.friends && u.friends.includes(removedUid)) {
+                u.friends = u.friends.filter(f => f !== removedUid);
+              }
+            }
+          }
           await saveUsers(env, users);
-          return json({ ok: true });
+          // 级联清理该用户的关联数据，避免 UID 被新用户复用后串联历史聊天记录
+          let cleaned = { messages: 0, groupMessages: 0, friendReqs: 0, groupsDissolved: 0 };
+          if (removedUid) {
+            // 1. 清理私聊消息（该用户收发的）及定向广播副本
+            let msgs = await loadMessages(env);
+            const beforeMsg = msgs.length;
+            msgs = msgs.filter(m => {
+              if (m.broadcast) return m.to !== removedUid;          // 删除发给该用户的广播副本
+              return m.from !== removedUid && m.to !== removedUid;  // 删除该用户参与的私聊
+            });
+            cleaned.messages = beforeMsg - msgs.length;
+            if (cleaned.messages > 0) await saveMessages(env, msgs);
+            // 2. 清理该用户发送的群组消息（避免新用户复用 UID 后显示成新用户所发）
+            try {
+              const gRaw = await env.USERS.get('group_messages');
+              if (gRaw) {
+                let gmsgs = JSON.parse(gRaw);
+                if (Array.isArray(gmsgs)) {
+                  const beforeG = gmsgs.length;
+                  gmsgs = gmsgs.filter(m => m.from !== removedUid);
+                  cleaned.groupMessages = beforeG - gmsgs.length;
+                  if (cleaned.groupMessages > 0) await env.USERS.put('group_messages', JSON.stringify(gmsgs));
+                }
+              }
+            } catch(e) {}
+            // 3. 清理好友请求
+            let reqs = await loadFriendReqs(env);
+            const beforeR = reqs.length;
+            reqs = reqs.filter(r => r.from !== removedUid && r.to !== removedUid);
+            cleaned.friendReqs = beforeR - reqs.length;
+            if (cleaned.friendReqs > 0) await saveFriendReqs(env, reqs);
+            // 4. 群组成员资格：群主被删则解散群（并清群消息），普通成员则移除
+            try {
+              const grRaw = await env.USERS.get('groups');
+              if (grRaw) {
+                let groups = JSON.parse(grRaw);
+                if (Array.isArray(groups)) {
+                  const dissolvedIds = [];
+                  let memberChanged = false;
+                  groups = groups.filter(g => {
+                    if (g.creator === removedUid) { dissolvedIds.push(g.id); return false; }
+                    if (g.members && g.members.includes(removedUid)) {
+                      g.members = g.members.filter(m => m !== removedUid);
+                      memberChanged = true;
+                    }
+                    return true;
+                  });
+                  cleaned.groupsDissolved = dissolvedIds.length;
+                  if (dissolvedIds.length || memberChanged) {
+                    await env.USERS.put('groups', JSON.stringify(groups));
+                  }
+                  // 解散的群同步清理其群消息
+                  if (dissolvedIds.length) {
+                    const gmRaw2 = await env.USERS.get('group_messages');
+                    if (gmRaw2) {
+                      let gmsgs2 = JSON.parse(gmRaw2);
+                      if (Array.isArray(gmsgs2)) {
+                        gmsgs2 = gmsgs2.filter(m => !dissolvedIds.includes(m.gid));
+                        await env.USERS.put('group_messages', JSON.stringify(gmsgs2));
+                      }
+                    }
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+          return json({ ok: true, cleaned });
         }
 
         if (url.pathname === '/api/users' && request.method === 'PUT') {
@@ -511,6 +594,101 @@ export default {
           backups = backups.filter(b => b.id !== backupId);
           await env.USERS.put('backups', JSON.stringify(backups));
           return json({ ok: true });
+        }
+
+        // ========== UID 迁移（一次性运维操作） ==========
+        // POST /api/migrate-uids — 重新分配所有用户 UID（admin 固定 00001，其余按创建时间顺延）
+        // 并重映射消息/群组/好友请求中的 UID 引用，设置 uid_counter 防止未来复用
+        if (url.pathname === '/api/migrate-uids' && request.method === 'POST') {
+          const { operator } = await readBody(request);
+          const users = await loadUsers(env);
+          // 鉴权：仅 admin 可执行
+          const opUser = users.find(u => u.name === operator || u.uid === operator);
+          if (!opUser || opUser.role !== 'admin') return json({ ok: false, msg: '仅管理员可执行 UID 迁移' });
+          // 1. 读取全部相关数据
+          const messages = await loadMessages(env);
+          let groupMsgs = []; const gmRaw = await env.USERS.get('group_messages');
+          try { if (gmRaw) { const p = JSON.parse(gmRaw); if (Array.isArray(p)) groupMsgs = p; } } catch(e) {}
+          let groups = []; const grRaw = await env.USERS.get('groups');
+          try { if (grRaw) { const p = JSON.parse(grRaw); if (Array.isArray(p)) groups = p; } } catch(e) {}
+          let friendReqs = await loadFriendReqs(env);
+          // 2. 迁移前完整快照（含 groups/group_messages/friend_requests，比普通备份更全）
+          const snapshot = {
+            id: Date.now(), created: Date.now(), operator: opUser.name,
+            note: 'UID 迁移前自动备份', type: 'auto',
+            data: {
+              users: JSON.parse(JSON.stringify(users)),
+              messages: JSON.parse(JSON.stringify(messages)),
+              requests: (await env.USERS.get('requests')) ? JSON.parse(await env.USERS.get('requests')) : [],
+              groups: JSON.parse(JSON.stringify(groups)),
+              group_messages: JSON.parse(JSON.stringify(groupMsgs)),
+              friend_requests: JSON.parse(JSON.stringify(friendReqs)),
+            }
+          };
+          const bkRaw = await env.USERS.get('backups');
+          let backups = bkRaw ? JSON.parse(bkRaw) : [];
+          if (!Array.isArray(backups)) backups = [];
+          backups.push(snapshot);
+          if (backups.length > 30) backups = backups.slice(-30);
+          await env.USERS.put('backups', JSON.stringify(backups));
+          // 3. 构建 oldUid -> newUid 映射：admin=00001，其余按 created 升序
+          const adminUser = users.find(u => u.role === 'admin') || users.find(u => u.name === 'admin');
+          const others = users.filter(u => u !== adminUser);
+          others.sort((a, b) => (a.created || 0) - (b.created || 0) || (parseInt(a.uid) - parseInt(b.uid)));
+          const uidMap = {};
+          let seq = 1;
+          if (adminUser) { uidMap[adminUser.uid] = String(seq).padStart(5, '0'); seq++; }
+          for (const u of others) { uidMap[u.uid] = String(seq).padStart(5, '0'); seq++; }
+          const remap = (uid) => uidMap[uid] || uid; // 未在映射中的孤儿 UID 保持原值
+          // 4. 重映射 users
+          let changedUsers = 0;
+          for (const u of users) {
+            if (uidMap[u.uid] && uidMap[u.uid] !== u.uid) changedUsers++;
+            u.uid = remap(u.uid);
+            if (Array.isArray(u.friends)) u.friends = u.friends.map(remap);
+          }
+          // 5. 重映射 messages（私聊 from/to；广播副本 to=具体UID 也重映射，to='all'/'all_users' 保留）
+          let changedMsgs = 0;
+          for (const m of messages) {
+            const of = m.from, ot = m.to;
+            m.from = remap(m.from);
+            if (m.to !== 'all' && m.to !== 'all_users' && m.to !== 'all_including_admin') m.to = remap(m.to);
+            if (m.from !== of || m.to !== ot) changedMsgs++;
+          }
+          // 6. 重映射 group_messages（from）
+          let changedGm = 0;
+          for (const m of groupMsgs) { const of = m.from; m.from = remap(m.from); if (m.from !== of) changedGm++; }
+          // 7. 重映射 groups（creator + members）
+          let changedGroups = 0;
+          for (const g of groups) {
+            const oc = g.creator;
+            g.creator = remap(g.creator);
+            if (Array.isArray(g.members)) g.members = g.members.map(remap);
+            if (g.creator !== oc) changedGroups++;
+          }
+          // 8. 重映射 friend_requests（from/to）
+          let changedReqs = 0;
+          for (const r of friendReqs) {
+            const of = r.from, ot = r.to;
+            r.from = remap(r.from); r.to = remap(r.to);
+            if (r.from !== of || r.to !== ot) changedReqs++;
+          }
+          // 9. 写回全部数据
+          await saveUsers(env, users);
+          await saveMessages(env, messages);
+          await env.USERS.put('group_messages', JSON.stringify(groupMsgs));
+          await env.USERS.put('groups', JSON.stringify(groups));
+          await saveFriendReqs(env, friendReqs);
+          // 10. 设置 uid_counter = 当前最大 UID，确保未来新建用户 UID 永远递增不复用
+          let maxUid = 0;
+          for (const u of users) { const n = parseInt(u.uid); if (!isNaN(n) && n > maxUid) maxUid = n; }
+          await env.USERS.put('uid_counter', String(maxUid));
+          return json({ ok: true, migrated: true, mapping: uidMap, summary: {
+            users: users.length, changedUsers, messages: messages.length, changedMsgs,
+            groupMessages: groupMsgs.length, changedGm, groups: groups.length, changedGroups,
+            friendRequests: friendReqs.length, changedReqs, uidCounter: maxUid,
+            backupId: snapshot.id
+          }});
         }
 
         // ========== 库存流水记录系统 ==========
