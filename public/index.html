@@ -3071,7 +3071,9 @@ function applyI18n() {
       ? `<img src="${peerAvatar.startsWith('data:') ? peerAvatar : 'data:image/jpeg;base64,' + peerAvatar}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;vertical-align:middle">`
       : peerAvatar)
       : '👤';
-    $('#chatHeader').innerHTML = `${avatarHtml} ${peerName||peerUid}`;
+    $('#chatHeader').innerHTML = `${avatarHtml} ${peerName||peerUid} <button class="trae-icon-btn" style="margin-left:auto;font-size:11px;color:var(--danger)" onclick="openReportModal('${(peerName||peerUid).replace(/'/g,"\\'")}','${peerUid}')">🚨 ${t('report_title')||'举报'}</button>`;
+    $('#chatHeader').style.display = 'flex';
+    $('#chatHeader').style.alignItems = 'center';
     $('#chatInput').disabled = false;
     $('#sendMsgBtn').disabled = false;
     $('#attachFileBtn').disabled = false;
@@ -3418,6 +3420,7 @@ function applyI18n() {
       <div style="font-size:14px;line-height:1.7;color:var(--fg);margin-bottom:16px;white-space:pre-wrap">${p.content}</div>
       <div style="display:flex;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
         <button class="nav-btn ${isLiked?'active':''}" id="likeBtn" style="${isLiked?'':'border-color:var(--danger);color:var(--danger)'}">❤ ${isLiked?t('forum_liked'):t('forum_like')} (${(p.likes||[]).length})</button>
+        ${isAuthor?'':`<button class="nav-btn" style="border-color:var(--danger);color:var(--danger)" onclick="openReportModal('${(p.author||'').replace(/'/g,"\\'")}','${p.authorUid||''}')">🚨 ${t('report_title')||'举报'}</button>`}
         ${(isAuthor||isAdmin)?`<button class="nav-btn danger" id="deletePostBtn" data-i18n="forum_delete">删除</button>`:''}
       </div>
       <div style="margin-bottom:8px;font-size:13px;font-weight:600" data-i18n="forum_comments">评论 (${(p.comments||[]).length})</div>
