@@ -1,5 +1,5 @@
 ﻿/**
- * SparkMinds Lab v2.1 — Cloudflare Worker
+ * SparkMinds Lab v2.2 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
 
@@ -106,6 +106,51 @@ async function genUid(env, users) {
   return String(next).padStart(5, '0');
 }
 
+// ========== 举报/惩罚辅助函数 ==========
+async function loadReports(env) {
+  const raw = await env.USERS.get('reports');
+  if (raw) {
+    try { const p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch(e) {}
+  }
+  return [];
+}
+
+async function saveReports(env, reports) {
+  await env.USERS.put('reports', JSON.stringify(reports));
+}
+
+async function loadPunishments(env) {
+  const raw = await env.USERS.get('punishments');
+  if (raw) {
+    try { const p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch(e) {}
+  }
+  return [];
+}
+
+async function savePunishments(env, punishments) {
+  await env.USERS.put('punishments', JSON.stringify(punishments));
+}
+
+// 检查用户是否被禁言：permanent 永久禁言，或 mute 未过期
+// 返回 { muted: false } 或 { muted: true, punishment, msg }
+async function checkMuted(env, uid) {
+  if (!uid) return { muted: false };
+  const punishments = await loadPunishments(env);
+  const now = Date.now();
+  const active = punishments.find(p => p.uid === uid && p.active === true && (
+    p.type === 'permanent' || (p.type === 'mute' && p.until && p.until > now)
+  ));
+  if (!active) return { muted: false };
+  let msg;
+  if (active.type === 'permanent') {
+    msg = '您已被永久禁言，禁止发送消息和提交申请';
+  } else {
+    const remainHours = Math.ceil((active.until - now) / (1000 * 60 * 60));
+    msg = `您已被禁言，剩余约 ${remainHours} 小时，禁止发送消息和提交申请`;
+  }
+  return { muted: true, punishment: active, msg };
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -117,7 +162,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       try {
         if (url.pathname === '/api/health')
-          return json({ ok: true, time: Date.now(), version: 'v2.1' });
+          return json({ ok: true, time: Date.now(), version: 'v2.2' });
 
         // ========== 用户认证 ==========
         if (url.pathname === '/api/login' && request.method === 'POST') {
@@ -393,10 +438,14 @@ export default {
 
         // POST /api/messages — 发送私聊消息
         if (url.pathname === '/api/messages' && request.method === 'POST') {
-          const { from, to, content } = await readBody(request);
-          if (!from || !to || !content) return json({ ok: false, msg: '缺少参数' });
+          const { from, to, content, fileId, fileName } = await readBody(request);
+          if (!from || !to) return json({ ok: false, msg: '缺少参数' });
+          if (!content && !fileId) return json({ ok: false, msg: '缺少内容' });
+          // 禁言检查
+          const mute = await checkMuted(env, from);
+          if (mute.muted) return json({ ok: false, msg: mute.msg, muted: true });
           let msgs = await loadMessages(env);
-          const newMsg = { id: Date.now(), from, to, content, broadcast: false, read: false, created: Date.now() };
+          const newMsg = { id: Date.now(), from, to, content: content || '', fileId: fileId || null, fileName: fileName || null, broadcast: false, read: false, created: Date.now() };
           msgs.push(newMsg);
           await saveMessages(env, msgs);
           return json({ ok: true, message: newMsg });
@@ -743,6 +792,17 @@ export default {
         if (url.pathname === '/api/requests' && request.method === 'POST') {
           const { user, type, target, detail } = await readBody(request);
           if (!user || !type) return json({ ok: false, msg: '缺少必要参数' });
+          // 禁言检查：user 可能是用户名或 UID，统一解析为 UID
+          let _reqUid = user;
+          if (!/^\d{5}$/.test(user)) {
+            const _users = await loadUsers(env);
+            const _u = _users.find(u => u.name === user);
+            if (_u) _reqUid = _u.uid;
+          }
+          if (_reqUid) {
+            const _mute = await checkMuted(env, _reqUid);
+            if (_mute.muted) return json({ ok: false, msg: _mute.msg, muted: true });
+          }
           const raw = await env.USERS.get('requests');
           let requests = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(requests)) requests = [];
@@ -786,21 +846,56 @@ export default {
           return json({ ok: true, count });
         }
 
-        // ========== 文件传输 ==========
+        // ========== 文件传输（分块存储，支持大文件） ==========
         // POST /api/upload — 上传文件（base64），返回 fileId
         if (url.pathname === '/api/upload' && request.method === 'POST') {
-          const { name, size, type, data, from } = await readBody(request);
-          if (!data || !name) return json({ ok: false, msg: '缺少文件数据' });
-          if (size > 5 * 1024 * 1024) return json({ ok: false, msg: '文件不能超过5MB' });
+          const body = await readBody(request);
+          const { name, size, type, data, from } = body;
+          if (!data || !name) return json({ ok: false, msg: '缺少文件数据（可能请求体过大被截断）' });
+          if (size > 50 * 1024 * 1024) return json({ ok: false, msg: '文件不能超过50MB' });
           const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-          const fileRecord = { id: fileId, name, size, type, data, from: from || 'unknown', created: Date.now() };
-          const raw = await env.USERS.get('files');
-          let files = raw ? JSON.parse(raw) : [];
-          if (!Array.isArray(files)) files = [];
-          files.push(fileRecord);
-          // 最多保留 200 个文件
-          if (files.length > 200) files = files.slice(-200);
-          await env.USERS.put('files', JSON.stringify(files));
+          const meta = { id: fileId, name, size, type, from: from || 'unknown', created: Date.now() };
+          // KV 单值上限 25MB；JSON.stringify 后 base64 数据约膨胀 1.33x
+          // 超过 20MB 则分块存储，每块 10MB
+          const dataLen = typeof data === 'string' ? data.length : 0;
+          if (dataLen < 20 * 1024 * 1024) {
+            // 小文件：单键存储
+            const fileRecord = { ...meta, data };
+            try {
+              await env.USERS.put('file_' + fileId, JSON.stringify(fileRecord));
+            } catch(e) {
+              return json({ ok: false, msg: '文件存储失败：' + e.message });
+            }
+          } else {
+            // 大文件：分块存储
+            const chunkSize = 10 * 1024 * 1024;
+            const numChunks = Math.ceil(dataLen / chunkSize);
+            meta.chunked = true;
+            meta.numChunks = numChunks;
+            try {
+              // 先存元数据（不含 data）
+              await env.USERS.put('file_' + fileId, JSON.stringify(meta));
+              // 逐块存储
+              for (let i = 0; i < numChunks; i++) {
+                const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+                await env.USERS.put('file_' + fileId + '_chunk_' + i, chunk);
+              }
+            } catch(e) {
+              // 清理已写入的块
+              for (let i = 0; i < numChunks; i++) {
+                try { await env.USERS.delete('file_' + fileId + '_chunk_' + i); } catch(_) {}
+              }
+              try { await env.USERS.delete('file_' + fileId); } catch(_) {}
+              return json({ ok: false, msg: '文件存储失败（分块）：' + e.message });
+            }
+          }
+          // 更新文件索引列表（仅元信息）
+          const idxRaw = await env.USERS.get('file_index');
+          let idx = idxRaw ? JSON.parse(idxRaw) : [];
+          if (!Array.isArray(idx)) idx = [];
+          idx.push({ id: fileId, name, size, type, from: from || 'unknown', created: meta.created });
+          if (idx.length > 500) idx = idx.slice(-500);
+          await env.USERS.put('file_index', JSON.stringify(idx));
           return json({ ok: true, fileId, name, size });
         }
 
@@ -808,12 +903,35 @@ export default {
         if (url.pathname === '/api/download' && request.method === 'GET') {
           const fileId = url.searchParams.get('id');
           if (!fileId) return json({ ok: false, msg: '缺少 id' });
-          const raw = await env.USERS.get('files');
-          let files = raw ? JSON.parse(raw) : [];
-          if (!Array.isArray(files)) files = [];
-          const file = files.find(f => f.id === fileId);
-          if (!file) return json({ ok: false, msg: '文件不存在' }, 404);
-          return json({ ok: true, file });
+          // 优先从独立 KV 键读取
+          const raw = await env.USERS.get('file_' + fileId);
+          if (raw) {
+            try {
+              const file = JSON.parse(raw);
+              // 分块文件：逐块读取并拼接
+              if (file.chunked && file.numChunks) {
+                let data = '';
+                for (let i = 0; i < file.numChunks; i++) {
+                  const chunk = await env.USERS.get('file_' + fileId + '_chunk_' + i);
+                  if (chunk !== null) data += chunk;
+                }
+                return json({ ok: true, file: { ...file, data, chunked: false, numChunks: undefined } });
+              }
+              return json({ ok: true, file });
+            } catch(e) {}
+          }
+          // 兼容旧数据：从聚合 'files' 键中查找
+          const oldRaw = await env.USERS.get('files');
+          if (oldRaw) {
+            try {
+              let files = JSON.parse(oldRaw);
+              if (Array.isArray(files)) {
+                const file = files.find(f => f.id === fileId);
+                if (file) return json({ ok: true, file });
+              }
+            } catch(e) {}
+          }
+          return json({ ok: false, msg: '文件不存在' }, 404);
         }
 
         // ========== 群组系统 ==========
@@ -916,7 +1034,11 @@ export default {
         // POST /api/groups/messages — 发送群组消息
         if (url.pathname === '/api/groups/messages' && request.method === 'POST') {
           const { gid, from, fromName, content, fileId, fileName } = await readBody(request);
-          if (!gid || !from || !content) return json({ ok: false, msg: '缺少参数' });
+          if (!gid || !from) return json({ ok: false, msg: '缺少参数' });
+          if (!content && !fileId) return json({ ok: false, msg: '缺少内容' });
+          // 禁言检查
+          const mute = await checkMuted(env, from);
+          if (mute.muted) return json({ ok: false, msg: mute.msg, muted: true });
           const raw = await env.USERS.get('group_messages');
           let gmsgs = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(gmsgs)) gmsgs = [];
@@ -930,15 +1052,13 @@ export default {
         // ========== 用户举报 ==========
         // POST /api/report — 提交举报
         if (url.pathname === '/api/report' && request.method === 'POST') {
-          const { reporter, target, targetUid, reason, detail } = await readBody(request);
+          const { reporter, reporterUid, target, targetUid, reason, detail } = await readBody(request);
           if (!reporter || !target || !reason) return json({ ok: false, msg: '缺少参数' });
-          const raw = await env.USERS.get('reports');
-          let reports = raw ? JSON.parse(raw) : [];
-          if (!Array.isArray(reports)) reports = [];
-          const report = { id: 'rpt_' + Date.now(), reporter, target, targetUid, reason, detail: detail || '', status: 'pending', created: Date.now() };
+          let reports = await loadReports(env);
+          const report = { id: 'rpt_' + Date.now(), reporter, reporterUid: reporterUid || '', target, targetUid: targetUid || '', reason, detail: detail || '', status: 'pending', created: Date.now(), offenseCount: 0 };
           reports.push(report);
           if (reports.length > 500) reports = reports.slice(-500);
-          await env.USERS.put('reports', JSON.stringify(reports));
+          await saveReports(env, reports);
           return json({ ok: true, report });
         }
 
@@ -951,19 +1071,181 @@ export default {
           return json({ ok: true, reports });
         }
 
-        // POST /api/report/handle — 处理举报（管理员）
+        // POST /api/report/handle — 处理举报（管理员），resolved 时按累计次数自动生成惩罚
         if (url.pathname === '/api/report/handle' && request.method === 'POST') {
-          const { reportId, action, note } = await readBody(request);
-          const raw = await env.USERS.get('reports');
-          let reports = raw ? JSON.parse(raw) : [];
-          if (!Array.isArray(reports)) reports = [];
+          const { reportId, action, note, muteDuration } = await readBody(request);
+          if (!reportId || !action) return json({ ok: false, msg: '缺少参数' });
+          if (action !== 'resolved' && action !== 'dismissed') return json({ ok: false, msg: '无效的处理动作' });
+          let reports = await loadReports(env);
           const report = reports.find(r => r.id === reportId);
           if (!report) return json({ ok: false, msg: '举报不存在' });
-          report.status = action; // 'resolved' | 'dismissed'
+          if (report.status !== 'pending') return json({ ok: false, msg: '该举报已处理' });
+          report.status = action;
           report.handleNote = note || '';
           report.handledAt = Date.now();
-          await env.USERS.put('reports', JSON.stringify(reports));
-          return json({ ok: true });
+          // resolved 时根据累计次数自动确定惩罚级别
+          if (action === 'resolved') {
+            const targetUid = report.targetUid;
+            if (targetUid) {
+              // 累计 resolved 举报次数（含本次，此时 report.status 已置为 resolved）
+              const offenseCount = reports.filter(r => r.targetUid === targetUid && r.status === 'resolved').length;
+              report.offenseCount = offenseCount;
+              // 根据次数确定惩罚级别
+              let pType, duration, until;
+              if (offenseCount === 1) {
+                pType = 'warning'; duration = 0; until = 0;
+              } else if (offenseCount === 2) {
+                pType = 'mute';
+                duration = parseInt(muteDuration) > 0 ? parseInt(muteDuration) : 24;
+                until = Date.now() + duration * 3600 * 1000;
+              } else if (offenseCount === 3) {
+                pType = 'mute';
+                const md = parseInt(muteDuration) > 0 ? parseInt(muteDuration) : 720;
+                duration = Math.max(md, 720);
+                until = Date.now() + duration * 3600 * 1000;
+              } else if (offenseCount === 4) {
+                pType = 'mute';
+                const md = parseInt(muteDuration) > 0 ? parseInt(muteDuration) : 2160;
+                duration = Math.max(md, 2160);
+                until = Date.now() + duration * 3600 * 1000;
+              } else {
+                pType = 'permanent'; duration = 0; until = 0;
+              }
+              const punishment = {
+                id: 'pn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                uid: targetUid,
+                type: pType,
+                duration,
+                reason: report.reason || '',
+                until,
+                createdAt: Date.now(),
+                active: true,
+                reportId: report.id
+              };
+              let punishments = await loadPunishments(env);
+              punishments.push(punishment);
+              if (punishments.length > 1000) punishments = punishments.slice(-1000);
+              await savePunishments(env, punishments);
+              // 在举报上记录惩罚信息
+              report.punishment = {
+                type: pType,
+                duration,
+                reason: punishment.reason,
+                until,
+                createdAt: punishment.createdAt
+              };
+            }
+          }
+          await saveReports(env, reports);
+          return json({ ok: true, report });
+        }
+
+        // GET /api/report/chat-records?uid1=xxx&uid2=yyy — 查看两用户间私聊记录（管理员）
+        if (url.pathname === '/api/report/chat-records' && request.method === 'GET') {
+          const uid1 = url.searchParams.get('uid1');
+          const uid2 = url.searchParams.get('uid2');
+          if (!uid1 || !uid2) return json({ ok: false, msg: '缺少参数' });
+          let msgs = await loadMessages(env);
+          const records = msgs.filter(m => !m.broadcast && (
+            (m.from === uid1 && m.to === uid2) || (m.from === uid2 && m.to === uid1)
+          )).sort((a, b) => a.created - b.created);
+          return json({ ok: true, messages: records });
+        }
+
+        // POST /api/report/appeal — 用户提交申诉
+        if (url.pathname === '/api/report/appeal' && request.method === 'POST') {
+          const { reportId, uid, content } = await readBody(request);
+          if (!reportId || !uid || !content) return json({ ok: false, msg: '缺少参数' });
+          let reports = await loadReports(env);
+          const report = reports.find(r => r.id === reportId);
+          if (!report) return json({ ok: false, msg: '举报不存在' });
+          if (report.targetUid !== uid) return json({ ok: false, msg: '只有被举报者可以申诉' });
+          if (!report.punishment) return json({ ok: false, msg: '该举报未产生惩罚，无需申诉' });
+          if (report.appeal && report.appeal.status === 'pending') return json({ ok: false, msg: '已提交申诉，等待处理' });
+          report.appeal = { content, status: 'pending', adminReply: '', createdAt: Date.now() };
+          await saveReports(env, reports);
+          return json({ ok: true, appeal: report.appeal });
+        }
+
+        // GET /api/report/appeals — 获取待处理申诉列表（管理员）
+        if (url.pathname === '/api/report/appeals' && request.method === 'GET') {
+          let reports = await loadReports(env);
+          const appeals = reports.filter(r => r.appeal && r.appeal.status === 'pending');
+          appeals.sort((a, b) => (a.appeal.createdAt || 0) - (b.appeal.createdAt || 0));
+          return json({ ok: true, reports: appeals });
+        }
+
+        // POST /api/report/appeal/handle — 管理员处理申诉
+        if (url.pathname === '/api/report/appeal/handle' && request.method === 'POST') {
+          const { reportId, action, adminReply, newReason, revokePunishment } = await readBody(request);
+          if (!reportId || !action) return json({ ok: false, msg: '缺少参数' });
+          if (action !== 'accepted' && action !== 'rejected') return json({ ok: false, msg: '无效的处理动作' });
+          let reports = await loadReports(env);
+          const report = reports.find(r => r.id === reportId);
+          if (!report) return json({ ok: false, msg: '举报不存在' });
+          if (!report.appeal || report.appeal.status !== 'pending') return json({ ok: false, msg: '该举报没有待处理的申诉' });
+          report.appeal.status = action;
+          report.appeal.adminReply = adminReply || '';
+          report.appeal.handledAt = Date.now();
+          // 申诉通过：可修改惩罚原因 或 撤销当前惩罚
+          if (action === 'accepted') {
+            let punishments = await loadPunishments(env);
+            let pChanged = false;
+            const p = punishments.find(x => x.reportId === reportId && x.active === true);
+            if (newReason) {
+              report.punishment = report.punishment || {};
+              report.punishment.reason = newReason;
+              if (p) { p.reason = newReason; pChanged = true; }
+            }
+            if (revokePunishment && p) {
+              p.active = false;
+              p.revokedAt = Date.now();
+              pChanged = true;
+              if (report.punishment) report.punishment.revoked = true;
+            }
+            if (pChanged) await savePunishments(env, punishments);
+          }
+          await saveReports(env, reports);
+          return json({ ok: true, report });
+        }
+
+        // ========== 惩罚记录系统 ==========
+        // GET /api/punishments — 管理员查看所有有效惩罚；?uid=xxx 查看指定用户当前有效惩罚；?uid=xxx&all=1 查看全部历史
+        if (url.pathname === '/api/punishments' && request.method === 'GET') {
+          const uid = url.searchParams.get('uid');
+          const showAll = url.searchParams.get('all') === '1';
+          let punishments = await loadPunishments(env);
+          const now = Date.now();
+          // 自动过期清理：将已过期的 mute 标记为 inactive
+          let changed = false;
+          for (const p of punishments) {
+            if (p.active === true && p.type === 'mute' && p.until && p.until <= now) {
+              p.active = false; p.expiredAt = now; changed = true;
+            }
+          }
+          if (changed) await savePunishments(env, punishments);
+          let result;
+          if (uid) {
+            result = showAll ? punishments.filter(p => p.uid === uid) : punishments.filter(p => p.uid === uid && p.active === true);
+          } else {
+            result = punishments.filter(p => p.active === true);
+          }
+          result.sort((a, b) => b.createdAt - a.createdAt);
+          return json({ ok: true, punishments: result });
+        }
+
+        // POST /api/punishments/revoke — 管理员撤销惩罚
+        if (url.pathname === '/api/punishments/revoke' && request.method === 'POST') {
+          const { uid, punishmentId } = await readBody(request);
+          if (!uid || !punishmentId) return json({ ok: false, msg: '缺少参数' });
+          let punishments = await loadPunishments(env);
+          const p = punishments.find(x => x.id === punishmentId && x.uid === uid);
+          if (!p) return json({ ok: false, msg: '惩罚记录不存在' });
+          if (!p.active) return json({ ok: false, msg: '该惩罚已失效' });
+          p.active = false;
+          p.revokedAt = Date.now();
+          await savePunishments(env, punishments);
+          return json({ ok: true, punishment: p });
         }
 
         // ========== 论坛系统 ==========

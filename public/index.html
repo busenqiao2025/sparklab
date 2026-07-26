@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.1]</title>
+<title>SparkMinds Lab [v2.2]</title>
 <style>
   /* ============================================================
-     SparkMinds Lab v2.1 — Design System + Glassmorphism
+     SparkMinds Lab v2.2 — Report System + File Transfer Fix
      Modern, clean, inspired by Linear / Vercel / Stripe
      ============================================================ */
   :root{
@@ -427,6 +427,7 @@
   .modal-card{background:rgba(255,255,255,.88);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);border:1px solid rgba(226,232,240,.5);border-radius:var(--radius);padding:28px;max-width:480px;width:90%;box-shadow:var(--shadow-xl);animation:cardIn .35s cubic-bezier(.34,1.56,.64,1)}
 [data-theme="dark"] .modal-card{background:rgba(20,24,33,.88);border-color:rgba(30,36,51,.5)}
   @keyframes cardIn{from{opacity:0;transform:scale(.9) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   .modal-title{font-size:17px;font-weight:700;color:var(--fg);margin-bottom:20px;display:flex;align-items:center;gap:8px;letter-spacing:-.3px}
   .modal-title::before{content:'';width:4px;height:18px;background:var(--accent);border-radius:2px}
   .modal-field{margin-bottom:14px}
@@ -514,12 +515,16 @@ const I18N = {
     'panel_warehouse': '仓库库存管理', 'panel_users': '用户管理',
     'panel_profile': '个人主页', 'panel_messages': '站内信', 'panel_dashboard': '数据概览', 'dashboard_recent_txn': '最近库存变动', 'dashboard_low': '偏低', 'dashboard_types': '种类', 'nav_dashboard': '仪表盘', 'panel_backup': '数据回滚管理', 'panel_transactions': '库存流水记录',
     'dashboard_inv_overview': '库存总览', 'dashboard_category_ratio': '分类占比', 'dashboard_remain_rate': '耗材剩余率', 'dashboard_txn_trend': '库存变动趋势', 'dashboard_health_radar': '库存健康度', 'dashboard_action_stacked': '操作分类分布', 'dashboard_radar_quantity': '数量丰富度', 'dashboard_radar_diversity': '类别多样性', 'dashboard_radar_health': '库存健康', 'dashboard_radar_activity': '操作活跃度', 'dashboard_radar_turnover': '周转率', 'th_other': '其他',
-    'panel_groups': '群组', 'panel_forum': '论坛', 'nav_groups': '群组', 'nav_forum': '论坛', 'nav_reports': '举报管理',
+    'panel_groups': '群组', 'panel_forum': '论坛', 'nav_groups': '群组', 'nav_forum': '论坛', 'nav_reports': '举报管理', 'nav_mypunish': '我的处罚',
     'group_create': '创建群组', 'group_search': '搜索群组', 'group_no_groups': '暂无群组，点击创建或搜索加入', 'group_type_class': '课堂群', 'group_type_normal': '普通群', 'group_members': '人', 'group_chat': '聊天', 'group_leave': '退出', 'group_leave_confirm': '确定要退出此群组吗？', 'group_left': '已退出群组', 'group_create_name': '请输入群组名称', 'group_is_class': '是课堂群吗？', 'group_description': '请输入群组描述（可选）', 'group_created': '群组已创建', 'group_create_failed': '创建失败', 'group_search_prompt': '输入群组名称搜索', 'group_no_results': '未找到群组', 'group_join': '加入', 'group_joined': '已加入群组', 'group_no_messages': '暂无消息，发送第一条吧',
     'report_title': '举报用户', 'report_reason': '举报原因', 'report_detail': '详细说明（可选）', 'report_detail_ph': '请描述具体情况...', 'report_spam': '垃圾信息/广告', 'report_abuse': '辱骂/人身攻击', 'report_inappropriate': '不当内容', 'report_cheating': '作弊/违规操作', 'report_other': '其他', 'report_submit': '提交举报', 'report_submitted': '举报已提交', 'report_failed': '举报失败', 'report_mgmt': '举报管理', 'report_no_data': '暂无举报记录', 'report_status_pending': '待处理', 'report_status_resolved': '已处理', 'report_status_dismissed': '已驳回', 'report_resolve': '处理', 'report_dismiss': '驳回', 'report_handled': '已处理', 'cancel': '取消', 'send': '发送',
     'panel_settings': '设置', 'nav_settings': '设置', 'settings_theme': '主题模式', 'settings_language': '语言', 'settings_data': '数据管理', 'settings_about': '关于', 'settings_about_desc': '实验室物联网监控平台', 'settings_light': '浅色', 'settings_dark': '深色', 'settings_export': '导出数据', 'settings_import': '导入数据', 'settings_export_done': '数据已导出', 'settings_import_confirm': '确定要导入数据吗？当前数据将被覆盖', 'settings_import_done': '数据已导入', 'settings_import_failed': '导入失败：文件格式错误',
     'txn_no_data': '暂无流水记录', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入库', 'txn_consume': '出库', 'txn_edit': '修改', 'txn_delete': '删除', 'txn_create': '新建', 'backup_no_data': '暂无备份记录', 'backup_create': '创建备份', 'backup_refresh': '刷新列表', 'backup_restore': '恢复', 'backup_confirm_restore': '确定要恢复到此备份吗？当前数据将被覆盖（会自动创建恢复前备份）', 'backup_restored': '数据已恢复，正在刷新...', 'backup_restore_failed': '恢复失败', 'backup_delete_confirm': '确定要删除此备份吗？', 'backup_deleted': '备份已删除', 'backup_created': '备份已创建', 'backup_failed': '备份失败', 'backup_prompt_note': '请输入备份备注（可选）：', 'backup_manual': '手动备份', 'backup_auto': '自动', 'backup_no_note': '无备注', 'backup_delete': '删除',
-    'msg_attach_file': '发送文件', 'file_download_failed': '文件下载失败', 'file_too_large': '文件过大（最大5MB）', 'file_uploading': '正在上传文件...', 'file_ready': '文件已就绪，输入消息后发送', 'file_upload_failed': '文件上传失败', 'file_default_name': '文件', 'msg_me': '我', 'msg_user_info': '用户信息', 'msg_admin': '管理员', 'msg_input_placeholder': '输入消息...',
+    'msg_attach_file': '发送文件', 'file_download_failed': '文件下载失败', 'file_too_large': '文件过大（最大50MB）', 'file_uploading': '正在上传文件...', 'file_ready': '文件已就绪，输入消息后发送', 'file_upload_failed': '文件上传失败', 'file_default_name': '文件', 'msg_me': '我', 'msg_user_info': '用户信息', 'msg_admin': '管理员', 'msg_input_placeholder': '输入消息...', 'msg_send_failed': '消息发送失败', 'muted_msg': '您已被禁言，无法发送消息', 'muted_banner': '您当前已被禁言', 'muted_banner_permanent': '您已被永久禁言，无法发送消息和申请操作', 'muted_banner_temporary': '您已被禁言，剩余约 {hours} 小时', 'muted_appeal_hint': '如对处罚有异议，可前往「举报管理」提交申诉',
+    'report_tab_reports': '举报列表', 'report_tab_appeals': '申诉管理', 'report_tab_punishments': '惩罚管理', 'report_view_chat': '查看聊天记录', 'report_chat_between': '聊天双方', 'report_chat_title': '聊天记录', 'report_no_chat': '暂无聊天记录', 'report_mute_duration_prompt': '请输入禁言时长（小时）', 'report_mute_duration_hint': '第2次可自定义，第3次至少720小时(30天)，第4次至少2160小时(90天)',
+    'punish_warning': '警告', 'punish_mute': '禁言', 'punish_permanent': '永久禁言', 'punish_label': '处罚', 'punish_revoke': '撤销处罚', 'punish_no_data': '暂无处罚记录', 'punish_expired': '已过期', 'punish_created': '处罚时间', 'punish_until': '到期时间', 'punish_revoked': '处罚已撤销', 'punish_revoke_confirm': '确定要撤销此处罚吗？', 'punish_status': '处罚状态', 'punish_user_badge_warning': '⚠ 警告', 'punish_user_badge_mute': '🔇 禁言', 'punish_user_badge_permanent': '🚫 永久禁言',
+    'appeal_pending_short': '申诉中', 'appeal_no_data': '暂无申诉记录', 'appeal_label': '申诉内容', 'appeal_accept': '通过申诉', 'appeal_reject': '驳回申诉', 'appeal_reply_prompt': '请输入回复内容（可选）：', 'appeal_revoke_confirm': '是否同时撤销该处罚？', 'appeal_modify_reason_confirm': '是否修改处罚原因？', 'appeal_new_reason_prompt': '请输入新的处罚原因：', 'appeal_accepted_done': '申诉已通过', 'appeal_rejected_done': '申诉已驳回', 'appeal_submit': '提交申诉', 'appeal_content_prompt': '请输入申诉内容，说明您对处罚的异议：', 'appeal_submitted': '申诉已提交，等待管理员处理', 'appeal_my_records': '我的处罚记录', 'appeal_no_punishment': '暂无处罚记录',
+    'th_punish': '处罚', 'punish_none': '无', 'punish_active': '生效中', 'punish_revoked_label': '已撤销', 'punish_reason_label': '处罚原因', 'mypunish_no_data': '暂无处罚记录', 'appeal_submit_btn': '申诉', 'appeal_submit_failed': '申诉提交失败', 'punish_rules_title': '处罚规则', 'punish_rule_1': '第1次被举报（成立）：警告', 'punish_rule_2': '第2次：禁言（管理员自定义时长）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久禁用站内信和仓库操作权限', 'punish_appeal_hint_rule': '对处罚结果不满意可提交申诉，管理员将审核并决定是否修改',
     'report_reason_label': '原因', 'report_reporter': '举报人', 'req_detail_required': '请填写详细说明', 'req_submit_failed': '提交失败', 'req_submitted': '申请已提交，等待管理员审批', 'req_my_records_title': '我的申请记录', 'req_no_records': '暂无申请记录', 'req_action_failed': '操作失败', 'req_approved': '已批准该申请', 'req_deny_reason_prompt': '拒绝原因（可留空）：', 'req_denied': '已拒绝该申请',
     'forum_post_default': '帖子', 'settings_toggle_theme': '切换主题', 'sim_off_toast': '模拟数据已关闭', 'sim_on_toast': '模拟数据已开启（无真实设备时用于测试）',
     'wp_cleared': '已清除壁纸', 'wp_switched': '已切换至「{name}」', 'wp_set_compressed': '壁纸已设置（压缩至 {kb}KB）', 'wp_storage_full': '存储空间不足，请清除壁纸后重试', 'wp_image_load_failed': '图片加载失败', 'settings_wallpaper': '自定义壁纸', 'wp_hint': '选择预设或上传图片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩浓度', 'wp_upload': '上传自定义壁纸', 'wp_clear': '清除壁纸', 'wp_name_none': '无', 'wp_name_aurora': '极光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '余烬', 'wp_name_custom': '自定义',
@@ -638,12 +643,16 @@ const I18N = {
     'panel_warehouse': '倉庫庫存管理', 'panel_users': '用戶管理',
     'panel_profile': '個人主頁', 'panel_messages': '站內信', 'panel_dashboard': '數據概覽', 'dashboard_recent_txn': '最近庫存變動', 'dashboard_low': '偏低', 'dashboard_types': '種類', 'nav_dashboard': '儀表盤', 'panel_backup': '數據回滾管理', 'panel_transactions': '庫存流水記錄',
     'dashboard_inv_overview': '庫存總覽', 'dashboard_category_ratio': '分類佔比', 'dashboard_remain_rate': '耗材剩餘率', 'dashboard_txn_trend': '庫存變動趨勢', 'dashboard_health_radar': '庫存健康度', 'dashboard_action_stacked': '操作分類分佈', 'dashboard_radar_quantity': '數量豐富度', 'dashboard_radar_diversity': '類別多樣性', 'dashboard_radar_health': '庫存健康', 'dashboard_radar_activity': '操作活躍度', 'dashboard_radar_turnover': '週轉率', 'th_other': '其他',
-    'panel_groups': '群組', 'panel_forum': '論壇', 'nav_groups': '群組', 'nav_forum': '論壇', 'nav_reports': '舉報管理',
+    'panel_groups': '群組', 'panel_forum': '論壇', 'nav_groups': '群組', 'nav_forum': '論壇', 'nav_reports': '舉報管理', 'nav_mypunish': '我的處罰',
     'group_create': '建立群組', 'group_search': '搜尋群組', 'group_no_groups': '暫無群組，點擊建立或搜尋加入', 'group_type_class': '課堂群', 'group_type_normal': '普通群', 'group_members': '人', 'group_chat': '聊天', 'group_leave': '退出', 'group_leave_confirm': '確定要退出此群組嗎？', 'group_left': '已退出群組', 'group_create_name': '請輸入群組名稱', 'group_is_class': '是課堂群嗎？', 'group_description': '請輸入群組描述（可選）', 'group_created': '群組已建立', 'group_create_failed': '建立失敗', 'group_search_prompt': '輸入群組名稱搜尋', 'group_no_results': '未找到群組', 'group_join': '加入', 'group_joined': '已加入群組', 'group_no_messages': '暫無消息，發送第一條吧',
     'report_title': '舉報用戶', 'report_reason': '舉報原因', 'report_detail': '詳細說明（可選）', 'report_detail_ph': '請描述具體情況...', 'report_spam': '垃圾信息/廣告', 'report_abuse': '辱罵/人身攻擊', 'report_inappropriate': '不當內容', 'report_cheating': '作弊/違規操作', 'report_other': '其他', 'report_submit': '提交舉報', 'report_submitted': '舉報已提交', 'report_failed': '舉報失敗', 'report_mgmt': '舉報管理', 'report_no_data': '暫無舉報記錄', 'report_status_pending': '待處理', 'report_status_resolved': '已處理', 'report_status_dismissed': '已駁回', 'report_resolve': '處理', 'report_dismiss': '駁回', 'report_handled': '已處理', 'cancel': '取消', 'send': '發送',
     'panel_settings': '設定', 'nav_settings': '設定', 'settings_theme': '主題模式', 'settings_language': '語言', 'settings_data': '數據管理', 'settings_about': '關於', 'settings_about_desc': '實驗室物聯網監控平台', 'settings_light': '淺色', 'settings_dark': '深色', 'settings_export': '匯出數據', 'settings_import': '匯入數據', 'settings_export_done': '數據已匯出', 'settings_import_confirm': '確定要匯入數據嗎？當前數據將被覆蓋', 'settings_import_done': '數據已匯入', 'settings_import_failed': '匯入失敗：檔案格式錯誤',
     'txn_no_data': '暫無流水記錄', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入庫', 'txn_consume': '出庫', 'txn_edit': '修改', 'txn_delete': '刪除', 'txn_create': '新建', 'backup_no_data': '暫無備份記錄', 'backup_create': '建立備份', 'backup_refresh': '刷新列表', 'backup_restore': '恢復', 'backup_confirm_restore': '確定要恢復到此備份嗎？當前數據將被覆蓋（會自動建立恢復前備份）', 'backup_restored': '數據已恢復，正在刷新...', 'backup_restore_failed': '恢復失敗', 'backup_delete_confirm': '確定要刪除此備份嗎？', 'backup_deleted': '備份已刪除', 'backup_created': '備份已建立', 'backup_failed': '備份失敗', 'backup_prompt_note': '請輸入備份備註（可選）：', 'backup_manual': '手動備份', 'backup_auto': '自動', 'backup_no_note': '無備註', 'backup_delete': '刪除',
-    'msg_attach_file': '發送檔案', 'file_download_failed': '檔案下載失敗', 'file_too_large': '檔案過大（最大5MB）', 'file_uploading': '正在上傳檔案...', 'file_ready': '檔案已就緒，輸入訊息後發送', 'file_upload_failed': '檔案上傳失敗', 'file_default_name': '檔案', 'msg_me': '我', 'msg_user_info': '用戶資訊', 'msg_admin': '管理員', 'msg_input_placeholder': '輸入訊息...',
+    'msg_attach_file': '發送檔案', 'file_download_failed': '檔案下載失敗', 'file_too_large': '檔案過大（最大50MB）', 'file_uploading': '正在上傳檔案...', 'file_ready': '檔案已就緒，輸入訊息後發送', 'file_upload_failed': '檔案上傳失敗', 'file_default_name': '檔案', 'msg_me': '我', 'msg_user_info': '用戶資訊', 'msg_admin': '管理員', 'msg_input_placeholder': '輸入訊息...', 'msg_send_failed': '訊息發送失敗', 'muted_msg': '您已被禁言，無法發送訊息', 'muted_banner': '您目前已被禁言', 'muted_banner_permanent': '您已被永久禁言，無法發送訊息和申請操作', 'muted_banner_temporary': '您已被禁言，剩餘約 {hours} 小時', 'muted_appeal_hint': '如對處罰有異議，可前往「舉報管理」提交申訴',
+    'report_tab_reports': '舉報列表', 'report_tab_appeals': '申訴管理', 'report_tab_punishments': '懲罰管理', 'report_view_chat': '查看聊天記錄', 'report_chat_between': '聊天雙方', 'report_chat_title': '聊天記錄', 'report_no_chat': '暫無聊天記錄', 'report_mute_duration_prompt': '請輸入禁言時長（小時）', 'report_mute_duration_hint': '第2次可自訂，第3次至少720小時(30天)，第4次至少2160小時(90天)',
+    'punish_warning': '警告', 'punish_mute': '禁言', 'punish_permanent': '永久禁言', 'punish_label': '處罰', 'punish_revoke': '撤銷處罰', 'punish_no_data': '暫無處罰記錄', 'punish_expired': '已過期', 'punish_created': '處罰時間', 'punish_until': '到期時間', 'punish_revoked': '處罰已撤銷', 'punish_revoke_confirm': '確定要撤銷此處罰嗎？', 'punish_status': '處罰狀態', 'punish_user_badge_warning': '⚠ 警告', 'punish_user_badge_mute': '🔇 禁言', 'punish_user_badge_permanent': '🚫 永久禁言',
+    'appeal_pending_short': '申訴中', 'appeal_no_data': '暫無申訴記錄', 'appeal_label': '申訴內容', 'appeal_accept': '通過申訴', 'appeal_reject': '駁回申訴', 'appeal_reply_prompt': '請輸入回覆內容（可選）：', 'appeal_revoke_confirm': '是否同時撤銷該處罰？', 'appeal_modify_reason_confirm': '是否修改處罰原因？', 'appeal_new_reason_prompt': '請輸入新的處罰原因：', 'appeal_accepted_done': '申訴已通過', 'appeal_rejected_done': '申訴已駁回', 'appeal_submit': '提交申訴', 'appeal_content_prompt': '請輸入申訴內容，說明您對處罰的異議：', 'appeal_submitted': '申訴已提交，等待管理員處理', 'appeal_my_records': '我的處罰記錄', 'appeal_no_punishment': '暫無處罰記錄',
+    'th_punish': '處罰', 'punish_none': '無', 'punish_active': '生效中', 'punish_revoked_label': '已撤銷', 'punish_reason_label': '處罰原因', 'mypunish_no_data': '暫無處罰記錄', 'appeal_submit_btn': '申訴', 'appeal_submit_failed': '申訴提交失敗', 'punish_rules_title': '處罰規則', 'punish_rule_1': '第1次被舉報（成立）：警告', 'punish_rule_2': '第2次：禁言（管理員自訂時長）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久停用站內信和倉庫操作權限', 'punish_appeal_hint_rule': '對處罰結果不滿意可提交申訴，管理員將審核並決定是否修改',
     'report_reason_label': '原因', 'report_reporter': '舉報人', 'req_detail_required': '請填寫詳細說明', 'req_submit_failed': '提交失敗', 'req_submitted': '申請已提交，等待管理員審批', 'req_my_records_title': '我的申請記錄', 'req_no_records': '暫無申請記錄', 'req_action_failed': '操作失敗', 'req_approved': '已批准該申請', 'req_deny_reason_prompt': '拒絕原因（可留空）：', 'req_denied': '已拒絕該申請',
     'forum_post_default': '帖子', 'settings_toggle_theme': '切換主題', 'sim_off_toast': '模擬數據已關閉', 'sim_on_toast': '模擬數據已開啟（無真實設備時用於測試）',
     'wp_cleared': '已清除桌布', 'wp_switched': '已切換至「{name}」', 'wp_set_compressed': '桌布已設定（壓縮至 {kb}KB）', 'wp_storage_full': '儲存空間不足，請清除桌布後重試', 'wp_image_load_failed': '圖片載入失敗', 'settings_wallpaper': '自訂桌布', 'wp_hint': '選擇預設或上傳圖片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩濃度', 'wp_upload': '上傳自訂桌布', 'wp_clear': '清除桌布', 'wp_name_none': '無', 'wp_name_aurora': '極光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '餘燼', 'wp_name_custom': '自訂',
@@ -746,12 +755,16 @@ const I18N = {
     'panel_warehouse': 'Warehouse Inventory', 'panel_users': 'User Management',
     'panel_profile': 'Profile', 'panel_messages': 'Messages', 'panel_dashboard': 'Dashboard', 'dashboard_recent_txn': 'Recent Transactions', 'dashboard_low': 'low', 'dashboard_types': 'types', 'nav_dashboard': 'Dashboard', 'panel_backup': 'Data Backup & Restore', 'panel_transactions': 'Inventory Transactions',
     'dashboard_inv_overview': 'Inventory Overview', 'dashboard_category_ratio': 'Category Ratio', 'dashboard_remain_rate': 'Material Remain %', 'dashboard_txn_trend': 'Transaction Trend', 'dashboard_health_radar': 'Inventory Health', 'dashboard_action_stacked': 'Action Distribution', 'dashboard_radar_quantity': 'Quantity', 'dashboard_radar_diversity': 'Diversity', 'dashboard_radar_health': 'Stock Health', 'dashboard_radar_activity': 'Activity', 'dashboard_radar_turnover': 'Turnover', 'th_other': 'Other',
-    'panel_groups': 'Groups', 'panel_forum': 'Forum', 'nav_groups': 'Groups', 'nav_forum': 'Forum', 'nav_reports': 'Reports',
+    'panel_groups': 'Groups', 'panel_forum': 'Forum', 'nav_groups': 'Groups', 'nav_forum': 'Forum', 'nav_reports': 'Reports', 'nav_mypunish': 'My Punishments',
     'group_create': 'Create Group', 'group_search': 'Search Groups', 'group_no_groups': 'No groups yet. Create or search to join', 'group_type_class': 'Class', 'group_type_normal': 'Normal', 'group_members': 'members', 'group_chat': 'Chat', 'group_leave': 'Leave', 'group_leave_confirm': 'Leave this group?', 'group_left': 'Left group', 'group_create_name': 'Enter group name', 'group_is_class': 'Is this a class group?', 'group_description': 'Enter group description (optional)', 'group_created': 'Group created', 'group_create_failed': 'Create failed', 'group_search_prompt': 'Enter group name to search', 'group_no_results': 'No groups found', 'group_join': 'Join', 'group_joined': 'Joined group', 'group_no_messages': 'No messages yet. Send the first one!',
     'report_title': 'Report User', 'report_reason': 'Reason', 'report_detail': 'Details (optional)', 'report_detail_ph': 'Describe the situation...', 'report_spam': 'Spam/Advertising', 'report_abuse': 'Abuse/Personal Attack', 'report_inappropriate': 'Inappropriate Content', 'report_cheating': 'Cheating/Rule Violation', 'report_other': 'Other', 'report_submit': 'Submit Report', 'report_submitted': 'Report submitted', 'report_failed': 'Report failed', 'report_mgmt': 'Report Management', 'report_no_data': 'No reports', 'report_status_pending': 'Pending', 'report_status_resolved': 'Resolved', 'report_status_dismissed': 'Dismissed', 'report_resolve': 'Resolve', 'report_dismiss': 'Dismiss', 'report_handled': 'Handled', 'cancel': 'Cancel', 'send': 'Send',
     'panel_settings': 'Settings', 'nav_settings': 'Settings', 'settings_theme': 'Theme', 'settings_language': 'Language', 'settings_data': 'Data Management', 'settings_about': 'About', 'settings_about_desc': 'Lab IoT Monitoring Platform', 'settings_light': 'Light', 'settings_dark': 'Dark', 'settings_export': 'Export Data', 'settings_import': 'Import Data', 'settings_export_done': 'Data exported', 'settings_import_confirm': 'Import data? Current data will be overwritten', 'settings_import_done': 'Data imported', 'settings_import_failed': 'Import failed: invalid file format',
     'txn_no_data': 'No transactions', 'txn_all': 'All', 'txn_material': '3D Material', 'txn_component': 'Components', 'txn_board': 'Boards', 'txn_add': 'Stock In', 'txn_consume': 'Stock Out', 'txn_edit': 'Edit', 'txn_delete': 'Delete', 'txn_create': 'Create', 'backup_no_data': 'No backups', 'backup_create': 'Create Backup', 'backup_refresh': 'Refresh', 'backup_restore': 'Restore', 'backup_confirm_restore': 'Restore to this backup? Current data will be overwritten (auto backup created first)', 'backup_restored': 'Data restored, refreshing...', 'backup_restore_failed': 'Restore failed', 'backup_delete_confirm': 'Delete this backup?', 'backup_deleted': 'Backup deleted', 'backup_created': 'Backup created', 'backup_failed': 'Backup failed', 'backup_prompt_note': 'Enter backup note (optional):', 'backup_manual': 'Manual', 'backup_auto': 'Auto', 'backup_no_note': 'No note', 'backup_delete': 'Delete',
-    'msg_attach_file': 'Send File', 'file_download_failed': 'File download failed', 'file_too_large': 'File too large (max 5MB)', 'file_uploading': 'Uploading file...', 'file_ready': 'File ready, type a message and send', 'file_upload_failed': 'File upload failed', 'file_default_name': 'File', 'msg_me': 'Me', 'msg_user_info': 'User Info', 'msg_admin': 'Admin', 'msg_input_placeholder': 'Type a message...',
+    'msg_attach_file': 'Send File', 'file_download_failed': 'File download failed', 'file_too_large': 'File too large (max 50MB)', 'file_uploading': 'Uploading file...', 'file_ready': 'File ready, type a message and send', 'file_upload_failed': 'File upload failed', 'file_default_name': 'File', 'msg_me': 'Me', 'msg_user_info': 'User Info', 'msg_admin': 'Admin', 'msg_input_placeholder': 'Type a message...', 'msg_send_failed': 'Message send failed', 'muted_msg': 'You are muted and cannot send messages', 'muted_banner': 'You are currently muted', 'muted_banner_permanent': 'You are permanently muted, cannot send messages or submit requests', 'muted_banner_temporary': 'You are muted, approximately {hours} hours remaining', 'muted_appeal_hint': 'If you disagree with the punishment, go to Report Management to submit an appeal',
+    'report_tab_reports': 'Reports', 'report_tab_appeals': 'Appeals', 'report_tab_punishments': 'Punishments', 'report_view_chat': 'View Chat', 'report_chat_between': 'Between', 'report_chat_title': 'Chat Records', 'report_no_chat': 'No chat records', 'report_mute_duration_prompt': 'Enter mute duration (hours)', 'report_mute_duration_hint': '2nd: custom, 3rd: min 720h (30d), 4th: min 2160h (90d)',
+    'punish_warning': 'Warning', 'punish_mute': 'Mute', 'punish_permanent': 'Permanent Ban', 'punish_label': 'Punishment', 'punish_revoke': 'Revoke', 'punish_no_data': 'No punishments', 'punish_expired': 'Expired', 'punish_created': 'Created', 'punish_until': 'Until', 'punish_revoked': 'Punishment revoked', 'punish_revoke_confirm': 'Revoke this punishment?', 'punish_status': 'Status', 'punish_user_badge_warning': '⚠ Warning', 'punish_user_badge_mute': '🔇 Muted', 'punish_user_badge_permanent': '🚫 Permanent Ban',
+    'appeal_pending_short': 'Appealing', 'appeal_no_data': 'No appeals', 'appeal_label': 'Appeal Content', 'appeal_accept': 'Accept', 'appeal_reject': 'Reject', 'appeal_reply_prompt': 'Enter reply (optional):', 'appeal_revoke_confirm': 'Also revoke the punishment?', 'appeal_modify_reason_confirm': 'Modify the punishment reason?', 'appeal_new_reason_prompt': 'Enter new punishment reason:', 'appeal_accepted_done': 'Appeal accepted', 'appeal_rejected_done': 'Appeal rejected', 'appeal_submit': 'Submit Appeal', 'appeal_content_prompt': 'Enter your appeal content explaining your disagreement:', 'appeal_submitted': 'Appeal submitted, awaiting admin review', 'appeal_my_records': 'My Punishments', 'appeal_no_punishment': 'No punishment records',
+    'th_punish': 'Punishment', 'punish_none': 'None', 'punish_active': 'Active', 'punish_revoked_label': 'Revoked', 'punish_reason_label': 'Reason', 'mypunish_no_data': 'No punishment records', 'appeal_submit_btn': 'Appeal', 'appeal_submit_failed': 'Appeal submission failed', 'punish_rules_title': 'Punishment Rules', 'punish_rule_1': '1st report (valid): Warning', 'punish_rule_2': '2nd: Mute (admin custom duration)', 'punish_rule_3': '3rd: Mute at least 30 days', 'punish_rule_4': '4th: Mute at least 90 days', 'punish_rule_5': '5th: Permanent ban from messaging and warehouse operations', 'punish_appeal_hint_rule': 'If dissatisfied with the punishment, you can submit an appeal and the admin will review and decide whether to modify it',
     'report_reason_label': 'Reason', 'report_reporter': 'Reporter', 'req_detail_required': 'Please provide details', 'req_submit_failed': 'Submit failed', 'req_submitted': 'Request submitted, awaiting approval', 'req_my_records_title': 'My Request Records', 'req_no_records': 'No requests yet', 'req_action_failed': 'Action failed', 'req_approved': 'Request approved', 'req_deny_reason_prompt': 'Deny reason (optional):', 'req_denied': 'Request denied',
     'forum_post_default': 'Post', 'settings_toggle_theme': 'Toggle Theme', 'sim_off_toast': 'Simulation data disabled', 'sim_on_toast': 'Simulation data enabled (for testing without real devices)',
     'wp_cleared': 'Wallpaper cleared', 'wp_switched': 'Switched to "{name}"', 'wp_set_compressed': 'Wallpaper set (compressed to {kb}KB)', 'wp_storage_full': 'Storage full, please clear wallpaper and retry', 'wp_image_load_failed': 'Image load failed', 'settings_wallpaper': 'Custom Wallpaper', 'wp_hint': 'Choose a preset or upload an image', 'wp_opacity': 'Opacity', 'wp_blur': 'Blur', 'wp_mask': 'Mask Density', 'wp_upload': 'Upload Custom Wallpaper', 'wp_clear': 'Clear Wallpaper', 'wp_name_none': 'None', 'wp_name_aurora': 'Aurora', 'wp_name_sunset': 'Sunset', 'wp_name_ocean': 'Ocean', 'wp_name_forest': 'Forest', 'wp_name_galaxy': 'Galaxy', 'wp_name_peach': 'Peach', 'wp_name_mint': 'Mint', 'wp_name_lavender': 'Lavender', 'wp_name_ember': 'Ember', 'wp_name_custom': 'Custom',
@@ -882,7 +895,7 @@ function applyI18n() {
     const lbl = document.getElementById('langLabel');
     if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.1]';
+    document.title = t('app_name') + ' [v2.2]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1116,7 +1129,7 @@ function applyI18n() {
     </div>
     <div class="term-box" data-title="用户列表" data-i18n-title="user_list">
       <table class="term-table" id="userTable">
-        <thead><tr><th data-i18n="th_username">用户名</th><th>UID</th><th data-i18n="th_nickname">昵称</th><th data-i18n="th_password">密码</th><th data-i18n="th_role">角色</th><th data-i18n="th_created">创建时间</th><th data-i18n="th_action">操作</th></tr></thead>
+        <thead><tr><th data-i18n="th_username">用户名</th><th>UID</th><th data-i18n="th_nickname">昵称</th><th data-i18n="th_password">密码</th><th data-i18n="th_role">角色</th><th data-i18n="th_punish">处罚</th><th data-i18n="th_created">创建时间</th><th data-i18n="th_action">操作</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -1131,7 +1144,8 @@ function applyI18n() {
   <!-- 站内信面板 -->
   <div id="panel-messages" class="panel">
     <div class="panel-title" data-i18n="panel_messages">站内信</div>
-    <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 160px);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+    <div id="mutedBanner" style="display:none;padding:10px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--danger);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)"></div>
+    <div id="msgLayout" style="display:flex;gap:0;height:calc(100vh - 200px);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
       <div style="width:280px;border-right:1px solid rgba(226,232,240,.4);display:flex;flex-direction:column;background:rgba(255,255,255,.72);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)">
         <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center">
           <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" data-i18n-ph="msg_add_friend_hint" style="flex:1;background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
@@ -1239,6 +1253,22 @@ function applyI18n() {
     </div>
   </div>
 
+  <!-- 我的处罚面板 -->
+  <div id="panel-mypunish" class="panel">
+    <div class="panel-title" data-i18n="nav_mypunish">我的处罚</div>
+    <div id="myPunishBanner" style="display:none;margin-bottom:12px;padding:12px 16px;border-radius:var(--radius);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);display:none;align-items:center;gap:10px;font-size:13px"></div>
+    <div id="myPunishList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
+    <div style="margin-top:16px;padding:12px 16px;border-radius:var(--radius);background:var(--bg-soft);font-size:12px;color:var(--fg-light);line-height:1.8">
+      <div style="font-weight:600;margin-bottom:6px" data-i18n="punish_rules_title">处罚规则</div>
+      <div data-i18n="punish_rule_1">第1次被举报（成立）：警告</div>
+      <div data-i18n="punish_rule_2">第2次：禁言（管理员自定义时长）</div>
+      <div data-i18n="punish_rule_3">第3次：禁言至少30天</div>
+      <div data-i18n="punish_rule_4">第4次：禁言至少90天</div>
+      <div data-i18n="punish_rule_5">第5次：永久禁用站内信和仓库操作权限</div>
+      <div style="margin-top:6px;color:var(--accent)" data-i18n="punish_appeal_hint_rule">对处罚结果不满意可提交申诉，管理员将审核并决定是否修改</div>
+    </div>
+  </div>
+
   <!-- 设置面板 -->
   <div id="panel-settings" class="panel">
     <div class="panel-title" data-i18n="panel_settings">设置</div>
@@ -1317,7 +1347,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.1</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.2</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -1327,7 +1357,12 @@ function applyI18n() {
   <!-- 举报管理面板 -->
   <div id="panel-reports" class="panel">
     <div class="panel-title" data-i18n="report_mgmt">举报管理</div>
-    <div id="reportList"></div>
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="nav-btn active" data-report-tab="reports" id="rptTabReports" data-i18n="report_tab_reports">举报列表</button>
+      <button class="nav-btn admin-only" data-report-tab="appeals" id="rptTabAppeals" data-i18n="report_tab_appeals">申诉管理</button>
+      <button class="nav-btn admin-only" data-report-tab="punishments" id="rptTabPunishments" data-i18n="report_tab_punishments">惩罚管理</button>
+    </div>
+    <div id="reportList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
   </div>
 
   <!-- 数据回滚面板 -->
@@ -1724,6 +1759,9 @@ function applyI18n() {
     $('#loginScreen').classList.remove('active');
     $('#mainScreen').classList.add('active');
     if (currentUser.role === 'admin') document.body.classList.add('is-admin');
+    // 管理员不需要"我的申请"按钮（管理员有直接操作权限），直接从 DOM 移除
+    const myReqBtn = $('#myReqBtn');
+    if (myReqBtn && currentUser.role === 'admin') myReqBtn.remove();
     initRooms();
     initMQTT();
     renderMaterialCards();
@@ -1772,6 +1810,7 @@ function applyI18n() {
     user: [
       { id: 'profile', icon: '👤', label: 'nav_profile' },
       { id: 'messages', icon: '💬', label: 'nav_messages', badgeId: 'msgBadge' },
+      { id: 'mypunish', icon: '⚖️', label: 'nav_mypunish' },
       { id: 'forum', icon: '📝', label: 'nav_forum' },
       { id: 'settings', icon: '⚙️', label: 'nav_settings' },
     ],
@@ -1839,7 +1878,7 @@ function applyI18n() {
     // 离开仪表盘时销毁图表，避免 canvas 残留
     if (p !== 'dashboard' && typeof destroyDashboardCharts === 'function') destroyDashboardCharts();
     // Panel-specific rendering
-    if (p === 'messages') { renderContacts(); renderFriendReqs(); }
+    if (p === 'messages') { renderContacts(); renderFriendReqs(); checkMyPunishment(); }
     if (p === 'profile') renderProfile();
     if (p === 'backup') renderBackups();
     if (p === 'dashboard') renderDashboard();
@@ -1847,6 +1886,7 @@ function applyI18n() {
     if (p === 'forum') renderForum();
     if (p === 'groups') { renderGroups(); }
     if (p === 'reports') renderReports();
+    if (p === 'mypunish') renderMyPunishments();
     if (p === 'settings') initSettings();
   }
 
@@ -2782,18 +2822,41 @@ function applyI18n() {
     const isAdmin = currentUser.role === 'admin';
     // admin 请求带密码字段，普通用户不返回密码
     const users = await apiGetUsers(isAdmin);
-    tbody.innerHTML = users.map(u => `<tr>
+    // 获取所有活跃处罚，用于在用户表中显示处罚状态
+    const punishR = await apiGetPunishments();
+    const punishMap = {};
+    if (punishR.ok && punishR.punishments) {
+      for (const p of punishR.punishments) {
+        if (!punishMap[p.uid]) punishMap[p.uid] = [];
+        punishMap[p.uid].push(p);
+      }
+    }
+    const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    tbody.innerHTML = users.map(u => {
+      // 构建处罚徽章
+      const userPunishments = punishMap[u.uid] || [];
+      let punishHtml = '<span style="color:var(--muted);font-size:11px">'+t('punish_none')+'</span>';
+      if (userPunishments.length > 0) {
+        punishHtml = userPunishments.map(p => {
+          const color = p.type === 'permanent' ? 'var(--danger)' : p.type === 'mute' ? 'var(--warning)' : 'var(--accent)';
+          const remain = p.type === 'mute' && p.until ? Math.ceil((p.until - Date.now()) / 3600000) : 0;
+          return `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};font-weight:600;display:inline-block;margin:1px">${punishLabel[p.type]||p.type}${p.type==='mute' && remain > 0 ? ' '+remain+'h' : ''}</span>`;
+        }).join(' ');
+      }
+      return `<tr>
       <td>${u.name}</td>
       <td><span style="font-family:monospace;color:var(--accent);font-weight:600">${u.uid || '-'}</span></td>
       <td>${u.avatar && u.avatar.startsWith('data:') ? `<img src="${u.avatar}" style="width:24px;height:24px;border-radius:6px;object-fit:cover;vertical-align:middle">` : (u.avatar || '👤')} ${u.nickname || u.name}</td>
       <td>${isAdmin ? `<span style="font-family:monospace;color:var(--accent)">${u.pass || '-'}</span>` : '<span style="color:var(--muted)">******</span>'}</td>
       <td>${u.role === 'admin' ? t('role_admin') : t('role_user')}</td>
+      <td>${punishHtml}</td>
       <td>${fmtDate(u.created)}</td>
       <td>
         ${isAdmin ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="editPass('${u.name}')">${t('change_pass')}</button>` : ''}
         ${u.name === 'admin' ? `<span style="color:var(--muted)">${t('protected')}</span>` : `<button class="term-btn-sm danger" onclick="deleteUser('${u.name}')">${t('delete')}</button>`}
       </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
   }
 
   window.deleteUser = async function(name) {
@@ -2884,7 +2947,8 @@ function applyI18n() {
   });
 
   // 用户查看自己的申请
-  $('#myReqBtn').addEventListener('click', async () => {
+  const _myReqBtn = $('#myReqBtn');
+  if (_myReqBtn) _myReqBtn.addEventListener('click', async () => {
     $('#reqPanelTitle').textContent = t('req_my_records_title');
     $('#reqPanel').style.display = 'flex';
     await renderReqList(false);
@@ -3056,10 +3120,18 @@ function applyI18n() {
     try { const r = await fetch(`/api/forum/post?id=${id}`, { method:'DELETE' }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiUploadFile(name, size, type, data) {
-    try { const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name, size, type, data, from: currentUser.uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try {
+      const r = await fetch('/api/upload', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name, size, type, data, from: currentUser.uid }) });
+      if (!r.ok) {
+        let msg = 'HTTP ' + r.status;
+        try { const ej = await r.json(); if (ej.msg) msg = ej.msg; } catch(_) {}
+        return { ok:false, msg };
+      }
+      return await r.json();
+    } catch(e) { return { ok:false, msg: e.message || '网络错误' }; }
   }
   async function apiDownloadFile(fileId) {
-    try { const r = await fetch(`/api/download?id=${fileId}`); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch(`/api/download?id=${fileId}`); return await r.json(); } catch(e) { return { ok:false, msg: e.message }; }
   }
   async function apiGetGroups(uid) {
     try { const r = await fetch(`/api/groups?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
@@ -3091,8 +3163,26 @@ function applyI18n() {
   async function apiGetReports() {
     try { const r = await fetch('/api/report'); return await r.json(); } catch(e) { return { ok:false, reports:[] }; }
   }
-  async function apiHandleReport(reportId, action, note) {
-    try { const r = await fetch('/api/report/handle', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reportId, action, note }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  async function apiHandleReport(reportId, action, note, muteDuration) {
+    try { const r = await fetch('/api/report/handle', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reportId, action, note, muteDuration }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetChatRecords(uid1, uid2) {
+    try { const r = await fetch(`/api/report/chat-records?uid1=${uid1}&uid2=${uid2}`); return await r.json(); } catch(e) { return { ok:false, messages:[] }; }
+  }
+  async function apiSubmitAppeal(reportId, uid, content) {
+    try { const r = await fetch('/api/report/appeal', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reportId, uid, content }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetAppeals() {
+    try { const r = await fetch('/api/report/appeals'); return await r.json(); } catch(e) { return { ok:false, reports:[] }; }
+  }
+  async function apiHandleAppeal(reportId, action, adminReply, newReason, revokePunishment) {
+    try { const r = await fetch('/api/report/appeal/handle', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reportId, action, adminReply, newReason, revokePunishment }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetPunishments(uid) {
+    try { const url = uid ? `/api/punishments?uid=${uid}` : '/api/punishments'; const r = await fetch(url); return await r.json(); } catch(e) { return { ok:false, punishments:[] }; }
+  }
+  async function apiRevokePunishment(uid, punishmentId) {
+    try { const r = await fetch('/api/punishments/revoke', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, punishmentId }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
 
   function renderProfile() {
@@ -3267,10 +3357,110 @@ function applyI18n() {
   let currentChatMode = null; // 'friend' | 'group'
   let currentChatGroupId = null;
 
+  // 检查当前用户是否有活跃处罚，并在站内信面板显示禁言横幅
+  async function checkMyPunishment() {
+    if (!currentUser) return;
+    const banner = $('#mutedBanner');
+    if (!banner) return;
+    const r = await apiGetPunishments(currentUser.uid);
+    if (!r.ok || !r.punishments || r.punishments.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+    const p = r.punishments[0]; // 最新的活跃处罚
+    let icon, msg;
+    if (p.type === 'permanent') {
+      icon = '🚫';
+      msg = t('muted_banner_permanent');
+    } else if (p.type === 'mute') {
+      icon = '🔇';
+      const remainHours = p.until ? Math.ceil((p.until - Date.now()) / 3600000) : 0;
+      msg = t('muted_banner_temporary', { hours: remainHours });
+    } else {
+      icon = '⚠';
+      msg = t('muted_banner');
+    }
+    banner.innerHTML = `<span style="font-size:16px">${icon}</span><span>${msg}</span><span style="margin-left:auto;font-size:11px;opacity:.8;cursor:pointer;text-decoration:underline" onclick="switchPanel('mypunish')">${t('muted_appeal_hint')}</span>`;
+    banner.style.display = 'flex';
+  }
+  function showMutedBanner() { checkMyPunishment(); }
+
+  // 渲染"我的处罚"面板：显示当前活跃处罚 + 历史处罚记录 + 申诉入口
+  async function renderMyPunishments() {
+    if (!currentUser) return;
+    const banner = $('#myPunishBanner');
+    const list = $('#myPunishList');
+    if (!list) return;
+    // 获取全部处罚历史（含已过期/已撤销）
+    const r = await apiGetPunishmentsAll(currentUser.uid);
+    if (!r.ok || !r.punishments || r.punishments.length === 0) {
+      if (banner) banner.style.display = 'none';
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:13px">'+t('mypunish_no_data')+'</div>';
+      return;
+    }
+    const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    const now = Date.now();
+    // 活跃处罚横幅
+    const active = r.punishments.filter(p => p.active === true);
+    if (banner) {
+      if (active.length > 0) {
+        const p = active[0];
+        let icon, msg;
+        if (p.type === 'permanent') { icon = '🚫'; msg = t('muted_banner_permanent'); }
+        else if (p.type === 'mute') { icon = '🔇'; const rh = p.until ? Math.ceil((p.until - now) / 3600000) : 0; msg = t('muted_banner_temporary', { hours: rh }); }
+        else { icon = '⚠'; msg = t('muted_banner'); }
+        banner.innerHTML = `<span style="font-size:18px">${icon}</span><span style="font-weight:600">${msg}</span>`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+    // 处罚列表
+    list.innerHTML = r.punishments.map(p => {
+      const expired = p.type === 'mute' && p.until && p.until < now;
+      const revoked = p.active === false && p.revokedAt;
+      const statusText = revoked ? t('punish_revoked_label') : (expired ? t('punish_expired') : (p.active ? t('punish_active') : t('punish_expired')));
+      const statusColor = (p.active && !expired) ? 'var(--danger)' : 'var(--muted)';
+      return `
+      <div class="req-item">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+              <span style="font-size:13px;font-weight:600">${punishLabel[p.type]||p.type}${p.type==='mute'?' '+p.duration+'h':''}</span>
+              <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg-soft);color:${statusColor};font-weight:600">${statusText}</span>
+            </div>
+            <div style="font-size:11px;color:var(--fg-light)">${t('punish_created')}: ${fmtDate(p.createdAt)}${p.until?' · '+t('punish_until')+': '+fmtDate(p.until):''}</div>
+            ${p.reason ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${t('punish_reason_label')}: ${p.reason}</div>` : ''}
+          </div>
+          ${p.active && !expired && p.reportId ? `<button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="submitMyAppeal('${p.reportId}')">${t('appeal_submit_btn')}</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  window.submitMyAppeal = async function(reportId) {
+    const content = prompt(t('appeal_content_prompt'), '');
+    if (!content) return;
+    const r = await apiSubmitAppeal(reportId, currentUser.uid, content);
+    if (!r.ok) { toast(r.msg || t('appeal_submit_failed')); return; }
+    toast(t('appeal_submitted'));
+    renderMyPunishments();
+  }
+  async function apiGetPunishmentsAll(uid) {
+    try { const r = await fetch(`/api/punishments?uid=${uid}&all=1`); return await r.json(); } catch(e) { return { ok:false, punishments:[] }; }
+  }
+
   async function renderContacts() {
     if (!currentUser) return;
     const r = await apiGetContacts(currentUser.uid);
     const gr = await apiGetGroups(currentUser.uid);
+    // 获取所有活跃处罚，用于在联系人列表显示处罚徽章
+    const punishR = await apiGetPunishments();
+    const punishMap = {};
+    if (punishR.ok && punishR.punishments) {
+      for (const p of punishR.punishments) {
+        if (!punishMap[p.uid]) punishMap[p.uid] = p;
+      }
+    }
     const list = $('#contactList');
     let html = '';
     // 群组部分
@@ -3292,16 +3482,19 @@ function applyI18n() {
     if (r.ok && r.contacts && r.contacts.length > 0) {
       r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
       html += '<div style="padding:6px 16px;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">'+t('msg_friends')+'</div>';
-      html += r.contacts.map(c => `
+      html += r.contacts.map(c => {
+        const p = punishMap[c.uid];
+        const punishBadge = p ? (p.type === 'permanent' ? '🚫' : p.type === 'mute' ? '🔇' : '⚠') : '';
+        return `
         <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar||''}">
           <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : (c.avatar||'👤')}</div>
           <div class="c-info">
-            <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">管理员</span>':''}</div>
+            <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">'+t('msg_admin')+'</span>':''}${punishBadge ? ' <span style="font-size:11px" title="'+(p.type==='permanent'?t('punish_permanent'):p.type==='mute'?t('punish_mute'):t('punish_warning'))+'">'+punishBadge+'</span>' : ''}</div>
             <div class="c-last">${c.lastMsg || t('msg_start_chat')}</div>
           </div>
           ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
     if (!html) {
       list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">'+t('msg_no_contacts')+'<br>'+t('msg_add_friend_hint')+'</div>';
@@ -3410,19 +3603,30 @@ function applyI18n() {
     if (pendingFile) {
       fileId = pendingFile.fileId;
       fileName = pendingFile.fileName;
-      pendingFile = null;
-      input.placeholder = t('msg_input_placeholder') || '输入消息...';
     }
-    input.value = '';
     if (currentChatMode === 'group' && currentChatGroupId) {
       // 群组消息
-      await apiSendGroupMessage(currentChatGroupId, content, fileId, fileName);
+      const r = await apiSendGroupMessage(currentChatGroupId, content, fileId, fileName);
+      if (!r.ok) {
+        if (r.muted) { toast(r.msg || t('muted_msg')); showMutedBanner(); return; }
+        toast(t('msg_send_failed'));
+        return;
+      }
+      input.value = '';
+      if (pendingFile) { pendingFile = null; input.placeholder = t('msg_input_placeholder') || '输入消息...'; }
       await loadGroupMessagesInMain(currentChatGroupId);
     } else if (currentChatPeer) {
       // 好友消息
-      await apiSendMessage(currentUser.uid, currentChatPeer, content, fileId, fileName);
-      const r = await apiGetMessages(currentUser.uid, currentChatPeer);
-      renderChatMessages(r.messages || [], currentChatPeer);
+      const r = await apiSendMessage(currentUser.uid, currentChatPeer, content, fileId, fileName);
+      if (!r.ok) {
+        if (r.muted) { toast(r.msg || t('muted_msg')); showMutedBanner(); return; }
+        toast(t('msg_send_failed'));
+        return;
+      }
+      input.value = '';
+      if (pendingFile) { pendingFile = null; input.placeholder = t('msg_input_placeholder') || '输入消息...'; }
+      const r2 = await apiGetMessages(currentUser.uid, currentChatPeer);
+      renderChatMessages(r2.messages || [], currentChatPeer);
     }
     renderContacts();
   }
@@ -3505,13 +3709,18 @@ function applyI18n() {
     renderContacts();
   };
   window.downloadMsgFile = async function(fileId, fileName) {
+    toast(t('file_uploading') || '下载中...');
     const r = await apiDownloadFile(fileId);
-    if (r.ok && r.file) {
+    if (r.ok && r.file && r.file.data) {
       const a = document.createElement('a');
       a.href = r.file.data;
       a.download = fileName || r.file.name;
+      document.body.appendChild(a);
       a.click();
-    } else { toast(t('file_download_failed')); }
+      document.body.removeChild(a);
+    } else {
+      toast((t('file_download_failed') || '下载失败') + (r.msg ? ': ' + r.msg : ''));
+    }
   };
 
   // ===================== 仪表盘 =====================
@@ -4308,7 +4517,7 @@ function applyI18n() {
 
     // 导出数据
     $('#exportDataBtn').onclick = async () => {
-      const data = { version: '2.1', exported: Date.now(), materials: getMaterials(), components: getComponents(), boards: getBoards() };
+      const data = { version: '2.2', exported: Date.now(), materials: getMaterials(), components: getComponents(), boards: getBoards() };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -4504,7 +4713,10 @@ function applyI18n() {
       else toast(t('report_failed'));
     });
   }
+  let currentReportTab = 'reports';
   async function renderReports() {
+    if (currentReportTab === 'appeals') return renderAppeals();
+    if (currentReportTab === 'punishments') return renderPunishments();
     const r = await apiGetReports();
     const list = $('#reportList');
     if (!r.ok || !r.reports || r.reports.length === 0) {
@@ -4514,29 +4726,174 @@ function applyI18n() {
     const reasonLabel = { spam: t('report_spam'), abuse: t('report_abuse'), inappropriate: t('report_inappropriate'), cheating: t('report_cheating'), other: t('report_other') };
     const statusColor = { pending: 'var(--warning)', resolved: 'var(--success)', dismissed: 'var(--muted)' };
     const statusLabel = { pending: t('report_status_pending'), resolved: t('report_status_resolved'), dismissed: t('report_status_dismissed') };
-    list.innerHTML = r.reports.map(rpt => `
+    const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    list.innerHTML = r.reports.map(rpt => {
+      const p = rpt.punishment;
+      const punishBadge = p ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--danger-soft);color:var(--danger);font-weight:600;margin-left:4px">${punishLabel[p.type]||p.type}${p.type==='mute'?' '+p.duration+'h':''}</span>` : '';
+      const appealBadge = rpt.appeal && rpt.appeal.status === 'pending' ? `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:600;margin-left:4px">${t('appeal_pending_short')}</span>` : '';
+      return `
       <div class="req-item">
         <div style="display:flex;justify-content:space-between;align-items:start">
           <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
               <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:${statusColor[rpt.status]==='var(--warning)'?'var(--warning-soft)':statusColor[rpt.status]==='var(--success)'?'rgba(34,197,94,0.1)':'var(--bg-soft)'};color:${statusColor[rpt.status]};font-weight:600">${statusLabel[rpt.status]}</span>
               <span style="font-size:13px;font-weight:600">${rpt.target}</span>
+              ${punishBadge}${appealBadge}
             </div>
             <div style="font-size:12px;color:var(--fg-light)">${t('report_reason_label')}: ${reasonLabel[rpt.reason]||rpt.reason}</div>
             ${rpt.detail ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${rpt.detail}</div>` : ''}
             <div style="font-size:10px;color:var(--muted);margin-top:4px">${t('report_reporter')}: ${rpt.reporter} · ${fmtDate(rpt.created)}</div>
+            ${p ? `<div style="font-size:10px;color:var(--danger);margin-top:2px">${t('punish_label')}: ${punishLabel[p.type]||p.type}${p.type==='mute'?' ('+p.duration+'h)':''}${p.until?' → '+fmtDate(p.until):''}${p.reason?' · '+p.reason:''}</div>` : ''}
           </div>
-          ${rpt.status === 'pending' ? `<div style="display:flex;gap:6px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            ${rpt.reporterUid && rpt.targetUid ? `<button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent)" onclick="viewChatRecords('${rpt.reporterUid}','${rpt.targetUid}','${rpt.target}')">${t('report_view_chat')}</button>` : ''}
+            ${rpt.status === 'pending' ? `
             <button class="term-btn-sm" style="border-color:var(--success);color:var(--success)" onclick="handleReport('${rpt.id}','resolved')">${t('report_resolve')}</button>
             <button class="term-btn-sm danger" onclick="handleReport('${rpt.id}','dismissed')">${t('report_dismiss')}</button>
-          </div>` : ''}
+            ` : ''}
+            ${p && p.type !== 'warning' && rpt.status === 'resolved' && (!rpt.appeal || rpt.appeal.status !== 'pending') ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="revokePunishmentByUid('${rpt.targetUid}','${p.id||''}')">${t('punish_revoke')}</button>` : ''}
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
   window.handleReport = async function(rid, action) {
-    await apiHandleReport(rid, action, '');
-    toast(t('report_handled'));
+    if (action === 'resolved') {
+      // 询问禁言时长（第2次举报时管理员可指定）
+      let muteDuration = null;
+      const input = prompt(t('report_mute_duration_prompt') + '\n' + t('report_mute_duration_hint'), '24');
+      if (input === null) return; // 取消
+      if (input && !isNaN(parseInt(input))) muteDuration = parseInt(input);
+      const note = prompt(t('report_handle_note_prompt'), '') || '';
+      const r = await apiHandleReport(rid, action, note, muteDuration);
+      if (!r.ok) { toast(r.msg || t('report_failed')); return; }
+      toast(t('report_handled') + (r.punishment ? ' · ' + (r.punishment.type === 'warning' ? t('punish_warning') : r.punishment.type === 'mute' ? t('punish_mute')+' '+r.punishment.duration+'h' : t('punish_permanent')) : ''));
+    } else {
+      const r = await apiHandleReport(rid, action, '', null);
+      if (!r.ok) { toast(r.msg || t('report_failed')); return; }
+      toast(t('report_handled'));
+    }
     renderReports();
+  }
+  window.viewChatRecords = async function(uid1, uid2, targetName) {
+    const r = await apiGetChatRecords(uid1, uid2);
+    const msgs = r.ok ? (r.messages || []) : [];
+    const users = await apiGetUsers();
+    const getName = (uid) => { const u = (users.users||[]).find(x=>x.uid===uid); return u ? (u.nickname||u.name) : uid; };
+    let html = `<div style="margin-bottom:8px;font-size:12px;color:var(--fg-light)">${t('report_chat_between')}: ${getName(uid1)} ↔ ${getName(uid2)}</div>`;
+    if (msgs.length === 0) {
+      html += '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">'+t('report_no_chat')+'</div>';
+    } else {
+      html += '<div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:6px">' + msgs.map(m => {
+        const isU1 = m.from === uid1;
+        return `<div style="display:flex;flex-direction:column;align-items:${isU1?'flex-end':'flex-start'}">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:2px">${isU1?getName(uid1):getName(uid2)} · ${new Date(m.created).toLocaleString()}</div>
+          <div class="chat-bubble ${isU1?'me':'other'}" style="max-width:80%">${m.content}${m.fileId?'<div style="margin-top:4px;font-size:11px">📎 '+(m.fileName||'file')+'</div>':''}</div>
+        </div>`;
+      }).join('') + '</div>';
+    }
+    // 弹窗显示
+    showReportModal(html, t('report_chat_title') + ' - ' + targetName);
+  }
+  async function renderAppeals() {
+    const r = await apiGetAppeals();
+    const list = $('#reportList');
+    if (!r.ok || !r.reports || r.reports.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:12px">'+t('appeal_no_data')+'</div>';
+      return;
+    }
+    const reasonLabel = { spam: t('report_spam'), abuse: t('report_abuse'), inappropriate: t('report_inappropriate'), cheating: t('report_cheating'), other: t('report_other') };
+    const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    list.innerHTML = r.reports.map(rpt => {
+      const p = rpt.punishment || {};
+      return `
+      <div class="req-item">
+        <div style="margin-bottom:8px">
+          <span style="font-size:13px;font-weight:600">${rpt.target}</span>
+          <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--danger-soft);color:var(--danger);font-weight:600;margin-left:4px">${punishLabel[p.type]||''}${p.type==='mute'?' '+p.duration+'h':''}</span>
+        </div>
+        <div style="font-size:12px;color:var(--fg-light);margin-bottom:4px">${t('report_reason_label')}: ${reasonLabel[rpt.reason]||rpt.reason}</div>
+        <div style="font-size:12px;color:var(--accent);margin-bottom:4px;font-weight:600">${t('appeal_label')}:</div>
+        <div style="font-size:12px;color:var(--fg);padding:8px;background:var(--bg-soft);border-radius:var(--radius-sm);margin-bottom:8px">${rpt.appeal.content}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="term-btn-sm" style="border-color:var(--success);color:var(--success)" onclick="handleAppeal('${rpt.id}','accepted')">${t('appeal_accept')}</button>
+          <button class="term-btn-sm danger" onclick="handleAppeal('${rpt.id}','rejected')">${t('appeal_reject')}</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  window.handleAppeal = async function(reportId, action) {
+    const adminReply = prompt(t('appeal_reply_prompt'), '') || '';
+    let newReason = '', revokePunishment = false;
+    if (action === 'accepted') {
+      revokePunishment = confirm(t('appeal_revoke_confirm'));
+      if (confirm(t('appeal_modify_reason_confirm'))) {
+        newReason = prompt(t('appeal_new_reason_prompt'), '') || '';
+      }
+    }
+    const r = await apiHandleAppeal(reportId, action, adminReply, newReason, revokePunishment);
+    if (!r.ok) { toast(r.msg || t('report_failed')); return; }
+    toast(action === 'accepted' ? t('appeal_accepted_done') : t('appeal_rejected_done'));
+    renderAppeals();
+  }
+  async function renderPunishments() {
+    const r = await apiGetPunishments();
+    const list = $('#reportList');
+    if (!r.ok || !r.punishments || r.punishments.length === 0) {
+      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:12px">'+t('punish_no_data')+'</div>';
+      return;
+    }
+    const users = await apiGetUsers();
+    const getName = (uid) => { const u = (users.users||[]).find(x=>x.uid===uid); return u ? (u.nickname||u.name) : uid; };
+    const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    list.innerHTML = r.punishments.map(p => {
+      const expired = p.type === 'mute' && p.until && p.until < Date.now();
+      return `
+      <div class="req-item">
+        <div style="display:flex;justify-content:space-between;align-items:start">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+              <span style="font-size:13px;font-weight:600">${getName(p.uid)}</span>
+              <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${expired?'var(--bg-soft)':'var(--danger-soft)'};color:${expired?'var(--muted)':'var(--danger)'};font-weight:600">${punishLabel[p.type]||p.type}${p.type==='mute'?' '+p.duration+'h':''}${expired?' ('+t('punish_expired')+')':''}</span>
+            </div>
+            <div style="font-size:11px;color:var(--fg-light)">${t('punish_created')}: ${fmtDate(p.createdAt)}${p.until?' · '+t('punish_until')+': '+fmtDate(p.until):''}</div>
+            ${p.reason ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${p.reason}</div>` : ''}
+          </div>
+          ${p.active && !expired ? `<button class="term-btn-sm" style="border-color:var(--warning);color:var(--warning)" onclick="revokePunishmentByUid('${p.uid}','${p.id}')">${t('punish_revoke')}</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  window.revokePunishmentByUid = async function(uid, pid) {
+    if (!confirm(t('punish_revoke_confirm'))) return;
+    const r = await apiRevokePunishment(uid, pid);
+    if (!r.ok) { toast(r.msg || t('report_failed')); return; }
+    toast(t('punish_revoked'));
+    if (currentReportTab === 'punishments') renderPunishments(); else renderReports();
+  }
+  // tab 切换
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('[data-report-tab]');
+    if (!tab) return;
+    document.querySelectorAll('[data-report-tab]').forEach(b => b.classList.remove('active'));
+    tab.classList.add('active');
+    currentReportTab = tab.dataset.reportTab;
+    renderReports();
+  });
+  // 通用弹窗
+  function showReportModal(innerHtml, title) {
+    let modal = document.getElementById('reportDetailModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'reportDetailModal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'display:none';
+      modal.innerHTML = `<div class="modal-card" style="max-width:600px;width:92%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div class="modal-title" id="reportDetailTitle" style="margin-bottom:0"></div><button class="nav-btn" onclick="document.getElementById('reportDetailModal').style.display='none'">${t('close')||'关闭'}</button></div><div id="reportDetailBody"></div></div>`;
+      document.body.appendChild(modal);
+    }
+    document.getElementById('reportDetailTitle').textContent = title;
+    document.getElementById('reportDetailBody').innerHTML = innerHtml;
+    modal.style.display = 'flex';
   }
 
   function initMessaging() {
@@ -4555,26 +4912,99 @@ function applyI18n() {
     });
     // 文件附件按钮
     $('#attachFileBtn').addEventListener('click', () => { $('#chatFileInput').click(); });
+    // 图片压缩：将图片压缩到最大 1920px、4MB 以内
+    function compressImage(file) {
+      return new Promise((resolve) => {
+        if (!file.type.startsWith('image/')) { resolve(null); return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            const maxDim = 1920;
+            if (width > maxDim || height > maxDim) {
+              const ratio = Math.min(maxDim / width, maxDim / height);
+              width = Math.round(width * ratio);
+              height = Math.round(height * ratio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            let quality = 0.85;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            // 若仍超过 4MB，逐步降低质量
+            while (dataUrl.length > 4 * 1024 * 1024 && quality > 0.3) {
+              quality -= 0.1;
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+            }
+            resolve(dataUrl);
+          };
+          img.onerror = () => resolve(null);
+          img.src = ev.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
     $('#chatFileInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      if (file.size > 5 * 1024 * 1024) { toast(t('file_too_large')); e.target.value = ''; return; }
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const base64 = ev.target.result;
-        toast(t('file_uploading'));
-        const r = await apiUploadFile(file.name, file.size, file.type, base64);
+      if (file.size > 50 * 1024 * 1024) { toast(t('file_too_large')); e.target.value = ''; return; }
+      // 禁用输入区，显示上传中状态
+      const attachBtn = $('#attachFileBtn');
+      const sendBtn = $('#sendMsgBtn');
+      const chatInput = $('#chatInput');
+      const oldAttachText = attachBtn.innerHTML;
+      attachBtn.innerHTML = '<span style="animation:spin 1s linear infinite;display:inline-block">⏳</span>';
+      attachBtn.disabled = true;
+      sendBtn.disabled = true;
+      chatInput.disabled = true;
+      toast(t('file_uploading'));
+      try {
+        let base64Data, uploadSize;
+        // 图片类型自动压缩
+        if (file.type.startsWith('image/')) {
+          const compressed = await compressImage(file);
+          if (compressed) {
+            base64Data = compressed;
+            uploadSize = Math.round(compressed.length * 0.75);
+          } else {
+            const reader = new FileReader();
+            base64Data = await new Promise(r => { reader.onload = ev => r(ev.target.result); reader.readAsDataURL(file); });
+            uploadSize = file.size;
+          }
+        } else {
+          const reader = new FileReader();
+          base64Data = await new Promise(r => { reader.onload = ev => r(ev.target.result); reader.readAsDataURL(file); });
+          uploadSize = file.size;
+        }
+        // 前端预检：base64 数据超过 60MB 则直接拒绝（50MB 原始 × 1.33 base64 膨胀）
+        if (base64Data.length > 60 * 1024 * 1024) {
+          toast(t('file_too_large'));
+          return;
+        }
+        const r = await apiUploadFile(file.name, uploadSize, file.type.startsWith('image/') ? 'image/jpeg' : file.type, base64Data);
         if (r.ok && r.fileId) {
           pendingFile = { fileId: r.fileId, fileName: file.name };
-          $('#chatInput').value = '';
-          $('#chatInput').placeholder = '📎 ' + file.name;
+          chatInput.value = '';
+          chatInput.placeholder = '📎 ' + file.name;
           toast(t('file_ready'));
         } else {
-          toast(t('file_upload_failed'));
+          pendingFile = null;
+          chatInput.placeholder = t('msg_input_placeholder') || '输入消息...';
+          toast(t('file_upload_failed') + (r.msg ? ': ' + r.msg : ''));
         }
+      } catch(err) {
+        pendingFile = null;
+        toast(t('file_upload_failed') + ': ' + err.message);
+      } finally {
+        attachBtn.innerHTML = oldAttachText;
+        attachBtn.disabled = false;
+        sendBtn.disabled = false;
+        chatInput.disabled = false;
         e.target.value = '';
-      };
-      reader.readAsDataURL(file);
+      }
     });
     // 添加好友/搜索 UID
     $('#addFriendBtn').addEventListener('click', async () => {
