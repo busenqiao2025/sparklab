@@ -1,5 +1,5 @@
 ﻿/**
- * SparkMinds Lab v2.2 — Cloudflare Worker
+ * SparkMinds Lab v2.3 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
 
@@ -162,7 +162,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       try {
         if (url.pathname === '/api/health')
-          return json({ ok: true, time: Date.now(), version: 'v2.2' });
+          return json({ ok: true, time: Date.now(), version: 'v2.3' });
 
         // ========== 用户认证 ==========
         if (url.pathname === '/api/login' && request.method === 'POST') {
@@ -289,6 +289,53 @@ export default {
           target.pass = pass;
           await saveUsers(env, users);
           return json({ ok: true });
+        }
+
+        // ========== 在线状态 ==========
+        // POST /api/heartbeat — 用户心跳
+        if (url.pathname === '/api/heartbeat' && request.method === 'POST') {
+          const { uid } = await readBody(request);
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          await env.USERS.put(`heartbeat_${uid}`, JSON.stringify({ uid, lastSeen: Date.now() }));
+          return json({ ok: true });
+        }
+
+        // GET /api/online?uid=xxx — 查询单个用户在线状态（60 秒内活跃视为在线）
+        if (url.pathname === '/api/online' && request.method === 'GET') {
+          const uid = url.searchParams.get('uid');
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          let online = false;
+          let lastSeen = null;
+          const raw = await env.USERS.get(`heartbeat_${uid}`);
+          if (raw) {
+            try {
+              const data = JSON.parse(raw);
+              lastSeen = data.lastSeen;
+              online = !!lastSeen && (Date.now() - lastSeen) <= 60000;
+            } catch(e) {}
+          }
+          return json({ ok: true, online, lastSeen });
+        }
+
+        // GET /api/online-batch?uids=xxx,yyy — 批量查询在线状态
+        if (url.pathname === '/api/online-batch' && request.method === 'GET') {
+          const uidsParam = url.searchParams.get('uids') || '';
+          const uids = uidsParam.split(',').map(s => s.trim()).filter(Boolean);
+          const statuses = [];
+          for (const uid of uids) {
+            let online = false;
+            let lastSeen = null;
+            const raw = await env.USERS.get(`heartbeat_${uid}`);
+            if (raw) {
+              try {
+                const data = JSON.parse(raw);
+                lastSeen = data.lastSeen;
+                online = !!lastSeen && (Date.now() - lastSeen) <= 60000;
+              } catch(e) {}
+            }
+            statuses.push({ uid, online, lastSeen });
+          }
+          return json({ ok: true, statuses });
         }
 
         // ========== 个人主页 ==========
@@ -436,6 +483,25 @@ export default {
           return json({ ok: true, messages: result.sort((a,b) => a.created - b.created) });
         }
 
+        // GET /api/messages/search?uid=xxx&q=keyword&peerUid=yyy — 搜索私聊消息
+        if (url.pathname === '/api/messages/search' && request.method === 'GET') {
+          const uid = url.searchParams.get('uid');
+          const q = url.searchParams.get('q') || '';
+          const peerUid = url.searchParams.get('peerUid');
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          if (!q) return json({ ok: false, msg: '缺少搜索关键词 q' });
+          let msgs = await loadMessages(env);
+          // 仅搜索与我相关的私聊消息（排除广播），且内容包含关键词
+          let result = msgs.filter(m => !m.broadcast && (m.from === uid || m.to === uid) && m.content && m.content.includes(q));
+          // 若指定了 peerUid，则进一步限定为与该用户的对话
+          if (peerUid) {
+            result = result.filter(m => (m.from === uid && m.to === peerUid) || (m.from === peerUid && m.to === uid));
+          }
+          // 按 created 降序，最多返回 50 条
+          result = result.sort((a, b) => b.created - a.created).slice(0, 50);
+          return json({ ok: true, messages: result });
+        }
+
         // POST /api/messages — 发送私聊消息
         if (url.pathname === '/api/messages' && request.method === 'POST') {
           const { from, to, content, fileId, fileName } = await readBody(request);
@@ -449,6 +515,31 @@ export default {
           msgs.push(newMsg);
           await saveMessages(env, msgs);
           return json({ ok: true, message: newMsg });
+        }
+
+        // POST /api/messages/read-receipt — 发送已读回执
+        // body: { from, to, messageIds } — messageIds 可选，不传则标记该 from→to 的所有消息为已读
+        if (url.pathname === '/api/messages/read-receipt' && request.method === 'POST') {
+          const { from, to, messageIds } = await readBody(request);
+          if (!from || !to) return json({ ok: false, msg: '缺少参数' });
+          let msgs = await loadMessages(env);
+          const now = Date.now();
+          let changed = false;
+          // messageIds 可为数组、单值或不传；不传则标记 from→to 的全部消息
+          let idSet = null;
+          if (Array.isArray(messageIds)) idSet = new Set(messageIds);
+          else if (messageIds) idSet = new Set([messageIds]);
+          for (const m of msgs) {
+            if (m.from === from && m.to === to) {
+              if (!idSet || idSet.has(m.id)) {
+                m.readAt = now;
+                m.read = true;
+                changed = true;
+              }
+            }
+          }
+          if (changed) await saveMessages(env, msgs);
+          return json({ ok: true });
         }
 
         // POST /api/messages/broadcast — 管理员广播

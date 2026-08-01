@@ -1,48 +1,83 @@
-# SparkMinds Lab v1.9 — Cloudflare Workers 版
+# SparkMinds Lab v2.3 — Cloudflare Workers 版
 
 实验室物联网监控平台，部署在 Cloudflare 边缘网络。
 
-## v1.9 新增：用户社交系统
+## v2.3 新增：已读回执 + 在线状态 + 消息搜索 + 卡片化 UI
 
-### 用户 UID
-- 每个用户自动分配唯一 UID（10001 起）
-- 管理员可在用户管理表格中查看所有用户的 UID 和昵称
-- 通过 UID 可查询用户公开信息
+### 消息已读回执
+- 聊天气泡显示 ✓（未读）/ ✓✓（已读）双勾标识
+- 打开聊天自动标记对方消息为已读
+- 消息轮询实时同步已读状态
 
-### 个人主页
-- 查看自己的账号名、UID、密码、角色、注册时间
-- 自定义昵称（30 个 emoji 头像可选）
-- 自定义头像
+### 在线状态实时显示
+- 30 秒心跳机制，60 秒内活跃判定为在线
+- 联系人列表和聊天窗口显示绿点（在线）/灰点（离线）
+- 离线状态显示最后活跃时间
+- 登录自动启动心跳，退出/关闭页面自动清除
 
-### 好友系统
-- 输入 UID 搜索用户，发送好友请求
-- 收到好友请求时站内信面板顶部显示通知
-- 接受/拒绝好友请求
-- 好友列表显示在站内信面板左侧
+### 消息搜索
+- 站内信面板顶部搜索栏
+- 300ms 防抖触发，关键词高亮
+- 搜索结果点击跳转聊天，清空恢复当前视图
+- 最多返回 50 条，按时间倒序
+
+### 卡片化 UI 重构
+- CSS Grid 卡片布局（`repeat(auto-fill, minmax(280px, 1fr))`）
+- 请求项/库存卡片 hover 上浮动画
+- 在线状态点发光效果 + 明暗主题适配
+- 搜索结果项独立卡片样式
+
+## 历史功能
+
+### 用户系统
+- UID：5 位零填充编号（admin=00001，递增不复用）
+- 个人主页：昵称、30 款 emoji 头像、自定义头像
+- 好友系统：UID 搜索、好友请求、好友列表
+- 多语言：简中 / 繁中 / 英文
 
 ### 站内信
-- 左侧联系人列表（好友 + 管理员），显示最后消息和未读数
-- 右侧聊天窗口，支持实时收发消息（5 秒轮询）
-- 消息气泡区分自己/对方/广播
-- 导航栏站内信按钮显示未读消息红色徽标
+- 私聊/群聊实时收发（5 秒轮询）
+- 文件传输（最大 50MB，图片自动压缩，KV 分块存储）
+- 管理员广播（全体/普通用户/指定 UID）
+- 群组创建/加入/退出/解散
 
-### 管理员广播
-- 管理员可向全体用户或指定用户群发消息
-- 广播消息在聊天窗口中以黄色气泡居中显示
+### 举报/惩罚/申诉系统
+- 举报流程：用户举报 → 管理员查看聊天记录 → 处理
+- 渐进式惩罚：警告 → 24h 禁言 → 30d 禁言 → 90d 禁言 → 永久禁言
+- 申诉系统：用户申诉 → 管理员处理（通过/驳回）
+- 处罚展示：禁言横幅、用户徽章、惩罚管理
+
+### 实验室管理
+- 传感器实时监控（温度/湿度/光照/CO₂）
+- 灯光控制（仅管理员）
+- 3D 打印材料管理
+- 仓库元器件/主板管理
+- 库存流水记录
+- 数据快照/回滚 + UID 迁移工具
+
+### UI/UX
+- 毛玻璃效果（Glassmorphism）全面应用
+- 明暗双主题 + B站风格切换动画
+- SVG 火花星标 LOGO
+- 自定义壁纸系统（9 预设 + 图片上传 + 调节滑块）
+- Chart.js 数据概览仪表盘
+- 卡片化布局 + 华丽动画系统
 
 ## 仓库结构
 
 ```
 ├── public/
-│   └── index.html        前端页面
+│   └── index.html        前端页面（v2.3）
 ├── src/
-│   └── worker.js         Cloudflare Worker（API 逻辑）
+│   └── worker.js         Cloudflare Worker（v2.3）
 ├── wrangler.toml         Cloudflare 配置
 ├── package.json          依赖与脚本
+├── 更新日志.md            版本变更记录
+├── 版本概览.md            版本总览
 └── .gitignore
 ```
 
-## API 路由
+## API 路由（v2.3 新增标注 ✨）
 
 ### 用户认证
 | 方法 | 路径 | 说明 |
@@ -53,54 +88,47 @@
 | DELETE | /api/users?name=xxx | 删除用户 |
 | PUT | /api/users | 修改密码 |
 
-### 个人主页
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | /api/profile?uid=xxx | 按 UID 查询用户 |
-| PUT | /api/profile | 更新昵称/头像 |
-
-### 好友系统
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | /api/friends?uid=xxx | 获取好友列表 |
-| POST | /api/friends/request | 发送好友请求 |
-| POST | /api/friends/accept | 接受好友请求 |
-| POST | /api/friends/reject | 拒绝好友请求 |
-| GET | /api/friends/requests?uid=xxx | 获取收到的好友请求 |
-| POST | /api/friends/remove | 删除好友 |
-
 ### 站内信
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | /api/messages?uid=xxx&peerUid=yyy | 获取聊天记录 |
+| GET | /api/messages?uid=&peerUid= | 获取聊天记录 |
 | POST | /api/messages | 发送私聊消息 |
 | POST | /api/messages/broadcast | 管理员广播 |
-| GET | /api/messages/unread?uid=xxx | 未读消息数 |
-| GET | /api/messages/contacts?uid=xxx | 联系人列表 |
+| GET | /api/messages/unread?uid= | 未读消息数 |
+| GET | /api/messages/contacts?uid= | 联系人列表 |
+| ✨ POST | /api/messages/read-receipt | 已读回执 |
+| ✨ GET | /api/messages/search?uid=&q=&peerUid= | 搜索消息 |
 
-### 申请授权系统
+### ✨ 在线状态（v2.3 新增）
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | /api/requests | 获取申请列表 |
-| POST | /api/requests | 提交申请 |
-| POST | /api/requests/approve | 管理员批准 |
-| POST | /api/requests/deny | 管理员拒绝 |
-| GET | /api/requests/pending | 待处理数量 |
+| ✨ POST | /api/heartbeat | 用户心跳 |
+| ✨ GET | /api/online-batch?uids= | 批量查询在线状态 |
 
-## Cloudflare Pages Git 部署配置
+### 举报/惩罚/申诉
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/report | 提交举报 |
+| GET | /api/reports | 举报列表 |
+| POST | /api/report/handle | 处理举报 |
+| GET | /api/report/chat-records?uid1=&uid2= | 查看聊天记录 |
+| POST | /api/punishment/create | 创建惩罚 |
+| GET | /api/punishments | 惩罚列表 |
+| POST | /api/punishment/revoke | 撤销惩罚 |
+| POST | /api/appeal/submit | 提交申诉 |
+| GET | /api/appeals | 申诉列表 |
+| POST | /api/appeal/handle | 处理申诉 |
 
-| 配置项 | 值 |
-|--------|-----|
-| Framework preset | None |
-| Build command | 留空 |
-| Deploy command | `npx wrangler deploy` |
-| Root directory | `/` |
+## 部署
 
-## 部署前必做
+```bash
+cd SparkMindsLab-v2.3
+npx wrangler deploy
+```
 
+### 部署前必做
 1. 在 Cloudflare Dashboard 创建 KV 命名空间，名称 `USERS`
 2. 把返回的 namespace ID 填入 `wrangler.toml`：`id = "你的真实ID"`
-3. push 代码到 GitHub
 
 ## 默认账号
 
@@ -117,3 +145,10 @@
 | messages | 站内信数组 |
 | friend_requests | 好友请求数组 |
 | requests | 授权申请数组 |
+| reports | 举报记录数组 |
+| punishments | 惩罚记录数组 |
+| appeals | 申诉记录数组 |
+| heartbeat_{uid} | ✨ 用户心跳（在线状态） |
+| uid_counter | UID 持久化计数器 |
+| file_{id} | 文件存储（<20MB 单键） |
+| file_{id}_chunk_{n} | 文件分块（≥20MB） |

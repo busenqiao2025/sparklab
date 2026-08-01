@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.2]</title>
+<title>SparkMinds Lab [v2.3]</title>
 <style>
   /* ============================================================
-     SparkMinds Lab v2.2 — Report System + File Transfer Fix
+     SparkMinds Lab v2.3 — Read Receipts + Online Status + Search + Card Layout
      Modern, clean, inspired by Linear / Vercel / Stripe
      ============================================================ */
   :root{
@@ -390,7 +390,7 @@
 
   /* ===== Inventory Cards ===== */
   .card-stack{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:16px}
-  .inv-card{background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .inv-card{background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-md);position:relative;overflow:hidden}
 [data-theme="dark"] .inv-card{background:rgba(20,24,33,.78);border-color:rgba(30,36,51,.4)}
 .inv-card::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);transform:translateX(-100%);transition:transform .4s}
 .inv-card:hover::after{transform:translateX(100%)}
@@ -438,9 +438,9 @@
   .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
 
   /* ===== Request Items ===== */
-  .req-item{background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;transition:all .25s ease}
+  .req-item{background:rgba(255,255,255,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);padding:16px;margin-bottom:10px;transition:all .28s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-md)}
 [data-theme="dark"] .req-item{background:rgba(20,24,33,.75);border-color:rgba(30,36,51,.4)}
-  .req-item:hover{border-color:var(--border-strong);box-shadow:var(--shadow)}
+  .req-item:hover{border-color:var(--accent-light);box-shadow:var(--shadow-lg),0 0 20px rgba(99,102,241,.08);transform:translateY(-3px)}
 
   /* ===== Profile ===== */
   .profile-card{background:rgba(255,255,255,.78);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
@@ -470,14 +470,66 @@
   .contact-item .c-last{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .contact-item .c-badge{background:var(--danger);color:#fff;border-radius:10px;font-size:10px;padding:1px 6px;min-width:14px;text-align:center;font-weight:700;flex-shrink:0}
   .chat-bubble{max-width:70%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;word-break:break-word}
-  .chat-bubble.me{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-bottom-right-radius:4px;align-self:flex-end;animation:bubbleIn .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 8px rgba(99,102,241,.2)}
-  .chat-bubble.other{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(226,232,240,.4);color:var(--fg);border-bottom-left-radius:4px;align-self:flex-start;animation:bubbleIn .3s cubic-bezier(.34,1.56,.64,1)}
+  .chat-bubble.me{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:#fff;border-bottom-right-radius:4px;align-self:flex-end;animation:bubbleIn .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 10px rgba(99,102,241,.16);transition:transform .2s ease,box-shadow .2s ease}
+  .chat-bubble.me:hover{transform:scale(1.015);box-shadow:0 4px 16px rgba(99,102,241,.24)}
+  .chat-bubble.other{background:rgba(255,255,255,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(226,232,240,.4);color:var(--fg);border-bottom-left-radius:4px;align-self:flex-start;animation:bubbleIn .3s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--shadow-xs);transition:transform .2s ease,box-shadow .2s ease}
+  .chat-bubble.other:hover{transform:scale(1.015);box-shadow:var(--shadow-md)}
 [data-theme="dark"] .chat-bubble.other{background:rgba(20,24,33,.82);border-color:rgba(30,36,51,.4)}
   .chat-bubble.broadcast{background:var(--warning-soft);border:1px solid var(--warning);color:var(--fg);align-self:center;border-radius:10px;text-align:center;max-width:85%}
   .chat-time{font-size:10px;color:var(--muted);margin-top:2px}
   .friend-req-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border-light);font-size:12px}
   .friend-req-item .r-avatar{font-size:16px}
   .friend-req-item .r-name{flex:1;color:var(--fg);font-weight:500}
+
+  /* ===== v2.3 Card Grid / Online Dot / Search Highlight ===== */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .online-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;transition:background .3s ease;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+  .online-dot.on{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(255,255,255,.6)}
+  .online-dot.off{background:#94a3b8;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
+  [data-theme="dark"] .online-dot{box-shadow:0 0 0 2px rgba(20,24,33,.6)}
+  [data-theme="dark"] .online-dot.on{box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(20,24,33,.6)}
+  [data-theme="dark"] .online-dot.off{box-shadow:0 0 0 2px rgba(20,24,33,.6)}
+  .msg-search-highlight{background:rgba(99,102,241,0.2);padding:1px 3px;border-radius:3px;color:var(--accent-dark);font-weight:600}
+  [data-theme="dark"] .msg-search-highlight{color:var(--accent-light)}
+  .msg-search-result{padding:12px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:var(--transition);border-radius:var(--radius-sm);margin-bottom:6px}
+  .msg-search-result:hover{background:var(--accent-soft);transform:translateX(2px)}
+  .msg-search-result .msr-meta{font-size:11px;color:var(--muted);margin-bottom:3px}
+  .msg-search-result .msr-content{font-size:13px;color:var(--fg);line-height:1.5}
+
+  /* ===== 🥚 EASTER EGGS ===== */
+  /* Confetti particle */
+  .ee-confetti{position:fixed;width:10px;height:10px;pointer-events:none;z-index:99999;will-change:transform,opacity}
+  /* Firework particle */
+  .ee-firework{position:fixed;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:99999;will-change:transform,opacity}
+  /* Secret toast */
+  .ee-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,rgba(99,102,241,.95),rgba(139,92,246,.95));color:#fff;padding:20px 40px;border-radius:16px;font-size:18px;font-weight:700;box-shadow:0 20px 60px rgba(99,102,241,.4);z-index:99999;pointer-events:none;backdrop-filter:blur(10px);text-align:center;transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .4s}
+  .ee-toast.show{transform:translate(-50%,-50%) scale(1)}
+  .ee-toast .ee-sub{font-size:13px;font-weight:400;margin-top:6px;opacity:.85}
+  /* Logo rainbow spin */
+  .ee-logo-spin{animation:eeLogoSpin 1.2s ease-in-out!important}
+  @keyframes eeLogoSpin{0%{transform:rotate(0) scale(1)}25%{transform:rotate(180deg) scale(1.4);filter:hue-rotate(90deg) drop-shadow(0 0 12px #f59e0b)}50%{transform:rotate(360deg) scale(1.6);filter:hue-rotate(180deg) drop-shadow(0 0 16px #ec4899)}75%{transform:rotate(540deg) scale(1.4);filter:hue-rotate(270deg) drop-shadow(0 0 12px #10b981)}100%{transform:rotate(720deg) scale(1);filter:none}}
+  /* Neon mode */
+  .ee-neon-mode{animation:eeNeonShift 3s ease-in-out infinite!important}
+  @keyframes eeNeonShift{0%,100%{filter:hue-rotate(0deg) saturate(1.3)}33%{filter:hue-rotate(120deg) saturate(1.6)}66%{filter:hue-rotate(240deg) saturate(1.6)}}
+  .ee-neon-mode .trae-brand{animation:eeNeonText 2s ease-in-out infinite}
+  @keyframes eeNeonText{0%,100%{text-shadow:0 0 4px rgba(99,102,241,.5)}50%{text-shadow:0 0 12px rgba(236,72,153,.7),0 0 24px rgba(99,102,241,.5)}}
+  /* About easter egg modal */
+  .ee-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);z-index:99998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;pointer-events:none}
+  .ee-modal-overlay.show{opacity:1;pointer-events:auto}
+  .ee-modal{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:480px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,.3);transform:scale(.85);transition:transform .4s cubic-bezier(.34,1.56,.64,1);max-height:80vh;overflow-y:auto}
+  .ee-modal-overlay.show .ee-modal{transform:scale(1)}
+  .ee-modal h2{font-size:20px;font-weight:700;margin-bottom:4px;background:linear-gradient(135deg,var(--accent),#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .ee-modal .ee-ver{font-size:12px;color:var(--muted);margin-bottom:16px}
+  .ee-modal .ee-timeline{list-style:none;padding:0;margin:0 0 16px}
+  .ee-modal .ee-timeline li{padding:6px 0;border-bottom:1px solid var(--border-light);font-size:13px;color:var(--fg-light);display:flex;justify-content:space-between;align-items:center}
+  .ee-modal .ee-timeline li:last-child{border-bottom:none}
+  .ee-modal .ee-timeline .ee-date{font-size:11px;color:var(--muted);flex-shrink:0;margin-left:12px}
+  .ee-modal .ee-timeline .ee-tag{font-size:10px;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-weight:600;flex-shrink:0;margin-left:8px}
+  .ee-modal .ee-quote{font-size:13px;color:var(--fg-light);font-style:italic;padding:12px;background:var(--bg-soft);border-radius:12px;border-left:3px solid var(--accent);margin-bottom:16px;line-height:1.6}
+  .ee-modal .ee-close{width:100%;padding:10px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:transform .2s}
+  .ee-modal .ee-close:hover{transform:scale(1.02)}
+  .ee-modal .ee-credits{text-align:center;font-size:11px;color:var(--muted);margin-top:12px}
+  .ee-modal .ee-badge{display:inline-block;font-size:24px;margin-right:8px}
 
   /* ===== Responsive ===== */
   @media(max-width:768px){
@@ -517,7 +569,7 @@ const I18N = {
     'dashboard_inv_overview': '库存总览', 'dashboard_category_ratio': '分类占比', 'dashboard_remain_rate': '耗材剩余率', 'dashboard_txn_trend': '库存变动趋势', 'dashboard_health_radar': '库存健康度', 'dashboard_action_stacked': '操作分类分布', 'dashboard_radar_quantity': '数量丰富度', 'dashboard_radar_diversity': '类别多样性', 'dashboard_radar_health': '库存健康', 'dashboard_radar_activity': '操作活跃度', 'dashboard_radar_turnover': '周转率', 'th_other': '其他',
     'panel_groups': '群组', 'panel_forum': '论坛', 'nav_groups': '群组', 'nav_forum': '论坛', 'nav_reports': '举报管理', 'nav_mypunish': '我的处罚',
     'group_create': '创建群组', 'group_search': '搜索群组', 'group_no_groups': '暂无群组，点击创建或搜索加入', 'group_type_class': '课堂群', 'group_type_normal': '普通群', 'group_members': '人', 'group_chat': '聊天', 'group_leave': '退出', 'group_leave_confirm': '确定要退出此群组吗？', 'group_left': '已退出群组', 'group_create_name': '请输入群组名称', 'group_is_class': '是课堂群吗？', 'group_description': '请输入群组描述（可选）', 'group_created': '群组已创建', 'group_create_failed': '创建失败', 'group_search_prompt': '输入群组名称搜索', 'group_no_results': '未找到群组', 'group_join': '加入', 'group_joined': '已加入群组', 'group_no_messages': '暂无消息，发送第一条吧',
-    'report_title': '举报用户', 'report_reason': '举报原因', 'report_detail': '详细说明（可选）', 'report_detail_ph': '请描述具体情况...', 'report_spam': '垃圾信息/广告', 'report_abuse': '辱骂/人身攻击', 'report_inappropriate': '不当内容', 'report_cheating': '作弊/违规操作', 'report_other': '其他', 'report_submit': '提交举报', 'report_submitted': '举报已提交', 'report_failed': '举报失败', 'report_mgmt': '举报管理', 'report_no_data': '暂无举报记录', 'report_status_pending': '待处理', 'report_status_resolved': '已处理', 'report_status_dismissed': '已驳回', 'report_resolve': '处理', 'report_dismiss': '驳回', 'report_handled': '已处理', 'cancel': '取消', 'send': '发送',
+    'report_title': '举报用户', 'report_reason': '举报原因', 'report_detail': '详细说明（可选）', 'report_detail_ph': '请描述具体情况...', 'report_spam': '垃圾信息/广告', 'report_abuse': '辱骂/人身攻击', 'report_inappropriate': '不当内容', 'report_cheating': '作弊/违规操作', 'report_other': '其他', 'report_submit': '提交举报', 'report_submitted': '举报已提交', 'report_failed': '举报失败', 'report_mgmt': '举报管理', 'report_no_data': '暂无举报记录', 'report_status_pending': '待处理', 'report_status_resolved': '已处理', 'report_status_dismissed': '已驳回', 'report_resolve': '处理', 'report_dismiss': '驳回', 'report_handled': '已处理', 'report_handle_note_prompt': '处理备注（可选）：', 'cancel': '取消', 'send': '发送',
     'panel_settings': '设置', 'nav_settings': '设置', 'settings_theme': '主题模式', 'settings_language': '语言', 'settings_data': '数据管理', 'settings_about': '关于', 'settings_about_desc': '实验室物联网监控平台', 'settings_light': '浅色', 'settings_dark': '深色', 'settings_export': '导出数据', 'settings_import': '导入数据', 'settings_export_done': '数据已导出', 'settings_import_confirm': '确定要导入数据吗？当前数据将被覆盖', 'settings_import_done': '数据已导入', 'settings_import_failed': '导入失败：文件格式错误',
     'txn_no_data': '暂无流水记录', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入库', 'txn_consume': '出库', 'txn_edit': '修改', 'txn_delete': '删除', 'txn_create': '新建', 'backup_no_data': '暂无备份记录', 'backup_create': '创建备份', 'backup_refresh': '刷新列表', 'backup_restore': '恢复', 'backup_confirm_restore': '确定要恢复到此备份吗？当前数据将被覆盖（会自动创建恢复前备份）', 'backup_restored': '数据已恢复，正在刷新...', 'backup_restore_failed': '恢复失败', 'backup_delete_confirm': '确定要删除此备份吗？', 'backup_deleted': '备份已删除', 'backup_created': '备份已创建', 'backup_failed': '备份失败', 'backup_prompt_note': '请输入备份备注（可选）：', 'backup_manual': '手动备份', 'backup_auto': '自动', 'backup_no_note': '无备注', 'backup_delete': '删除',
     'msg_attach_file': '发送文件', 'file_download_failed': '文件下载失败', 'file_too_large': '文件过大（最大50MB）', 'file_uploading': '正在上传文件...', 'file_ready': '文件已就绪，输入消息后发送', 'file_upload_failed': '文件上传失败', 'file_default_name': '文件', 'msg_me': '我', 'msg_user_info': '用户信息', 'msg_admin': '管理员', 'msg_input_placeholder': '输入消息...', 'msg_send_failed': '消息发送失败', 'muted_msg': '您已被禁言，无法发送消息', 'muted_banner': '您当前已被禁言', 'muted_banner_permanent': '您已被永久禁言，无法发送消息和申请操作', 'muted_banner_temporary': '您已被禁言，剩余约 {hours} 小时', 'muted_appeal_hint': '如对处罚有异议，可前往「举报管理」提交申诉', 'warning_banner': '您已收到警告，请注意行为规范',
@@ -581,6 +633,7 @@ const I18N = {
     'msg_mark_read': '已读',
     'msg_send_friend_req': '发送好友请求', 'msg_user_not_found': '用户不存在',
     'msg_enter_uid': '请输入 UID', 'msg_uid_enter_uid': '请输入至少一个 UID',
+    'msg_read': '已读', 'msg_unread': '未读', 'msg_search_placeholder': '搜索消息...', 'msg_search_no_results': '未找到相关消息', 'msg_online': '在线', 'msg_offline': '离线', 'msg_last_seen': '最后活跃',
     // Profile
     'profile_account': '账号名', 'profile_uid': 'UID', 'profile_password': '密码',
     'profile_role': '角色', 'profile_created': '注册时间',
@@ -645,7 +698,7 @@ const I18N = {
     'dashboard_inv_overview': '庫存總覽', 'dashboard_category_ratio': '分類佔比', 'dashboard_remain_rate': '耗材剩餘率', 'dashboard_txn_trend': '庫存變動趨勢', 'dashboard_health_radar': '庫存健康度', 'dashboard_action_stacked': '操作分類分佈', 'dashboard_radar_quantity': '數量豐富度', 'dashboard_radar_diversity': '類別多樣性', 'dashboard_radar_health': '庫存健康', 'dashboard_radar_activity': '操作活躍度', 'dashboard_radar_turnover': '週轉率', 'th_other': '其他',
     'panel_groups': '群組', 'panel_forum': '論壇', 'nav_groups': '群組', 'nav_forum': '論壇', 'nav_reports': '舉報管理', 'nav_mypunish': '我的處罰',
     'group_create': '建立群組', 'group_search': '搜尋群組', 'group_no_groups': '暫無群組，點擊建立或搜尋加入', 'group_type_class': '課堂群', 'group_type_normal': '普通群', 'group_members': '人', 'group_chat': '聊天', 'group_leave': '退出', 'group_leave_confirm': '確定要退出此群組嗎？', 'group_left': '已退出群組', 'group_create_name': '請輸入群組名稱', 'group_is_class': '是課堂群嗎？', 'group_description': '請輸入群組描述（可選）', 'group_created': '群組已建立', 'group_create_failed': '建立失敗', 'group_search_prompt': '輸入群組名稱搜尋', 'group_no_results': '未找到群組', 'group_join': '加入', 'group_joined': '已加入群組', 'group_no_messages': '暫無消息，發送第一條吧',
-    'report_title': '舉報用戶', 'report_reason': '舉報原因', 'report_detail': '詳細說明（可選）', 'report_detail_ph': '請描述具體情況...', 'report_spam': '垃圾信息/廣告', 'report_abuse': '辱罵/人身攻擊', 'report_inappropriate': '不當內容', 'report_cheating': '作弊/違規操作', 'report_other': '其他', 'report_submit': '提交舉報', 'report_submitted': '舉報已提交', 'report_failed': '舉報失敗', 'report_mgmt': '舉報管理', 'report_no_data': '暫無舉報記錄', 'report_status_pending': '待處理', 'report_status_resolved': '已處理', 'report_status_dismissed': '已駁回', 'report_resolve': '處理', 'report_dismiss': '駁回', 'report_handled': '已處理', 'cancel': '取消', 'send': '發送',
+    'report_title': '舉報用戶', 'report_reason': '舉報原因', 'report_detail': '詳細說明（可選）', 'report_detail_ph': '請描述具體情況...', 'report_spam': '垃圾信息/廣告', 'report_abuse': '辱罵/人身攻擊', 'report_inappropriate': '不當內容', 'report_cheating': '作弊/違規操作', 'report_other': '其他', 'report_submit': '提交舉報', 'report_submitted': '舉報已提交', 'report_failed': '舉報失敗', 'report_mgmt': '舉報管理', 'report_no_data': '暫無舉報記錄', 'report_status_pending': '待處理', 'report_status_resolved': '已處理', 'report_status_dismissed': '已駁回', 'report_resolve': '處理', 'report_dismiss': '駁回', 'report_handled': '已處理', 'report_handle_note_prompt': '處理備註（可選）：', 'cancel': '取消', 'send': '發送',
     'panel_settings': '設定', 'nav_settings': '設定', 'settings_theme': '主題模式', 'settings_language': '語言', 'settings_data': '數據管理', 'settings_about': '關於', 'settings_about_desc': '實驗室物聯網監控平台', 'settings_light': '淺色', 'settings_dark': '深色', 'settings_export': '匯出數據', 'settings_import': '匯入數據', 'settings_export_done': '數據已匯出', 'settings_import_confirm': '確定要匯入數據嗎？當前數據將被覆蓋', 'settings_import_done': '數據已匯入', 'settings_import_failed': '匯入失敗：檔案格式錯誤',
     'txn_no_data': '暫無流水記錄', 'txn_all': '全部', 'txn_material': '3D耗材', 'txn_component': '元器件', 'txn_board': '主板', 'txn_add': '入庫', 'txn_consume': '出庫', 'txn_edit': '修改', 'txn_delete': '刪除', 'txn_create': '新建', 'backup_no_data': '暫無備份記錄', 'backup_create': '建立備份', 'backup_refresh': '刷新列表', 'backup_restore': '恢復', 'backup_confirm_restore': '確定要恢復到此備份嗎？當前數據將被覆蓋（會自動建立恢復前備份）', 'backup_restored': '數據已恢復，正在刷新...', 'backup_restore_failed': '恢復失敗', 'backup_delete_confirm': '確定要刪除此備份嗎？', 'backup_deleted': '備份已刪除', 'backup_created': '備份已建立', 'backup_failed': '備份失敗', 'backup_prompt_note': '請輸入備份備註（可選）：', 'backup_manual': '手動備份', 'backup_auto': '自動', 'backup_no_note': '無備註', 'backup_delete': '刪除',
     'msg_attach_file': '發送檔案', 'file_download_failed': '檔案下載失敗', 'file_too_large': '檔案過大（最大50MB）', 'file_uploading': '正在上傳檔案...', 'file_ready': '檔案已就緒，輸入訊息後發送', 'file_upload_failed': '檔案上傳失敗', 'file_default_name': '檔案', 'msg_me': '我', 'msg_user_info': '用戶資訊', 'msg_admin': '管理員', 'msg_input_placeholder': '輸入訊息...', 'msg_send_failed': '訊息發送失敗', 'muted_msg': '您已被禁言，無法發送訊息', 'muted_banner': '您目前已被禁言', 'muted_banner_permanent': '您已被永久禁言，無法發送訊息和申請操作', 'muted_banner_temporary': '您已被禁言，剩餘約 {hours} 小時', 'muted_appeal_hint': '如對處罰有異議，可前往「舉報管理」提交申訴', 'warning_banner': '您已收到警告，請注意行為規範',
@@ -702,6 +755,7 @@ const I18N = {
     'msg_mark_read': '已讀',
     'msg_send_friend_req': '發送好友請求', 'msg_user_not_found': '用戶不存在',
     'msg_enter_uid': '請輸入 UID', 'msg_uid_enter_uid': '請輸入至少一個 UID',
+    'msg_read': '已讀', 'msg_unread': '未讀', 'msg_search_placeholder': '搜尋訊息...', 'msg_search_no_results': '未找到相關訊息', 'msg_online': '在線', 'msg_offline': '離線', 'msg_last_seen': '最後活躍',
     'profile_account': '帳號名', 'profile_uid': 'UID', 'profile_password': '密碼',
     'profile_role': '角色', 'profile_created': '註冊時間',
     'profile_edit_nickname': '編輯暱稱', 'profile_select_avatar': '選擇頭像',
@@ -757,7 +811,7 @@ const I18N = {
     'dashboard_inv_overview': 'Inventory Overview', 'dashboard_category_ratio': 'Category Ratio', 'dashboard_remain_rate': 'Material Remain %', 'dashboard_txn_trend': 'Transaction Trend', 'dashboard_health_radar': 'Inventory Health', 'dashboard_action_stacked': 'Action Distribution', 'dashboard_radar_quantity': 'Quantity', 'dashboard_radar_diversity': 'Diversity', 'dashboard_radar_health': 'Stock Health', 'dashboard_radar_activity': 'Activity', 'dashboard_radar_turnover': 'Turnover', 'th_other': 'Other',
     'panel_groups': 'Groups', 'panel_forum': 'Forum', 'nav_groups': 'Groups', 'nav_forum': 'Forum', 'nav_reports': 'Reports', 'nav_mypunish': 'My Punishments',
     'group_create': 'Create Group', 'group_search': 'Search Groups', 'group_no_groups': 'No groups yet. Create or search to join', 'group_type_class': 'Class', 'group_type_normal': 'Normal', 'group_members': 'members', 'group_chat': 'Chat', 'group_leave': 'Leave', 'group_leave_confirm': 'Leave this group?', 'group_left': 'Left group', 'group_create_name': 'Enter group name', 'group_is_class': 'Is this a class group?', 'group_description': 'Enter group description (optional)', 'group_created': 'Group created', 'group_create_failed': 'Create failed', 'group_search_prompt': 'Enter group name to search', 'group_no_results': 'No groups found', 'group_join': 'Join', 'group_joined': 'Joined group', 'group_no_messages': 'No messages yet. Send the first one!',
-    'report_title': 'Report User', 'report_reason': 'Reason', 'report_detail': 'Details (optional)', 'report_detail_ph': 'Describe the situation...', 'report_spam': 'Spam/Advertising', 'report_abuse': 'Abuse/Personal Attack', 'report_inappropriate': 'Inappropriate Content', 'report_cheating': 'Cheating/Rule Violation', 'report_other': 'Other', 'report_submit': 'Submit Report', 'report_submitted': 'Report submitted', 'report_failed': 'Report failed', 'report_mgmt': 'Report Management', 'report_no_data': 'No reports', 'report_status_pending': 'Pending', 'report_status_resolved': 'Resolved', 'report_status_dismissed': 'Dismissed', 'report_resolve': 'Resolve', 'report_dismiss': 'Dismiss', 'report_handled': 'Handled', 'cancel': 'Cancel', 'send': 'Send',
+    'report_title': 'Report User', 'report_reason': 'Reason', 'report_detail': 'Details (optional)', 'report_detail_ph': 'Describe the situation...', 'report_spam': 'Spam/Advertising', 'report_abuse': 'Abuse/Personal Attack', 'report_inappropriate': 'Inappropriate Content', 'report_cheating': 'Cheating/Rule Violation', 'report_other': 'Other', 'report_submit': 'Submit Report', 'report_submitted': 'Report submitted', 'report_failed': 'Report failed', 'report_mgmt': 'Report Management', 'report_no_data': 'No reports', 'report_status_pending': 'Pending', 'report_status_resolved': 'Resolved', 'report_status_dismissed': 'Dismissed', 'report_resolve': 'Resolve', 'report_dismiss': 'Dismiss', 'report_handled': 'Handled', 'report_handle_note_prompt': 'Handle note (optional):', 'cancel': 'Cancel', 'send': 'Send',
     'panel_settings': 'Settings', 'nav_settings': 'Settings', 'settings_theme': 'Theme', 'settings_language': 'Language', 'settings_data': 'Data Management', 'settings_about': 'About', 'settings_about_desc': 'Lab IoT Monitoring Platform', 'settings_light': 'Light', 'settings_dark': 'Dark', 'settings_export': 'Export Data', 'settings_import': 'Import Data', 'settings_export_done': 'Data exported', 'settings_import_confirm': 'Import data? Current data will be overwritten', 'settings_import_done': 'Data imported', 'settings_import_failed': 'Import failed: invalid file format',
     'txn_no_data': 'No transactions', 'txn_all': 'All', 'txn_material': '3D Material', 'txn_component': 'Components', 'txn_board': 'Boards', 'txn_add': 'Stock In', 'txn_consume': 'Stock Out', 'txn_edit': 'Edit', 'txn_delete': 'Delete', 'txn_create': 'Create', 'backup_no_data': 'No backups', 'backup_create': 'Create Backup', 'backup_refresh': 'Refresh', 'backup_restore': 'Restore', 'backup_confirm_restore': 'Restore to this backup? Current data will be overwritten (auto backup created first)', 'backup_restored': 'Data restored, refreshing...', 'backup_restore_failed': 'Restore failed', 'backup_delete_confirm': 'Delete this backup?', 'backup_deleted': 'Backup deleted', 'backup_created': 'Backup created', 'backup_failed': 'Backup failed', 'backup_prompt_note': 'Enter backup note (optional):', 'backup_manual': 'Manual', 'backup_auto': 'Auto', 'backup_no_note': 'No note', 'backup_delete': 'Delete',
     'msg_attach_file': 'Send File', 'file_download_failed': 'File download failed', 'file_too_large': 'File too large (max 50MB)', 'file_uploading': 'Uploading file...', 'file_ready': 'File ready, type a message and send', 'file_upload_failed': 'File upload failed', 'file_default_name': 'File', 'msg_me': 'Me', 'msg_user_info': 'User Info', 'msg_admin': 'Admin', 'msg_input_placeholder': 'Type a message...', 'msg_send_failed': 'Message send failed', 'muted_msg': 'You are muted and cannot send messages', 'muted_banner': 'You are currently muted', 'muted_banner_permanent': 'You are permanently muted, cannot send messages or submit requests', 'muted_banner_temporary': 'You are muted, approximately {hours} hours remaining', 'muted_appeal_hint': 'If you disagree with the punishment, go to Report Management to submit an appeal', 'warning_banner': 'You have received a warning, please follow the rules',
@@ -814,6 +868,7 @@ const I18N = {
     'msg_mark_read': 'Mark as Read',
     'msg_send_friend_req': 'Send Friend Request', 'msg_user_not_found': 'User not found',
     'msg_enter_uid': 'Please enter UID', 'msg_uid_enter_uid': 'Please enter at least one UID',
+    'msg_read': 'Read', 'msg_unread': 'Unread', 'msg_search_placeholder': 'Search messages...', 'msg_search_no_results': 'No messages found', 'msg_online': 'Online', 'msg_offline': 'Offline', 'msg_last_seen': 'Last seen',
     'profile_account': 'Account', 'profile_uid': 'UID', 'profile_password': 'Password',
     'profile_role': 'Role', 'profile_created': 'Registered',
     'profile_edit_nickname': 'Edit Nickname', 'profile_select_avatar': 'Select Avatar',
@@ -895,7 +950,7 @@ function applyI18n() {
     const lbl = document.getElementById('langLabel');
     if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.2]';
+    document.title = t('app_name') + ' [v2.3]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -936,7 +991,7 @@ function applyI18n() {
   <!-- Top Bar -->
   <div class="trae-topbar">
     <div class="trae-topbar-left">
-      <span class="trae-brand"><svg class="trae-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="24" height="24" rx="7" fill="url(#sparkGrad)"/><path d="M12 5 L13.6 10.4 L19 12 L13.6 13.6 L12 19 L10.4 13.6 L5 12 L10.4 10.4 Z" fill="#fff"/><path d="M17.6 6.4 L18.15 7.85 L19.6 8.4 L18.15 8.95 L17.6 10.4 L17.05 8.95 L15.6 8.4 L17.05 7.85 Z" fill="#fff" fill-opacity="0.85"/></svg>SparkMinds Lab v2.2</span>
+      <span class="trae-brand"><svg class="trae-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sparkGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="24" height="24" rx="7" fill="url(#sparkGrad)"/><path d="M12 5 L13.6 10.4 L19 12 L13.6 13.6 L12 19 L10.4 13.6 L5 12 L10.4 10.4 Z" fill="#fff"/><path d="M17.6 6.4 L18.15 7.85 L19.6 8.4 L18.15 8.95 L17.6 10.4 L17.05 8.95 L15.6 8.4 L17.05 7.85 Z" fill="#fff" fill-opacity="0.85"/></svg>SparkMinds Lab v2.3</span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1151,6 +1206,9 @@ function applyI18n() {
           <input id="addFriendInput" type="text" placeholder="输入 UID 添加好友" data-i18n-ph="msg_add_friend_hint" style="flex:1;background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
           <button class="nav-btn" id="addFriendBtn" style="padding:5px 10px;font-size:11px" data-i18n="search">搜索</button>
         </div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
+          <input id="msgSearchInput" type="text" placeholder="搜索消息..." data-i18n-ph="msg_search_placeholder" style="width:100%;background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;font-size:12px;outline:none">
+        </div>
         <div id="friendReqList" style="max-height:120px;overflow-y:auto"></div>
         <div id="contactList" style="flex:1;overflow-y:auto;padding:4px 0"></div>
         <div style="padding:8px 12px;border-top:1px solid rgba(226,232,240,.4);display:flex;gap:6px">
@@ -1347,7 +1405,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.2</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.3</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -1791,6 +1849,7 @@ function applyI18n() {
     if (simInterval) { clearInterval(simInterval); simInterval = null; }
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
+    stopHeartbeat(); // v2.3 清除在线状态心跳
     currentChatPeer = null;
   });
 
@@ -3078,6 +3137,22 @@ function applyI18n() {
   async function apiMarkRead(uid, msgIds) {
     try { const r = await fetch('/api/messages/mark-read', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, msgIds }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
+  // ===================== v2.3 已读回执 / 在线状态 / 消息搜索 API =====================
+  async function apiSendReadReceipt(from, to) {
+    try { const r = await fetch('/api/messages/read-receipt', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiHeartbeat(uid) {
+    try { const r = await fetch('/api/heartbeat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  }
+  async function apiGetOnline(uid) {
+    try { const r = await fetch(`/api/online?uid=${encodeURIComponent(uid)}`); return await r.json(); } catch(e) { return { ok:false, online:false }; }
+  }
+  async function apiGetOnlineBatch(uids) {
+    try { const r = await fetch(`/api/online-batch?uids=${encodeURIComponent(uids.join(','))}`); return await r.json(); } catch(e) { return { ok:false, statuses:{} }; }
+  }
+  async function apiSearchMessages(uid, q, peerUid) {
+    try { const params = new URLSearchParams({ uid, q }); if (peerUid) params.set('peerUid', peerUid); const r = await fetch(`/api/messages/search?${params.toString()}`); return await r.json(); } catch(e) { return { ok:false, results:[] }; }
+  }
   async function apiRemoveFriend(uid, friendUid) {
     try { const r = await fetch('/api/friends/remove', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, friendUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
@@ -3157,8 +3232,8 @@ function applyI18n() {
   async function apiSendGroupMessage(gid, content, fileId, fileName) {
     try { const r = await fetch('/api/groups/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ gid, from:currentUser.uid, fromName:currentUser.nickname||currentUser.name, content, fileId, fileName }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
-  async function apiReport(reporter, target, targetUid, reason, detail) {
-    try { const r = await fetch('/api/report', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reporter, target, targetUid, reason, detail }) }); return await r.json(); } catch(e) { return { ok:false }; }
+  async function apiReport(reporter, reporterUid, target, targetUid, reason, detail) {
+    try { const r = await fetch('/api/report', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ reporter, reporterUid, target, targetUid, reason, detail }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiGetReports() {
     try { const r = await fetch('/api/report'); return await r.json(); } catch(e) { return { ok:false, reports:[] }; }
@@ -3276,6 +3351,10 @@ function applyI18n() {
   // ===================== 站内信 =====================
   let currentChatPeer = null; // 当前聊天对象 UID
   let msgPollTimer = null;
+  let heartbeatTimer = null; // v2.3 在线状态心跳定时器
+  let searchDebounceTimer = null; // v2.3 消息搜索防抖定时器
+  let onlineStatusMap = {}; // v2.3 联系人在线状态缓存 { uid: { online, lastSeen } }
+  let isSearchMode = false; // v2.3 是否处于搜索结果展示模式
 
   function fmtTime(ts) {
     if (!ts) return '';
@@ -3501,16 +3580,30 @@ function applyI18n() {
     // 好友部分
     if (r.ok && r.contacts && r.contacts.length > 0) {
       r.contacts.sort((a,b) => (b.lastTime||0) - (a.lastTime||0));
+      // v2.3 批量获取联系人在线状态
+      const friendUids = r.contacts.map(c => c.uid);
+      try {
+        const olRes = await apiGetOnlineBatch(friendUids);
+        if (olRes.ok && olRes.statuses) {
+          for (const uid of friendUids) {
+            const st = olRes.statuses[uid];
+            onlineStatusMap[uid] = { online: !!(st && st.online), lastSeen: st ? st.lastSeen : null };
+          }
+        }
+      } catch(e) {}
       html += '<div style="padding:6px 16px;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">'+t('msg_friends')+'</div>';
       html += r.contacts.map(c => {
         const p = punishMap[c.uid];
         const punishBadge = p ? (p.type === 'permanent' ? '🚫' : p.type === 'mute' ? '🔇' : '⚠') : '';
+        const ol = onlineStatusMap[c.uid] || { online:false };
+        const olTitle = ol.online ? t('msg_online') : (ol.lastSeen ? (t('msg_last_seen')+': '+fmtTime(ol.lastSeen)) : t('msg_offline'));
+        const olDot = `<span class="online-dot ${ol.online?'on':'off'}" style="margin-right:5px;flex-shrink:0" title="${olTitle}"></span>`;
         return `
         <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar||''}">
           <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : (c.avatar||'👤')}</div>
           <div class="c-info">
-            <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">'+t('msg_admin')+'</span>':''}${punishBadge ? ' <span style="font-size:11px" title="'+(p.type==='permanent'?t('punish_permanent'):p.type==='mute'?t('punish_mute'):t('punish_warning'))+'">'+punishBadge+'</span>' : ''}</div>
-            <div class="c-last">${c.lastMsg || t('msg_start_chat')}</div>
+            <div class="c-name">${olDot}${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">'+t('msg_admin')+'</span>':''}${punishBadge ? ' <span style="font-size:11px" title="'+(p.type==='permanent'?t('punish_permanent'):p.type==='mute'?t('punish_mute'):t('punish_warning'))+'">'+punishBadge+'</span>' : ''}</div>
+            <div class="c-last">${ol.online?'<span style="color:var(--success)">'+t('msg_online')+'</span> · ':''}${c.lastMsg || t('msg_start_chat')}</div>
           </div>
           ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
         </div>`;
@@ -3567,11 +3660,16 @@ function applyI18n() {
     currentChatPeer = peerUid;
     currentChatMode = 'friend';
     currentChatGroupId = null;
+    // 退出搜索模式，恢复聊天视图
+    isSearchMode = false;
+    const searchInput = $('#msgSearchInput');
+    if (searchInput) searchInput.value = '';
     const avatarHtml = peerAvatar ? (peerAvatar.startsWith('data:') || peerAvatar.length > 100
       ? `<img src="${peerAvatar.startsWith('data:') ? peerAvatar : 'data:image/jpeg;base64,' + peerAvatar}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;vertical-align:middle">`
       : peerAvatar)
       : '👤';
-    $('#chatHeader').innerHTML = `${avatarHtml} ${peerName||peerUid} <button class="trae-icon-btn" style="margin-left:auto;font-size:11px;color:var(--danger)" onclick="openReportModal('${(peerName||peerUid).replace(/'/g,"\\'")}','${peerUid}')">🚨 ${t('report_title')||'举报'}</button>`;
+    const onlineDotHtml = `<span id="chatPeerOnlineDot" class="online-dot off" style="margin:0 4px 0 2px;vertical-align:middle" title="${t('msg_offline')}"></span>`;
+    $('#chatHeader').innerHTML = `${avatarHtml}${onlineDotHtml} ${peerName||peerUid} <button class="trae-icon-btn" style="margin-left:auto;font-size:11px;color:var(--danger)" onclick="openReportModal('${(peerName||peerUid).replace(/'/g,"\\'")}','${peerUid}')">🚨 ${t('report_title')||'举报'}</button>`;
     $('#chatHeader').style.display = 'flex';
     $('#chatHeader').style.alignItems = 'center';
     // 如果被禁言则禁用输入控件
@@ -3580,6 +3678,10 @@ function applyI18n() {
     // 加载消息
     const r = await apiGetMessages(currentUser.uid, peerUid);
     renderChatMessages(r.messages || [], peerUid);
+    // 通知对方已读（异步发送，不阻塞界面）
+    apiSendReadReceipt(currentUser.uid, peerUid);
+    // 获取对方在线状态并更新头部状态点
+    updateChatHeaderOnline(peerUid);
     // 刷新联系人列表高亮
     renderContacts();
     renderFriendReqs();
@@ -3587,11 +3689,25 @@ function applyI18n() {
     if (msgPollTimer) clearInterval(msgPollTimer);
     msgPollTimer = setInterval(async () => {
       if (currentChatPeer === peerUid) {
+        // 搜索模式下不覆盖搜索结果
+        if (isSearchMode) { checkMyPunishment(); return; }
         const r2 = await apiGetMessages(currentUser.uid, peerUid);
         renderChatMessages(r2.messages || [], peerUid);
         checkMyPunishment(); // 轮询时同步禁言状态
       }
     }, 5000);
+  }
+
+  // v2.3 更新聊天头部在线状态点
+  async function updateChatHeaderOnline(peerUid) {
+    try {
+      const r = await apiGetOnline(peerUid);
+      const dot = $('#chatPeerOnlineDot');
+      if (!dot) return;
+      const online = !!(r.ok && r.online);
+      dot.className = 'online-dot ' + (online ? 'on' : 'off');
+      dot.title = online ? t('msg_online') : (r.lastSeen ? (t('msg_last_seen') + ': ' + fmtTime(r.lastSeen)) : t('msg_offline'));
+    } catch(e) {}
   }
 
   function renderChatMessages(messages, peerUid) {
@@ -3605,9 +3721,10 @@ function applyI18n() {
         return `<div class="chat-bubble broadcast">📢 ${m.content}${m.fileId ? `<div style="margin-top:6px"><a href="#" onclick="downloadMsgFile('${m.fileId}','${m.fileName||'file'}');return false" style="color:var(--accent);font-size:12px">📎 ${m.fileName||t('file_default_name')}</a></div>` : ''}<div class="chat-time" style="text-align:center">${fmtTime(m.created)}</div></div>`;
       }
       const isMe = m.from === currentUser.uid;
+      const readMark = isMe ? `<span style="font-size:10px;margin-left:4px;color:${m.read?'var(--accent)':'var(--muted)'}" title="${m.read?t('msg_read'):t('msg_unread')}">${m.read?'✓✓':'✓'}</span>` : '';
       return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
         <div class="chat-bubble ${isMe?'me':'other'}">${m.content}${m.fileId ? `<div style="margin-top:6px"><a href="#" onclick="downloadMsgFile('${m.fileId}','${m.fileName||'file'}');return false" style="color:var(--accent);font-size:12px">📎 ${m.fileName||'文件'}</a></div>` : ''}</div>
-        <div class="chat-time">${fmtTime(m.created)}</div>
+        <div class="chat-time" style="display:flex;align-items:center">${fmtTime(m.created)}${readMark}</div>
       </div>`;
     }).join('');
     area.scrollTop = area.scrollHeight;
@@ -4543,7 +4660,7 @@ function applyI18n() {
 
     // 导出数据
     $('#exportDataBtn').onclick = async () => {
-      const data = { version: '2.2', exported: Date.now(), materials: getMaterials(), components: getComponents(), boards: getBoards() };
+      const data = { version: '2.3', exported: Date.now(), materials: getMaterials(), components: getComponents(), boards: getBoards() };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -4734,7 +4851,7 @@ function applyI18n() {
       if (!reportTarget) return;
       const reason = $('#reportReason').value;
       const detail = $('#reportDetail').value.trim();
-      const r = await apiReport(currentUser.name, reportTarget.name, reportTarget.uid, reason, detail);
+      const r = await apiReport(currentUser.name, currentUser.uid, reportTarget.name, reportTarget.uid, reason, detail);
       if (r.ok) { toast(t('report_submitted')); $('#reportModal').style.display = 'none'; }
       else toast(t('report_failed'));
     });
@@ -4922,9 +5039,119 @@ function applyI18n() {
     modal.style.display = 'flex';
   }
 
+  // v2.3 在线状态心跳：每 30 秒向服务端发送一次心跳
+  function startHeartbeat() {
+    stopHeartbeat();
+    if (!currentUser) return;
+    // 立即发送一次，随后每 30 秒一次
+    apiHeartbeat(currentUser.uid);
+    heartbeatTimer = setInterval(() => {
+      if (currentUser) apiHeartbeat(currentUser.uid);
+    }, 30000);
+  }
+  function stopHeartbeat() {
+    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+  }
+
+  // v2.3 消息搜索：HTML 转义 + 关键词高亮
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function highlightKeyword(text, q) {
+    const safe = escapeHtml(text);
+    if (!q) return safe;
+    const qSafe = escapeHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    try {
+      return safe.replace(new RegExp('(' + qSafe + ')', 'gi'), '<span class="msg-search-highlight">$1</span>');
+    } catch(e) { return safe; }
+  }
+  // v2.3 渲染消息搜索结果到 #chatMessages
+  function renderSearchResults(results, q) {
+    const area = $('#chatMessages');
+    if (!results || results.length === 0) {
+      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:40px 0">🔍 '+t('msg_search_no_results')+'</div>';
+      return;
+    }
+    area.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;padding:0 4px">🔍 '+results.length+' '+t('msg_search_placeholder').replace('...','')+'</div>' +
+      results.map((m, idx) => {
+        const isMe = m.from === currentUser.uid;
+        const peerUid = isMe ? m.to : m.from;
+        const peerName = isMe ? (t('msg_me')||'我') : (m.fromName || m.from);
+        const snippet = m.content && m.content.length > 120 ? m.content.slice(0, 120) + '…' : (m.content || '');
+        return `<div class="msg-search-result" data-idx="${idx}" data-peer-uid="${escapeHtml(peerUid)}" data-peer-name="${escapeHtml(m.fromName||peerUid)}">
+          <div class="msr-meta">${escapeHtml(peerName)} · ${fmtTime(m.created)}${m.fileId?' · 📎':''}</div>
+          <div class="msr-content">${highlightKeyword(snippet, q)}</div>
+        </div>`;
+      }).join('');
+    // 绑定点击：跳转到对应聊天
+    area.querySelectorAll('.msg-search-result').forEach(el => {
+      el.addEventListener('click', () => {
+        const peerUid = el.dataset.peerUid;
+        const peerName = el.dataset.peerName;
+        if (peerUid) {
+          // 清空搜索框并退出搜索模式
+          const si = $('#msgSearchInput');
+          if (si) si.value = '';
+          isSearchMode = false;
+          openChat(peerUid, peerName, '');
+        }
+      });
+    });
+    area.scrollTop = 0;
+  }
+  // v2.3 执行消息搜索（带防抖）
+  function performMessageSearch(q) {
+    if (!currentUser) return;
+    q = (q || '').trim();
+    if (!q) {
+      // 搜索框清空：退出搜索模式，恢复当前聊天
+      isSearchMode = false;
+      restoreCurrentChat();
+      return;
+    }
+    isSearchMode = true;
+    apiSearchMessages(currentUser.uid, q).then(r => {
+      // 若在等待期间用户已清空搜索/切换聊天，则不渲染
+      if (!isSearchMode) return;
+      if (r.ok && r.results) {
+        renderSearchResults(r.results, q);
+      } else {
+        renderSearchResults([], q);
+      }
+    }).catch(() => {
+      if (isSearchMode) renderSearchResults([], q);
+    });
+  }
+  // v2.3 退出搜索模式后恢复当前聊天视图
+  function restoreCurrentChat() {
+    const area = $('#chatMessages');
+    if (currentChatMode === 'group' && currentChatGroupId) {
+      loadGroupMessagesInMain(currentChatGroupId);
+    } else if (currentChatPeer) {
+      apiGetMessages(currentUser.uid, currentChatPeer).then(r => {
+        renderChatMessages(r.messages || [], currentChatPeer);
+      }).catch(() => {});
+    } else {
+      area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">'+t('msg_select_contact')+'</div>';
+    }
+  }
+
   function initMessaging() {
     $('#sendMsgBtn').addEventListener('click', sendChatMessage);
     $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+    // v2.3 启动在线状态心跳（30秒间隔），登出/关闭页面时清除
+    startHeartbeat();
+    window.addEventListener('beforeunload', stopHeartbeat);
+    // v2.3 消息搜索框：输入时防抖 300ms 触发搜索
+    const msgSearchInput = $('#msgSearchInput');
+    if (msgSearchInput) {
+      msgSearchInput.addEventListener('input', () => {
+        const q = msgSearchInput.value;
+        if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => { performMessageSearch(q); }, 300);
+      });
+    }
     // 创建群组按钮（站内信内联）
     const inlineGroupBtn = $('#createGroupInlineBtn');
     if (inlineGroupBtn) inlineGroupBtn.addEventListener('click', async () => {
@@ -5118,6 +5345,323 @@ function applyI18n() {
   // 初始化语言
   applyI18n();
   initLogin();
+
+  // ===================== 🥚 EASTER EGGS =====================
+  (function easterEggs() {
+    'use strict';
+
+    // --- Helper: Secret Toast ---
+    function eeToast(title, sub, duration) {
+      duration = duration || 2500;
+      const el = document.createElement('div');
+      el.className = 'ee-toast';
+      el.innerHTML = '<div>' + title + '</div>' + (sub ? '<div class="ee-sub">' + sub + '</div>' : '');
+      document.body.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('show'));
+      setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 500);
+      }, duration);
+    }
+
+    // --- Helper: Confetti Rain ---
+    function eeConfetti(count) {
+      count = count || 80;
+      const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444'];
+      for (let i = 0; i < count; i++) {
+        const c = document.createElement('div');
+        c.className = 'ee-confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-20px';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        c.style.width = (6 + Math.random() * 8) + 'px';
+        c.style.height = (6 + Math.random() * 8) + 'px';
+        document.body.appendChild(c);
+        const dx = (Math.random() - 0.5) * 300;
+        const dy = window.innerHeight + 100;
+        const rot = Math.random() * 720;
+        const dur = 2000 + Math.random() * 1500;
+        c.animate([
+          { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+          { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + rot + 'deg)', opacity: 0 }
+        ], { duration: dur, easing: 'cubic-bezier(.3,.6,.7,1)' });
+        setTimeout(() => c.remove(), dur);
+      }
+    }
+
+    // --- Helper: Firework at position ---
+    function eeFirework(x, y) {
+      const colors = ['#6366f1', '#f59e0b', '#ec4899', '#10b981', '#3b82f6', '#a855f7'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'ee-firework';
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        p.style.background = color;
+        p.style.boxShadow = '0 0 8px ' + color;
+        document.body.appendChild(p);
+        const angle = (Math.PI * 2 * i) / count;
+        const dist = 40 + Math.random() * 60;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        const dur = 600 + Math.random() * 400;
+        p.animate([
+          { transform: 'translate(0,0) scale(1)', opacity: 1 },
+          { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(0)', opacity: 0 }
+        ], { duration: dur, easing: 'ease-out' });
+        setTimeout(() => p.remove(), dur);
+      }
+    }
+
+    // --- Egg 1: Konami Code (↑↑↓↓←→←→BA) ---
+    const konamiSeq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let konamiIdx = 0;
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === konamiSeq[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === konamiSeq.length) {
+          konamiIdx = 0;
+          eeConfetti(120);
+          eeToast('🎉 彩蛋猎人！', 'Konami Code 已解锁 — 你找到了第一个秘密', 3000);
+        }
+      } else {
+        konamiIdx = (key === konamiSeq[0]) ? 1 : 0;
+      }
+    });
+
+    // --- Egg 2: Logo 7-Click Combo ---
+    let logoClicks = 0;
+    let logoClickTimer = null;
+    const brand = document.querySelector('.trae-brand');
+    if (brand) {
+      brand.addEventListener('click', () => {
+        logoClicks++;
+        clearTimeout(logoClickTimer);
+        logoClickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
+        if (logoClicks >= 7) {
+          logoClicks = 0;
+          const logo = brand.querySelector('.trae-logo');
+          if (logo) {
+            logo.classList.add('ee-logo-spin');
+            setTimeout(() => logo.classList.remove('ee-logo-spin'), 1200);
+          }
+          eeConfetti(60);
+          eeToast('✨ Spark!', '7连击解锁 — 实验室的火花只为你绽放', 2800);
+        }
+      });
+    }
+
+    // --- Egg 3: Console ASCII Art ---
+    const sparkArt = [
+      '%c',
+      '\n' +
+      '    ✦    ✦    ✦\n' +
+      '     \\   |   /\n' +
+      '      \\  |  /\n' +
+      '   ╔═══╦═╧═╦═══╗\n' +
+      '   ║ S p a r k ║\n' +
+      '   ╚═══╩═╤═╩═══╝\n' +
+      '      /  |  \\\n' +
+      '     /   |   \\\n' +
+      '    ✦    ✦    ✦\n' +
+      '\n  🔬 SparkMinds Lab v2.3\n' +
+      '  💡 你找到了开发者留下的秘密\n' +
+      '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
+      '\n'
+    ];
+    console.log(sparkArt[1], 'color:#6366f1;font-size:12px;font-family:monospace;font-weight:bold;');
+
+    // --- Egg 4: Type "spark" anywhere ---
+    let sparkBuffer = '';
+    document.addEventListener('keydown', (e) => {
+      // Only when NOT typing in input/textarea
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (e.key.length === 1) {
+        sparkBuffer += e.key.toLowerCase();
+        if (sparkBuffer.length > 5) sparkBuffer = sparkBuffer.slice(-5);
+        if (sparkBuffer === 'spark') {
+          sparkBuffer = '';
+          eeFirework(window.innerWidth / 2, window.innerHeight / 2);
+          setTimeout(() => eeToast('🔥 SPARK!', '隐藏咒语已激活 — 火花四溅', 2000), 200);
+        }
+      }
+    });
+
+    // --- Egg 5: Double-click version number → About modal ---
+    let aboutModalShown = false;
+    function showEggAbout() {
+      if (aboutModalShown) return;
+      aboutModalShown = true;
+      const overlay = document.createElement('div');
+      overlay.className = 'ee-modal-overlay';
+      const modal = document.createElement('div');
+      modal.className = 'ee-modal';
+      const lang = (document.documentElement.lang || 'zh-CN').startsWith('en') ? 'en' : (document.documentElement.lang || 'zh-CN').startsWith('zh-TW') ? 'zh-TW' : 'zh-CN';
+      const content = lang === 'en' ? {
+        title: 'About SparkMinds Lab',
+        ver: 'Version Timeline · 2026',
+        quote: 'Every great lab starts with a single spark. 🔬✨',
+        close: 'Close',
+        credits: 'Crafted with TRAE · Hidden by a curious developer',
+        timeline: [
+          ['v1.0', 'Initial Release', '07-08', 'origin'],
+          ['v1.9', 'Cloudflare Migration', '07-24', 'cloud'],
+          ['v2.0', 'UI Redesign + Wallpaper', '07-25', 'design'],
+          ['v2.1', 'Glassmorphism + Animations', '07-25', 'glass'],
+          ['v2.2', 'File Transfer + Report System', '07-26', 'shield'],
+          ['v2.3', 'Read Receipts + Online + Search', '08-01', 'chat']
+        ]
+      } : lang === 'zh-TW' ? {
+        title: '關於 SparkMinds Lab',
+        ver: '版本時間線 · 2026',
+        quote: '每個偉大的實驗室，都從一顆火花開始。🔬✨',
+        close: '關閉',
+        credits: '由 TRAE 打造 · 一個好奇的開發者藏的',
+        timeline: [
+          ['v1.0', '初始版本', '07-08', '起源'],
+          ['v1.9', '遷移至 Cloudflare', '07-24', '雲端'],
+          ['v2.0', 'UI 重構 + 壁紙', '07-25', '設計'],
+          ['v2.1', '毛玻璃 + 動畫', '07-25', '玻璃'],
+          ['v2.2', '文件傳輸 + 舉報系統', '07-26', '盾牌'],
+          ['v2.3', '已讀回執 + 在線 + 搜尋', '08-01', '聊天']
+        ]
+      } : {
+        title: '关于 SparkMinds Lab',
+        ver: '版本时间线 · 2026',
+        quote: '每个伟大的实验室，都从一颗火花开始。🔬✨',
+        close: '关闭',
+        credits: '由 TRAE 打造 · 一个好奇的开发者藏的',
+        timeline: [
+          ['v1.0', '初始版本', '07-08', '起源'],
+          ['v1.9', '迁移至 Cloudflare', '07-24', '云端'],
+          ['v2.0', 'UI 重构 + 壁纸', '07-25', '设计'],
+          ['v2.1', '毛玻璃 + 动画', '07-25', '玻璃'],
+          ['v2.2', '文件传输 + 举报系统', '07-26', '盾牌'],
+          ['v2.3', '已读回执 + 在线 + 搜索', '08-01', '聊天']
+        ]
+      };
+      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬' };
+      modal.innerHTML =
+        '<h2><span class="ee-badge">🔬</span>' + content.title + '</h2>' +
+        '<div class="ee-ver">' + content.ver + '</div>' +
+        '<div class="ee-quote">' + content.quote + '</div>' +
+        '<ul class="ee-timeline">' +
+        content.timeline.map(function(t) {
+          return '<li><span><span style="margin-right:6px">' + (badges[t[3]] || '✨') + '</span><strong>' + t[0] + '</strong> ' + t[1] + '</span><span class="ee-date">' + t[2] + '</span></li>';
+        }).join('') +
+        '</ul>' +
+        '<button class="ee-close">' + content.close + '</button>' +
+        '<div class="ee-credits">' + content.credits + '</div>';
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+      requestAnimationFrame(() => overlay.classList.add('show'));
+      function close() {
+        overlay.classList.remove('show');
+        setTimeout(() => { overlay.remove(); aboutModalShown = false; }, 300);
+      }
+      modal.querySelector('.ee-close').addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', function escClose(ev) {
+        if (ev.key === 'Escape') { close(); document.removeEventListener('keydown', escClose); }
+      });
+      // Sparkle confetti when opening
+      eeConfetti(40);
+    }
+    // Listen for double-click on the version text
+    const brandText = document.querySelector('.trae-brand');
+    if (brandText) {
+      brandText.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showEggAbout();
+      });
+    }
+
+    // --- Egg 6: Theme toggle triple-click → Neon Mode ---
+    let themeClicks = 0;
+    let themeClickTimer = null;
+    let neonActive = false;
+    const themeToggle = document.getElementById('themeToggleTop');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        themeClicks++;
+        clearTimeout(themeClickTimer);
+        themeClickTimer = setTimeout(() => { themeClicks = 0; }, 600);
+        if (themeClicks >= 3 && !neonActive) {
+          themeClicks = 0;
+          neonActive = true;
+          document.body.classList.add('ee-neon-mode');
+          eeToast('🌈 霓虹模式', '三连击解锁 — 整个世界开始律动', 2500);
+          // Auto-disable after 30 seconds
+          setTimeout(() => {
+            if (neonActive) {
+              document.body.classList.remove('ee-neon-mode');
+              neonActive = false;
+            }
+          }, 30000);
+        }
+      }, true); // capture phase to fire before normal theme toggle
+    }
+
+    // --- Egg 7: Click the connection status 5 times → matrix rain ---
+    let connClicks = 0;
+    let connTimer = null;
+    let matrixActive = false;
+    const connStatus = document.getElementById('connStatus');
+    if (connStatus) {
+      connStatus.addEventListener('click', () => {
+        connClicks++;
+        clearTimeout(connTimer);
+        connTimer = setTimeout(() => { connClicks = 0; }, 1500);
+        if (connClicks >= 5 && !matrixActive) {
+          connClicks = 0;
+          matrixActive = true;
+          startMatrixRain();
+        }
+      });
+    }
+    function startMatrixRain() {
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:.18';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+      const fontSize = 14;
+      const columns = Math.floor(canvas.width / fontSize);
+      const drops = new Array(columns).fill(0).map(() => Math.random() * canvas.height);
+      let frameCount = 0;
+      function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,.06)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#22c55e';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const ch = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(ch, i * fontSize, drops[i]);
+          drops[i] += fontSize;
+          if (drops[i] > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        }
+        frameCount++;
+        if (frameCount < 400) {
+          requestAnimationFrame(draw);
+        } else {
+          canvas.style.transition = 'opacity 1s';
+          canvas.style.opacity = '0';
+          setTimeout(() => { canvas.remove(); matrixActive = false; }, 1000);
+        }
+      }
+      draw();
+      eeToast('💚 Matrix', '连接状态5连击 — 欢迎来到代码世界', 2200);
+    }
+
+  })();
 })();
 </script>
 </body>
