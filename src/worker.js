@@ -3,6 +3,36 @@
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
 
+// ========== 在线状态内存缓存（减少 KV 写入） ==========
+// Worker isolate 内共享，心跳先写内存，每 60 秒批量刷入 KV
+let hbCache = null;       // { [uid]: lastSeen }
+let hbFlushTime = 0;      // 上次刷新 KV 的时间
+let hbDirty = false;      // 是否有未刷入的变更
+const HB_FLUSH_INTERVAL = 60000;  // 刷新间隔 60 秒
+const HB_ONLINE_WINDOW = 90000;   // 在线判定窗口 90 秒
+const HB_EXPIRE = 300000;         // 清理超过 5 分钟无心跳的记录
+
+async function ensureHbCache(env) {
+  if (hbCache) return;
+  try {
+    const raw = await env.USERS.get('heartbeats');
+    hbCache = raw ? JSON.parse(raw) : {};
+  } catch(e) { hbCache = {}; }
+  hbFlushTime = Date.now();
+}
+
+async function flushHbCache(env) {
+  if (!hbCache) return;
+  // 清理过期记录
+  const now = Date.now();
+  for (const uid in hbCache) {
+    if (now - hbCache[uid] > HB_EXPIRE) delete hbCache[uid];
+  }
+  await env.USERS.put('heartbeats', JSON.stringify(hbCache));
+  hbFlushTime = now;
+  hbDirty = false;
+}
+
 function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
@@ -299,49 +329,41 @@ export default {
         }
 
         // ========== 在线状态 ==========
-        // POST /api/heartbeat — 用户心跳
+        // POST /api/heartbeat — 用户心跳（内存缓存，60 秌批量刷入 KV）
         if (url.pathname === '/api/heartbeat' && request.method === 'POST') {
           const { uid } = await readBody(request);
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
-          await env.USERS.put(`heartbeat_${uid}`, JSON.stringify({ uid, lastSeen: Date.now() }));
+          await ensureHbCache(env);
+          hbCache[uid] = Date.now();
+          hbDirty = true;
+          // 每 60 秒批量刷新一次，所有用户共用一次 KV 写入
+          if (Date.now() - hbFlushTime > HB_FLUSH_INTERVAL) {
+            await flushHbCache(env);
+          }
           return json({ ok: true });
         }
 
-        // GET /api/online?uid=xxx — 查询单个用户在线状态（60 秒内活跃视为在线）
+        // GET /api/online?uid=xxx — 查询单个用户在线状态（90 秒内活跃视为在线）
         if (url.pathname === '/api/online' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
-          let online = false;
-          let lastSeen = null;
-          const raw = await env.USERS.get(`heartbeat_${uid}`);
-          if (raw) {
-            try {
-              const data = JSON.parse(raw);
-              lastSeen = data.lastSeen;
-              online = !!lastSeen && (Date.now() - lastSeen) <= 60000;
-            } catch(e) {}
-          }
+          await ensureHbCache(env);
+          const lastSeen = hbCache[uid] || null;
+          const online = !!lastSeen && (Date.now() - lastSeen) <= HB_ONLINE_WINDOW;
           return json({ ok: true, online, lastSeen });
         }
 
-        // GET /api/online-batch?uids=xxx,yyy — 批量查询在线状态
+        // GET /api/online-batch?uids=xxx,yyy — 批量查询在线状态（内存读取，零 KV 消耗）
         if (url.pathname === '/api/online-batch' && request.method === 'GET') {
           const uidsParam = url.searchParams.get('uids') || '';
           const uids = uidsParam.split(',').map(s => s.trim()).filter(Boolean);
-          const statuses = [];
-          for (const uid of uids) {
-            let online = false;
-            let lastSeen = null;
-            const raw = await env.USERS.get(`heartbeat_${uid}`);
-            if (raw) {
-              try {
-                const data = JSON.parse(raw);
-                lastSeen = data.lastSeen;
-                online = !!lastSeen && (Date.now() - lastSeen) <= 60000;
-              } catch(e) {}
-            }
-            statuses.push({ uid, online, lastSeen });
-          }
+          await ensureHbCache(env);
+          const now = Date.now();
+          const statuses = uids.map(uid => {
+            const lastSeen = hbCache[uid] || null;
+            const online = !!lastSeen && (now - lastSeen) <= HB_ONLINE_WINDOW;
+            return { uid, online, lastSeen };
+          });
           return json({ ok: true, statuses });
         }
 
