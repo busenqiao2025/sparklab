@@ -484,11 +484,27 @@
   /* ===== v2.3 Card Grid / Online Dot / Search Highlight ===== */
   .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .online-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;transition:background .3s ease;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
-  .online-dot.on{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(255,255,255,.6)}
+  .online-dot.on{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(255,255,255,.6);animation:eePulse 2s ease-in-out infinite}
   .online-dot.off{background:#94a3b8;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
   [data-theme="dark"] .online-dot{box-shadow:0 0 0 2px rgba(20,24,33,.6)}
-  [data-theme="dark"] .online-dot.on{box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(20,24,33,.6)}
+  [data-theme="dark"] .online-dot.on{box-shadow:0 0 6px rgba(34,197,94,.5),0 0 0 2px rgba(20,24,33,.6);animation:eePulse 2s ease-in-out infinite}
   [data-theme="dark"] .online-dot.off{box-shadow:0 0 0 2px rgba(20,24,33,.6)}
+  @keyframes eePulse{0%,100%{box-shadow:0 0 6px rgba(34,197,94,.4),0 0 0 2px rgba(255,255,255,.6)}50%{box-shadow:0 0 12px rgba(34,197,94,.7),0 0 0 3px rgba(255,255,255,.5)}}
+  [data-theme="dark"] @keyframes eePulse{0%,100%{box-shadow:0 0 6px rgba(34,197,94,.4),0 0 0 2px rgba(20,24,33,.6)}50%{box-shadow:0 0 12px rgba(34,197,94,.7),0 0 0 3px rgba(20,24,33,.5)}}
+  /* Avatar online overlay */
+  .avatar-wrap{position:relative;display:inline-block;flex-shrink:0}
+  .avatar-wrap .avatar-dot{position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;border:2.5px solid var(--bg-card);z-index:2}
+  .avatar-wrap .avatar-dot.on{background:#22c55e;animation:eePulse 2s ease-in-out infinite}
+  .avatar-wrap .avatar-dot.off{background:#94a3b8}
+  [data-theme="dark"] .avatar-wrap .avatar-dot{border-color:#1e2329}
+  /* Chat header status text */
+  .chat-peer-status{font-size:11px;font-weight:400;color:var(--muted);margin-left:4px;display:inline-flex;align-items:center;gap:3px}
+  .chat-peer-status.online{color:var(--success)}
+  /* User table online indicator */
+  .user-online-cell{display:inline-flex;align-items:center;gap:5px;font-size:11px}
+  .user-online-cell .online-dot{width:7px;height:7px}
+  /* Group online count badge */
+  .group-online-count{font-size:10px;color:var(--success);background:rgba(34,197,94,.12);padding:2px 7px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:3px;margin-left:6px}
   .msg-search-highlight{background:rgba(99,102,241,0.2);padding:1px 3px;border-radius:3px;color:var(--accent-dark);font-weight:600}
   [data-theme="dark"] .msg-search-highlight{color:var(--accent-light)}
   .msg-search-result{padding:12px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:var(--transition);border-radius:var(--radius-sm);margin-bottom:6px}
@@ -576,7 +592,7 @@ const I18N = {
     'report_tab_reports': '举报列表', 'report_tab_appeals': '申诉管理', 'report_tab_punishments': '惩罚管理', 'report_view_chat': '查看聊天记录', 'report_chat_between': '聊天双方', 'report_chat_title': '聊天记录', 'report_no_chat': '暂无聊天记录', 'report_mute_duration_prompt': '请输入禁言时长（小时）', 'report_mute_duration_hint': '第2次可自定义，第3次至少720小时(30天)，第4次至少2160小时(90天)',
     'punish_warning': '警告', 'punish_mute': '禁言', 'punish_permanent': '永久禁言', 'punish_label': '处罚', 'punish_revoke': '撤销处罚', 'punish_no_data': '暂无处罚记录', 'punish_expired': '已过期', 'punish_created': '处罚时间', 'punish_until': '到期时间', 'punish_revoked': '处罚已撤销', 'punish_revoke_confirm': '确定要撤销此处罚吗？', 'punish_status': '处罚状态', 'punish_user_badge_warning': '⚠ 警告', 'punish_user_badge_mute': '🔇 禁言', 'punish_user_badge_permanent': '🚫 永久禁言',
     'appeal_pending_short': '申诉中', 'appeal_no_data': '暂无申诉记录', 'appeal_label': '申诉内容', 'appeal_accept': '通过申诉', 'appeal_reject': '驳回申诉', 'appeal_reply_prompt': '请输入回复内容（可选）：', 'appeal_revoke_confirm': '是否同时撤销该处罚？', 'appeal_modify_reason_confirm': '是否修改处罚原因？', 'appeal_new_reason_prompt': '请输入新的处罚原因：', 'appeal_accepted_done': '申诉已通过', 'appeal_rejected_done': '申诉已驳回', 'appeal_submit': '提交申诉', 'appeal_content_prompt': '请输入申诉内容，说明您对处罚的异议：', 'appeal_submitted': '申诉已提交，等待管理员处理', 'appeal_my_records': '我的处罚记录', 'appeal_no_punishment': '暂无处罚记录',
-    'th_punish': '处罚', 'punish_none': '无', 'punish_active': '生效中', 'punish_revoked_label': '已撤销', 'punish_reason_label': '处罚原因', 'mypunish_no_data': '暂无处罚记录', 'appeal_submit_btn': '申诉', 'appeal_submit_failed': '申诉提交失败', 'punish_rules_title': '处罚规则', 'punish_rule_1': '第1次被举报（成立）：警告', 'punish_rule_2': '第2次：禁言（管理员自定义时长）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久禁用站内信和仓库操作权限', 'punish_appeal_hint_rule': '对处罚结果不满意可提交申诉，管理员将审核并决定是否修改',
+    'th_punish': '处罚', 'th_status': '状态', 'punish_none': '无', 'punish_active': '生效中', 'punish_revoked_label': '已撤销', 'punish_reason_label': '处罚原因', 'mypunish_no_data': '暂无处罚记录', 'appeal_submit_btn': '申诉', 'appeal_submit_failed': '申诉提交失败', 'punish_rules_title': '处罚规则', 'punish_rule_1': '第1次被举报（成立）：警告', 'punish_rule_2': '第2次：禁言（管理员自定义时长）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久禁用站内信和仓库操作权限', 'punish_appeal_hint_rule': '对处罚结果不满意可提交申诉，管理员将审核并决定是否修改',
     'report_reason_label': '原因', 'report_reporter': '举报人', 'req_detail_required': '请填写详细说明', 'req_submit_failed': '提交失败', 'req_submitted': '申请已提交，等待管理员审批', 'req_my_records_title': '我的申请记录', 'req_no_records': '暂无申请记录', 'req_action_failed': '操作失败', 'req_approved': '已批准该申请', 'req_deny_reason_prompt': '拒绝原因（可留空）：', 'req_denied': '已拒绝该申请',
     'forum_post_default': '帖子', 'settings_toggle_theme': '切换主题', 'sim_off_toast': '模拟数据已关闭', 'sim_on_toast': '模拟数据已开启（无真实设备时用于测试）',
     'wp_cleared': '已清除壁纸', 'wp_switched': '已切换至「{name}」', 'wp_set_compressed': '壁纸已设置（压缩至 {kb}KB）', 'wp_storage_full': '存储空间不足，请清除壁纸后重试', 'wp_image_load_failed': '图片加载失败', 'settings_wallpaper': '自定义壁纸', 'wp_hint': '选择预设或上传图片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩浓度', 'wp_upload': '上传自定义壁纸', 'wp_clear': '清除壁纸', 'wp_name_none': '无', 'wp_name_aurora': '极光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '余烬', 'wp_name_custom': '自定义',
@@ -705,7 +721,7 @@ const I18N = {
     'report_tab_reports': '舉報列表', 'report_tab_appeals': '申訴管理', 'report_tab_punishments': '懲罰管理', 'report_view_chat': '查看聊天記錄', 'report_chat_between': '聊天雙方', 'report_chat_title': '聊天記錄', 'report_no_chat': '暫無聊天記錄', 'report_mute_duration_prompt': '請輸入禁言時長（小時）', 'report_mute_duration_hint': '第2次可自訂，第3次至少720小時(30天)，第4次至少2160小時(90天)',
     'punish_warning': '警告', 'punish_mute': '禁言', 'punish_permanent': '永久禁言', 'punish_label': '處罰', 'punish_revoke': '撤銷處罰', 'punish_no_data': '暫無處罰記錄', 'punish_expired': '已過期', 'punish_created': '處罰時間', 'punish_until': '到期時間', 'punish_revoked': '處罰已撤銷', 'punish_revoke_confirm': '確定要撤銷此處罰嗎？', 'punish_status': '處罰狀態', 'punish_user_badge_warning': '⚠ 警告', 'punish_user_badge_mute': '🔇 禁言', 'punish_user_badge_permanent': '🚫 永久禁言',
     'appeal_pending_short': '申訴中', 'appeal_no_data': '暫無申訴記錄', 'appeal_label': '申訴內容', 'appeal_accept': '通過申訴', 'appeal_reject': '駁回申訴', 'appeal_reply_prompt': '請輸入回覆內容（可選）：', 'appeal_revoke_confirm': '是否同時撤銷該處罰？', 'appeal_modify_reason_confirm': '是否修改處罰原因？', 'appeal_new_reason_prompt': '請輸入新的處罰原因：', 'appeal_accepted_done': '申訴已通過', 'appeal_rejected_done': '申訴已駁回', 'appeal_submit': '提交申訴', 'appeal_content_prompt': '請輸入申訴內容，說明您對處罰的異議：', 'appeal_submitted': '申訴已提交，等待管理員處理', 'appeal_my_records': '我的處罰記錄', 'appeal_no_punishment': '暫無處罰記錄',
-    'th_punish': '處罰', 'punish_none': '無', 'punish_active': '生效中', 'punish_revoked_label': '已撤銷', 'punish_reason_label': '處罰原因', 'mypunish_no_data': '暫無處罰記錄', 'appeal_submit_btn': '申訴', 'appeal_submit_failed': '申訴提交失敗', 'punish_rules_title': '處罰規則', 'punish_rule_1': '第1次被舉報（成立）：警告', 'punish_rule_2': '第2次：禁言（管理員自訂時長）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久停用站內信和倉庫操作權限', 'punish_appeal_hint_rule': '對處罰結果不滿意可提交申訴，管理員將審核並決定是否修改',
+    'th_punish': '處罰', 'th_status': '狀態', 'punish_none': '無', 'punish_active': '生效中', 'punish_revoked_label': '已撤銷', 'punish_reason_label': '處罰原因', 'mypunish_no_data': '暫無處罰記錄', 'appeal_submit_btn': '申訴', 'appeal_submit_failed': '申訴提交失敗', 'punish_rules_title': '處罰規則', 'punish_rule_1': '第1次被舉報（成立）：警告', 'punish_rule_2': '第2次：禁言（管理員自訂時長）', 'punish_rule_3': '第3次：禁言至少30天', 'punish_rule_4': '第4次：禁言至少90天', 'punish_rule_5': '第5次：永久停用站內信和倉庫操作權限', 'punish_appeal_hint_rule': '對處罰結果不滿意可提交申訴，管理員將審核並決定是否修改',
     'report_reason_label': '原因', 'report_reporter': '舉報人', 'req_detail_required': '請填寫詳細說明', 'req_submit_failed': '提交失敗', 'req_submitted': '申請已提交，等待管理員審批', 'req_my_records_title': '我的申請記錄', 'req_no_records': '暫無申請記錄', 'req_action_failed': '操作失敗', 'req_approved': '已批准該申請', 'req_deny_reason_prompt': '拒絕原因（可留空）：', 'req_denied': '已拒絕該申請',
     'forum_post_default': '帖子', 'settings_toggle_theme': '切換主題', 'sim_off_toast': '模擬數據已關閉', 'sim_on_toast': '模擬數據已開啟（無真實設備時用於測試）',
     'wp_cleared': '已清除桌布', 'wp_switched': '已切換至「{name}」', 'wp_set_compressed': '桌布已設定（壓縮至 {kb}KB）', 'wp_storage_full': '儲存空間不足，請清除桌布後重試', 'wp_image_load_failed': '圖片載入失敗', 'settings_wallpaper': '自訂桌布', 'wp_hint': '選擇預設或上傳圖片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩濃度', 'wp_upload': '上傳自訂桌布', 'wp_clear': '清除桌布', 'wp_name_none': '無', 'wp_name_aurora': '極光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '餘燼', 'wp_name_custom': '自訂',
@@ -818,7 +834,7 @@ const I18N = {
     'report_tab_reports': 'Reports', 'report_tab_appeals': 'Appeals', 'report_tab_punishments': 'Punishments', 'report_view_chat': 'View Chat', 'report_chat_between': 'Between', 'report_chat_title': 'Chat Records', 'report_no_chat': 'No chat records', 'report_mute_duration_prompt': 'Enter mute duration (hours)', 'report_mute_duration_hint': '2nd: custom, 3rd: min 720h (30d), 4th: min 2160h (90d)',
     'punish_warning': 'Warning', 'punish_mute': 'Mute', 'punish_permanent': 'Permanent Ban', 'punish_label': 'Punishment', 'punish_revoke': 'Revoke', 'punish_no_data': 'No punishments', 'punish_expired': 'Expired', 'punish_created': 'Created', 'punish_until': 'Until', 'punish_revoked': 'Punishment revoked', 'punish_revoke_confirm': 'Revoke this punishment?', 'punish_status': 'Status', 'punish_user_badge_warning': '⚠ Warning', 'punish_user_badge_mute': '🔇 Muted', 'punish_user_badge_permanent': '🚫 Permanent Ban',
     'appeal_pending_short': 'Appealing', 'appeal_no_data': 'No appeals', 'appeal_label': 'Appeal Content', 'appeal_accept': 'Accept', 'appeal_reject': 'Reject', 'appeal_reply_prompt': 'Enter reply (optional):', 'appeal_revoke_confirm': 'Also revoke the punishment?', 'appeal_modify_reason_confirm': 'Modify the punishment reason?', 'appeal_new_reason_prompt': 'Enter new punishment reason:', 'appeal_accepted_done': 'Appeal accepted', 'appeal_rejected_done': 'Appeal rejected', 'appeal_submit': 'Submit Appeal', 'appeal_content_prompt': 'Enter your appeal content explaining your disagreement:', 'appeal_submitted': 'Appeal submitted, awaiting admin review', 'appeal_my_records': 'My Punishments', 'appeal_no_punishment': 'No punishment records',
-    'th_punish': 'Punishment', 'punish_none': 'None', 'punish_active': 'Active', 'punish_revoked_label': 'Revoked', 'punish_reason_label': 'Reason', 'mypunish_no_data': 'No punishment records', 'appeal_submit_btn': 'Appeal', 'appeal_submit_failed': 'Appeal submission failed', 'punish_rules_title': 'Punishment Rules', 'punish_rule_1': '1st report (valid): Warning', 'punish_rule_2': '2nd: Mute (admin custom duration)', 'punish_rule_3': '3rd: Mute at least 30 days', 'punish_rule_4': '4th: Mute at least 90 days', 'punish_rule_5': '5th: Permanent ban from messaging and warehouse operations', 'punish_appeal_hint_rule': 'If dissatisfied with the punishment, you can submit an appeal and the admin will review and decide whether to modify it',
+    'th_punish': 'Punishment', 'th_status': 'Status', 'punish_none': 'None', 'punish_active': 'Active', 'punish_revoked_label': 'Revoked', 'punish_reason_label': 'Reason', 'mypunish_no_data': 'No punishment records', 'appeal_submit_btn': 'Appeal', 'appeal_submit_failed': 'Appeal submission failed', 'punish_rules_title': 'Punishment Rules', 'punish_rule_1': '1st report (valid): Warning', 'punish_rule_2': '2nd: Mute (admin custom duration)', 'punish_rule_3': '3rd: Mute at least 30 days', 'punish_rule_4': '4th: Mute at least 90 days', 'punish_rule_5': '5th: Permanent ban from messaging and warehouse operations', 'punish_appeal_hint_rule': 'If dissatisfied with the punishment, you can submit an appeal and the admin will review and decide whether to modify it',
     'report_reason_label': 'Reason', 'report_reporter': 'Reporter', 'req_detail_required': 'Please provide details', 'req_submit_failed': 'Submit failed', 'req_submitted': 'Request submitted, awaiting approval', 'req_my_records_title': 'My Request Records', 'req_no_records': 'No requests yet', 'req_action_failed': 'Action failed', 'req_approved': 'Request approved', 'req_deny_reason_prompt': 'Deny reason (optional):', 'req_denied': 'Request denied',
     'forum_post_default': 'Post', 'settings_toggle_theme': 'Toggle Theme', 'sim_off_toast': 'Simulation data disabled', 'sim_on_toast': 'Simulation data enabled (for testing without real devices)',
     'wp_cleared': 'Wallpaper cleared', 'wp_switched': 'Switched to "{name}"', 'wp_set_compressed': 'Wallpaper set (compressed to {kb}KB)', 'wp_storage_full': 'Storage full, please clear wallpaper and retry', 'wp_image_load_failed': 'Image load failed', 'settings_wallpaper': 'Custom Wallpaper', 'wp_hint': 'Choose a preset or upload an image', 'wp_opacity': 'Opacity', 'wp_blur': 'Blur', 'wp_mask': 'Mask Density', 'wp_upload': 'Upload Custom Wallpaper', 'wp_clear': 'Clear Wallpaper', 'wp_name_none': 'None', 'wp_name_aurora': 'Aurora', 'wp_name_sunset': 'Sunset', 'wp_name_ocean': 'Ocean', 'wp_name_forest': 'Forest', 'wp_name_galaxy': 'Galaxy', 'wp_name_peach': 'Peach', 'wp_name_mint': 'Mint', 'wp_name_lavender': 'Lavender', 'wp_name_ember': 'Ember', 'wp_name_custom': 'Custom',
@@ -1184,7 +1200,7 @@ function applyI18n() {
     </div>
     <div class="term-box" data-title="用户列表" data-i18n-title="user_list">
       <table class="term-table" id="userTable">
-        <thead><tr><th data-i18n="th_username">用户名</th><th>UID</th><th data-i18n="th_nickname">昵称</th><th data-i18n="th_password">密码</th><th data-i18n="th_role">角色</th><th data-i18n="th_punish">处罚</th><th data-i18n="th_created">创建时间</th><th data-i18n="th_action">操作</th></tr></thead>
+        <thead><tr><th data-i18n="th_username">用户名</th><th>UID</th><th data-i18n="th_nickname">昵称</th><th data-i18n="th_status">状态</th><th data-i18n="th_password">密码</th><th data-i18n="th_role">角色</th><th data-i18n="th_punish">处罚</th><th data-i18n="th_created">创建时间</th><th data-i18n="th_action">操作</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -2891,6 +2907,20 @@ function applyI18n() {
       }
     }
     const punishLabel = { warning: t('punish_warning'), mute: t('punish_mute'), permanent: t('punish_permanent') };
+    // v2.3 批量获取用户在线状态
+    let userOnlineMap = {};
+    try {
+      const allUids = users.map(u => u.uid).filter(Boolean);
+      if (allUids.length > 0) {
+        const olRes = await apiGetOnlineBatch(allUids);
+        if (olRes.ok && olRes.statuses) {
+          for (const uid of allUids) {
+            const st = olRes.statuses[uid];
+            userOnlineMap[uid] = { online: !!(st && st.online), lastSeen: st ? st.lastSeen : null };
+          }
+        }
+      }
+    } catch(e) {}
     tbody.innerHTML = users.map(u => {
       // 构建处罚徽章
       const userPunishments = punishMap[u.uid] || [];
@@ -2902,10 +2932,15 @@ function applyI18n() {
           return `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${color}22;color:${color};font-weight:600;display:inline-block;margin:1px">${punishLabel[p.type]||p.type}${p.type==='mute' && remain > 0 ? ' '+remain+'h' : ''}</span>`;
         }).join(' ');
       }
+      // v2.3 在线状态单元格
+      const ol = userOnlineMap[u.uid] || { online: false };
+      const olTitle = ol.online ? t('msg_online') : (ol.lastSeen ? (t('msg_last_seen')+': '+fmtTime(ol.lastSeen)) : t('msg_offline'));
+      const olCellHtml = `<span class="user-online-cell"><span class="online-dot ${ol.online?'on':'off'}" title="${olTitle}"></span>${ol.online?'<span style="color:var(--success);font-weight:600">'+t('msg_online')+'</span>':'<span style="color:var(--muted)">'+t('msg_offline')+'</span>'}</span>`;
       return `<tr>
       <td>${u.name}</td>
       <td><span style="font-family:monospace;color:var(--accent);font-weight:600">${u.uid || '-'}</span></td>
       <td>${u.avatar && u.avatar.startsWith('data:') ? `<img src="${u.avatar}" style="width:24px;height:24px;border-radius:6px;object-fit:cover;vertical-align:middle">` : (u.avatar || '👤')} ${u.nickname || u.name}</td>
+      <td>${olCellHtml}</td>
       <td>${isAdmin ? `<span style="font-family:monospace;color:var(--accent)">${u.pass || '-'}</span>` : '<span style="color:var(--muted)">******</span>'}</td>
       <td>${u.role === 'admin' ? t('role_admin') : t('role_user')}</td>
       <td>${punishHtml}</td>
@@ -3597,13 +3632,16 @@ function applyI18n() {
         const punishBadge = p ? (p.type === 'permanent' ? '🚫' : p.type === 'mute' ? '🔇' : '⚠') : '';
         const ol = onlineStatusMap[c.uid] || { online:false };
         const olTitle = ol.online ? t('msg_online') : (ol.lastSeen ? (t('msg_last_seen')+': '+fmtTime(ol.lastSeen)) : t('msg_offline'));
-        const olDot = `<span class="online-dot ${ol.online?'on':'off'}" style="margin-right:5px;flex-shrink:0" title="${olTitle}"></span>`;
+        const avatarInner = c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : (c.avatar||'👤');
         return `
         <div class="contact-item ${currentChatPeer===c.uid?'active':''}" data-uid="${c.uid}" data-name="${c.nickname}" data-avatar="${c.avatar||''}">
-          <div class="c-avatar">${c.avatar && c.avatar.startsWith('data:') ? `<img src="${c.avatar}" style="width:100%;height:100%;border-radius:10px;object-fit:cover">` : (c.avatar||'👤')}</div>
+          <div class="avatar-wrap">
+            <div class="c-avatar">${avatarInner}</div>
+            <span class="avatar-dot ${ol.online?'on':'off'}" title="${olTitle}"></span>
+          </div>
           <div class="c-info">
-            <div class="c-name">${olDot}${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">'+t('msg_admin')+'</span>':''}${punishBadge ? ' <span style="font-size:11px" title="'+(p.type==='permanent'?t('punish_permanent'):p.type==='mute'?t('punish_mute'):t('punish_warning'))+'">'+punishBadge+'</span>' : ''}</div>
-            <div class="c-last">${ol.online?'<span style="color:var(--success)">'+t('msg_online')+'</span> · ':''}${c.lastMsg || t('msg_start_chat')}</div>
+            <div class="c-name">${c.nickname}${c.isAdmin?' <span style="color:var(--accent);font-size:10px">'+t('msg_admin')+'</span>':''}${punishBadge ? ' <span style="font-size:11px" title="'+(p.type==='permanent'?t('punish_permanent'):p.type==='mute'?t('punish_mute'):t('punish_warning'))+'">'+punishBadge+'</span>' : ''}</div>
+            <div class="c-last">${ol.online?'<span style="color:var(--success);font-weight:600">● '+t('msg_online')+'</span>':(c.lastMsg || t('msg_start_chat'))}</div>
           </div>
           ${c.unread ? `<span class="c-badge">${c.unread}</span>` : ''}
         </div>`;
@@ -3668,8 +3706,9 @@ function applyI18n() {
       ? `<img src="${peerAvatar.startsWith('data:') ? peerAvatar : 'data:image/jpeg;base64,' + peerAvatar}" style="width:28px;height:28px;border-radius:8px;object-fit:cover;vertical-align:middle">`
       : peerAvatar)
       : '👤';
-    const onlineDotHtml = `<span id="chatPeerOnlineDot" class="online-dot off" style="margin:0 4px 0 2px;vertical-align:middle" title="${t('msg_offline')}"></span>`;
-    $('#chatHeader').innerHTML = `${avatarHtml}${onlineDotHtml} ${peerName||peerUid} <button class="trae-icon-btn" style="margin-left:auto;font-size:11px;color:var(--danger)" onclick="openReportModal('${(peerName||peerUid).replace(/'/g,"\\'")}','${peerUid}')">🚨 ${t('report_title')||'举报'}</button>`;
+    const onlineDotHtml = `<span id="chatPeerOnlineDot" class="online-dot off" style="margin:0 2px 0 6px;vertical-align:middle" title="${t('msg_offline')}"></span>`;
+    const statusTextHtml = `<span id="chatPeerStatusText" class="chat-peer-status">${t('msg_offline')}</span>`;
+    $('#chatHeader').innerHTML = `<div class="avatar-wrap" style="margin-right:2px">${avatarHtml}<span class="avatar-dot off" id="chatPeerAvatarDot"></span></div>${onlineDotHtml}${peerName||peerUid}${statusTextHtml} <button class="trae-icon-btn" style="margin-left:auto;font-size:11px;color:var(--danger)" onclick="openReportModal('${(peerName||peerUid).replace(/'/g,"\\'")}','${peerUid}')">🚨 ${t('report_title')||'举报'}</button>`;
     $('#chatHeader').style.display = 'flex';
     $('#chatHeader').style.alignItems = 'center';
     // 如果被禁言则禁用输入控件
@@ -3698,15 +3737,26 @@ function applyI18n() {
     }, 5000);
   }
 
-  // v2.3 更新聊天头部在线状态点
+  // v2.3 更新聊天头部在线状态（圆点 + 头像叠加 + 状态文字）
   async function updateChatHeaderOnline(peerUid) {
     try {
       const r = await apiGetOnline(peerUid);
-      const dot = $('#chatPeerOnlineDot');
-      if (!dot) return;
       const online = !!(r.ok && r.online);
-      dot.className = 'online-dot ' + (online ? 'on' : 'off');
-      dot.title = online ? t('msg_online') : (r.lastSeen ? (t('msg_last_seen') + ': ' + fmtTime(r.lastSeen)) : t('msg_offline'));
+      const statusText = online ? t('msg_online') : (r.lastSeen ? (t('msg_last_seen') + ': ' + fmtTime(r.lastSeen)) : t('msg_offline'));
+      const dotClass = 'online-dot ' + (online ? 'on' : 'off');
+      const avatarDotClass = 'avatar-dot ' + (online ? 'on' : 'off');
+      // Update standalone dot
+      const dot = $('#chatPeerOnlineDot');
+      if (dot) { dot.className = dotClass; dot.title = statusText; }
+      // Update avatar overlay dot
+      const avDot = $('#chatPeerAvatarDot');
+      if (avDot) { avDot.className = avatarDotClass; avDot.title = statusText; }
+      // Update status text
+      const statusEl = $('#chatPeerStatusText');
+      if (statusEl) {
+        statusEl.textContent = statusText;
+        statusEl.className = 'chat-peer-status ' + (online ? 'online' : '');
+      }
     } catch(e) {}
   }
 
@@ -3781,8 +3831,27 @@ function applyI18n() {
     currentChatPeer = null;
     // 清除好友轮询
     if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
+    // v2.3 获取群组成员在线状态
+    let onlineCount = 0;
+    let totalMembers = 0;
+    try {
+      const gr = await apiGetGroups(currentUser.uid);
+      if (gr.ok && gr.groups) {
+        const grp = gr.groups.find(g => g.id === gid);
+        if (grp && grp.members) {
+          totalMembers = grp.members.length;
+          const olRes = await apiGetOnlineBatch(grp.members);
+          if (olRes.ok && olRes.statuses) {
+            onlineCount = Object.values(olRes.statuses).filter(s => s && s.online).length;
+          }
+        }
+      }
+    } catch(e) {}
     // 设置头部
     let headerHtml = `💬 ${gname}`;
+    if (totalMembers > 0) {
+      headerHtml += `<span class="group-online-count">● ${onlineCount}/${totalMembers} ${t('msg_online')}</span>`;
+    }
     if (isOwner) {
       headerHtml += ` <button class="term-btn-sm danger" style="margin-left:8px;font-size:10px;padding:2px 8px" onclick="dissolveGroup('${gid}','${gname.replace(/'/g,"\\'")}')">${t('group_dissolve')}</button>`;
     } else {
