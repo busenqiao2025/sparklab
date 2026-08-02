@@ -189,6 +189,13 @@ export default {
           if (users.find(u => u.name === name)) return json({ ok: false, msg: '用户已存在' });
           const uid = await genUid(env, users);
           const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], created: Date.now() };
+          // 自动与 admin 建立双向好友关系
+          const adminUser = users.find(u => u.role === 'admin');
+          if (adminUser && adminUser.uid !== uid) {
+            newUser.friends.push(adminUser.uid);
+            if (!adminUser.friends) adminUser.friends = [];
+            if (!adminUser.friends.includes(uid)) adminUser.friends.push(uid);
+          }
           users.push(newUser);
           await saveUsers(env, users);
           return json({ ok: true, user: sanitize(newUser) });
@@ -625,14 +632,24 @@ export default {
               }
             }
           }
-          // 加上管理员（如果当前用户不是管理员）
+          // 加上管理员（如果当前用户不是管理员）— 自动修复双向好友关系
           if (user && user.role !== 'admin') {
             const admin = users.find(u => u.role === 'admin');
-            if (admin && (!user.friends || !user.friends.includes(admin.uid))) {
-              const aMsgs = msgs.filter(m => (m.from === uid && m.to === admin.uid) || (m.from === admin.uid && m.to === uid));
-              const lastMsg = aMsgs.sort((a,b) => b.created - a.created)[0];
-              const unread = aMsgs.filter(m => m.to === uid && !m.read).length;
-              contacts.unshift({ uid: admin.uid, name: admin.name, nickname: admin.nickname, avatar: admin.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread, isAdmin: true });
+            if (admin && admin.uid !== uid) {
+              // 如果用户没有 admin 好友，自动补上双向关系
+              let needSave = false;
+              if (!user.friends) { user.friends = []; needSave = true; }
+              if (!user.friends.includes(admin.uid)) { user.friends.push(admin.uid); needSave = true; }
+              if (!admin.friends) { admin.friends = []; needSave = true; }
+              if (!admin.friends.includes(uid)) { admin.friends.push(uid); needSave = true; }
+              if (needSave) await saveUsers(env, users);
+              // 如果 admin 不在联系人列表中（没有聊天记录），则添加
+              if (!contacts.find(c => c.uid === admin.uid)) {
+                const aMsgs = msgs.filter(m => (m.from === uid && m.to === admin.uid) || (m.from === admin.uid && m.to === uid));
+                const lastMsg = aMsgs.sort((a,b) => b.created - a.created)[0];
+                const unread = aMsgs.filter(m => m.to === uid && !m.read).length;
+                contacts.unshift({ uid: admin.uid, name: admin.name, nickname: admin.nickname, avatar: admin.avatar, lastMsg: lastMsg ? lastMsg.content : '', lastTime: lastMsg ? lastMsg.created : 0, unread, isAdmin: true });
+              }
             }
           }
           // 管理员视角：查看有广播消息往来的用户

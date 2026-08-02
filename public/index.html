@@ -1841,6 +1841,9 @@ function applyI18n() {
     renderMaterialCards();
     renderCompCards();
     renderBoardCards();
+    // v2.3 先启动心跳，再渲染用户列表（否则自己显示为离线）
+    await startHeartbeat();
+    window.addEventListener('beforeunload', stopHeartbeat);
     await renderUsers();
     renderProfile();
     initMessaging();
@@ -1963,6 +1966,8 @@ function applyI18n() {
     if (p === 'reports') renderReports();
     if (p === 'mypunish') renderMyPunishments();
     if (p === 'settings') initSettings();
+    // v2.3 切换面板时立即刷新在线状态
+    refreshOnlineStatus();
   }
 
   function switchCategory(cat) {
@@ -3123,7 +3128,81 @@ function applyI18n() {
     pollTimer = setInterval(() => {
       if (currentUser.role === 'admin') updateReqBadge();
       updateMsgBadge();
+      // v2.3 实时刷新当前面板的在线状态
+      refreshOnlineStatus();
     }, 10000);
+  }
+
+  // v2.3 按当前面板刷新在线状态（避免不必要的请求）
+  async function refreshOnlineStatus() {
+    if (!currentUser) return;
+    if (currentPanel === 'users' && currentUser.role === 'admin') {
+      // 用户管理表格：只更新在线状态列，不重新渲染整个表格
+      try {
+        const tbody = $('#userTable tbody');
+        if (!tbody) return;
+        const rows = tbody.querySelectorAll('tr');
+        const uids = [];
+        rows.forEach(row => {
+          const uidCell = row.children[1];
+          if (uidCell) {
+            const uid = uidCell.textContent.trim();
+            if (uid) uids.push({ uid, row });
+          }
+        });
+        if (uids.length === 0) return;
+        const olRes = await apiGetOnlineBatch(uids.map(u => u.uid));
+        if (!olRes.ok || !olRes.statuses) return;
+        uids.forEach(({ uid, row }) => {
+          const statusCell = row.children[3]; // 状态列
+          if (!statusCell) return;
+          const st = olRes.statuses[uid];
+          const online = !!(st && st.online);
+          const lastSeen = st ? st.lastSeen : null;
+          const title = online ? t('msg_online') : (lastSeen ? (t('msg_last_seen')+': '+fmtTime(lastSeen)) : t('msg_offline'));
+          statusCell.innerHTML = `<span class="user-online-cell"><span class="online-dot ${online?'on':'off'}" title="${title}"></span>${online?'<span style="color:var(--success);font-weight:600">'+t('msg_online')+'</span>':'<span style="color:var(--muted)">'+t('msg_offline')+'</span>'}</span>`;
+        });
+      } catch(e) {}
+    } else if (currentPanel === 'messages') {
+      // 站内信面板：刷新联系人列表在线状态
+      try {
+        const r = await apiGetContacts(currentUser.uid);
+        if (!r.ok || !r.contacts) return;
+        const friendUids = r.contacts.map(c => c.uid);
+        if (friendUids.length === 0) return;
+        const olRes = await apiGetOnlineBatch(friendUids);
+        if (olRes.ok && olRes.statuses) {
+          for (const uid of friendUids) {
+            const st = olRes.statuses[uid];
+            onlineStatusMap[uid] = { online: !!(st && st.online), lastSeen: st ? st.lastSeen : null };
+          }
+        }
+        // 只更新已有联系人项的在线圆点和状态文字，不重建 DOM
+        const items = document.querySelectorAll('#contactList .contact-item[data-uid]');
+        items.forEach(item => {
+          const uid = item.dataset.uid;
+          const ol = onlineStatusMap[uid] || { online: false };
+          const olTitle = ol.online ? t('msg_online') : (ol.lastSeen ? (t('msg_last_seen')+': '+fmtTime(ol.lastSeen)) : t('msg_offline'));
+          const dot = item.querySelector('.avatar-dot');
+          if (dot) {
+            dot.className = 'avatar-dot ' + (ol.online ? 'on' : 'off');
+            dot.title = olTitle;
+          }
+          const lastEl = item.querySelector('.c-last');
+          if (lastEl) {
+            if (ol.online) {
+              lastEl.innerHTML = '<span style="color:var(--success);font-weight:600">● '+t('msg_online')+'</span>';
+            } else {
+              // 保持原样，不覆盖最后消息
+            }
+          }
+        });
+        // 如果当前正在和好友聊天，也更新聊天头部
+        if (currentChatPeer && currentChatMode === 'friend') {
+          updateChatHeaderOnline(currentChatPeer);
+        }
+      } catch(e) {}
+    }
   }
 
   // ===================== 个人主页 =====================
@@ -3670,14 +3749,19 @@ function applyI18n() {
       el.innerHTML = ''; return;
     }
     el.innerHTML = '<div style="padding:6px 16px;font-size:11px;color:var(--fg-light);font-weight:600;background:var(--warning-soft)">'+t('msg_friend_req')+'</div>' +
-      r.requests.map(req => `
+      r.requests.map(req => {
+        const av = req.fromAvatar || '👤';
+        const avatarHtml = (av.startsWith('data:') || av.length > 100)
+          ? `<img src="${av.startsWith('data:') ? av : 'data:image/jpeg;base64,' + av}" style="width:20px;height:20px;border-radius:6px;object-fit:cover">`
+          : av;
+        return `
         <div class="friend-req-item">
-          <span class="r-avatar">${req.fromAvatar}</span>
+          <span class="r-avatar">${avatarHtml}</span>
           <span class="r-name">${req.fromName}</span>
           <button class="term-btn-sm" style="border-color:var(--success);color:var(--success);padding:3px 8px" data-accept="${req.id}">${t('msg_accept')}</button>
           <button class="term-btn-sm danger" style="padding:3px 8px" data-reject="${req.id}">${t('msg_reject')}</button>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     el.querySelectorAll('[data-accept]').forEach(b => {
       b.addEventListener('click', async () => {
         await apiAcceptFriend(parseInt(b.dataset.accept));
@@ -5109,11 +5193,11 @@ function applyI18n() {
   }
 
   // v2.3 在线状态心跳：每 30 秒向服务端发送一次心跳
-  function startHeartbeat() {
+  async function startHeartbeat() {
     stopHeartbeat();
     if (!currentUser) return;
-    // 立即发送一次，随后每 30 秒一次
-    apiHeartbeat(currentUser.uid);
+    // 立即发送一次（等待完成），随后每 30 秒一次
+    await apiHeartbeat(currentUser.uid);
     heartbeatTimer = setInterval(() => {
       if (currentUser) apiHeartbeat(currentUser.uid);
     }, 30000);
@@ -5209,9 +5293,6 @@ function applyI18n() {
   function initMessaging() {
     $('#sendMsgBtn').addEventListener('click', sendChatMessage);
     $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
-    // v2.3 启动在线状态心跳（30秒间隔），登出/关闭页面时清除
-    startHeartbeat();
-    window.addEventListener('beforeunload', stopHeartbeat);
     // v2.3 消息搜索框：输入时防抖 300ms 触发搜索
     const msgSearchInput = $('#msgSearchInput');
     if (msgSearchInput) {
