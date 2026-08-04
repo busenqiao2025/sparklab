@@ -1,5 +1,5 @@
 ﻿/**
- * SparkMinds Lab v2.3 — Cloudflare Worker
+ * SparkMinds Lab v2.4 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
 
@@ -192,7 +192,7 @@ export default {
     if (url.pathname.startsWith('/api/')) {
       try {
         if (url.pathname === '/api/health')
-          return json({ ok: true, time: Date.now(), version: 'v2.3' });
+          return json({ ok: true, time: Date.now(), version: 'v2.4' });
 
         // ========== 用户认证 ==========
         if (url.pathname === '/api/login' && request.method === 'POST') {

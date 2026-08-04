@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.3]</title>
+<title>SparkMinds Lab [v2.4]</title>
 <style>
   /* ============================================================
-     SparkMinds Lab v2.3 — Read Receipts + Online Status + Search + Card Layout
+     SparkMinds Lab v2.4 — Desktop App + Inventory Sync + Custom Theme + Original Logo
      Modern, clean, inspired by Linear / Vercel / Stripe
      ============================================================ */
   :root{
@@ -507,6 +507,29 @@
   .friend-req-item .r-avatar{font-size:16px}
   .friend-req-item .r-name{flex:1;color:var(--fg);font-weight:500}
 
+  /* ===== Notification Center ===== */
+  .notify-dropdown{position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:200;width:380px;max-height:480px;overflow-y:auto;overflow-x:hidden}
+  .notify-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;border-bottom:1px solid var(--border-light);position:sticky;top:0;background:var(--bg2);z-index:2}
+  .notify-header-title{font-size:14px;font-weight:700;color:var(--fg)}
+  .notify-mark-all{font-size:11px;color:var(--accent);cursor:pointer;border:none;background:transparent;padding:2px 6px;border-radius:var(--radius-xs);transition:var(--transition);font-family:var(--font)}
+  .notify-mark-all:hover{background:var(--accent-soft)}
+  .notify-tabs{display:flex;border-bottom:1px solid var(--border-light);position:sticky;top:41px;background:var(--bg2);z-index:2}
+  .notify-tab{flex:1;padding:8px 0;text-align:center;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;transition:var(--transition);font-family:var(--font)}
+  .notify-tab:hover{color:var(--fg)}
+  .notify-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .notify-tab .tab-count{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:8px;font-size:10px;padding:0 5px;margin-left:3px;font-weight:700;min-width:14px}
+  .notify-list{padding:0}
+  .notify-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .2s ease;position:relative}
+  .notify-item:hover{background:rgba(99,102,241,.06)}
+  .notify-item.unread::before{content:'';position:absolute;left:6px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 4px rgba(99,102,241,.5)}
+  .notify-item.unread{padding-left:22px}
+  .notify-icon{font-size:18px;flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--accent-soft)}
+  .notify-body{flex:1;min-width:0}
+  .notify-title{font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .notify-summary{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+  .notify-time{font-size:10px;color:var(--muted);flex-shrink:0;margin-left:auto;padding-left:6px;align-self:flex-start}
+  .notify-empty{padding:40px 16px;text-align:center;color:var(--muted);font-size:13px}
+
   /* ===== v2.3 Card Grid / Online Dot / Search Highlight ===== */
   .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
   .online-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;transition:background .3s ease;box-shadow:0 0 0 2px rgba(255,255,255,.6)}
@@ -624,6 +647,7 @@ const I18N = {
     'forum_post_default': '帖子', 'settings_toggle_theme': '切换主题', 'sim_off_toast': '模拟数据已关闭', 'sim_on_toast': '模拟数据已开启（无真实设备时用于测试）',
     'wp_cleared': '已清除壁纸', 'wp_switched': '已切换至「{name}」', 'wp_set_compressed': '壁纸已设置（压缩至 {kb}KB）', 'wp_storage_full': '存储空间不足，请清除壁纸后重试', 'wp_image_load_failed': '图片加载失败', 'settings_wallpaper': '自定义壁纸', 'wp_hint': '选择预设或上传图片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩浓度', 'wp_upload': '上传自定义壁纸', 'wp_clear': '清除壁纸', 'wp_name_none': '无', 'wp_name_aurora': '极光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '余烬', 'wp_name_custom': '自定义',
     'settings_accent_color': '主题色', 'settings_accent_hint': '点击选择自定义颜色', 'settings_accent_custom': '自定义', 'settings_accent_reset': '重置',
+    'dashboard_alerts': '库存预警', 'dashboard_sensor_history': '传感器历史', 'dashboard_no_alerts': '暂无预警', 'dashboard_alert_critical': '严重', 'dashboard_alert_warning': '警告', 'dashboard_export_report': '导出报告', 'export_html': 'HTML报告', 'export_csv': 'CSV数据', 'export_choose_format': '选择导出格式', 'export_done': '导出成功', 'report_title': 'SparkMinds Lab 实验报告', 'report_generated': '生成时间', 'shortcut_help': '快捷键帮助',
     'user_deleted_with_cleanup': '已删除用户并清理：私聊 {msg} 条、群消息 {gm} 条、好友请求 {req} 条、解散群组 {grp} 个', 'user_deleted_no_chat': '已删除用户（无关联聊天数据）',
     'migrate_uids_btn': 'UID 迁移', 'migrate_uids_confirm': '将重新分配所有用户 UID（admin 固定 00001，其余按注册时间顺延），并同步重映射聊天/群组/好友请求中的 UID。\n\n迁移前会自动创建完整备份，可通过数据回滚恢复。\n\n确定执行？', 'migrate_uids_running': '正在迁移 UID，请勿关闭页面...', 'migrate_uids_done': '迁移完成：{users} 个用户、重映射私聊 {msgs} 条、群消息 {gm} 条、群组 {groups} 个、好友请求 {reqs} 条，uid_counter={counter}', 'migrate_uids_failed': '迁移失败：',
     'txn_records_hint': '{count} 条记录 · 点击查看详情',
@@ -724,6 +748,8 @@ const I18N = {
     'room_3d': '3D打印·操作·仓库区',
     // Forum
     'nav_forum': '论坛', 'panel_forum': '论坛', 'forum_create': '发帖', 'forum_create_title': '发布新帖', 'forum_title': '标题', 'forum_title_ph': '请输入标题', 'forum_category': '分类', 'forum_content': '内容', 'forum_content_ph': '请输入内容...', 'forum_publish': '发布', 'forum_published': '发布成功', 'forum_publish_failed': '发布失败', 'forum_empty': '标题和内容不能为空', 'forum_no_posts': '暂无帖子，快来发第一篇吧', 'forum_not_found': '帖子不存在', 'forum_like': '点赞', 'forum_liked': '已赞', 'forum_delete': '删除', 'forum_delete_confirm': '确定要删除此帖子吗？', 'forum_deleted': '帖子已删除', 'forum_comments': '评论', 'forum_no_comments': '暂无评论，快来抢沙发', 'forum_comment_ph': '输入评论...', 'forum_comment_send': '评论', 'forum_cat_all': '全部', 'forum_cat_general': '综合讨论', 'forum_cat_tech': '技术交流', 'forum_cat_project': '项目展示', 'forum_cat_qa': '问答求助',
+    // Notification Center
+    'notify_center': '通知中心', 'notify_all': '全部', 'notify_messages': '站内信', 'notify_system': '系统', 'notify_mark_all_read': '全部已读', 'notify_empty': '暂无通知', 'notify_friend_request': '好友申请', 'notify_broadcast': '系统广播', 'notify_unread_msg': '条未读消息',
   },
   'zh-TW': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': '實驗室物聯網監控平台',
@@ -755,6 +781,7 @@ const I18N = {
     'forum_post_default': '帖子', 'settings_toggle_theme': '切換主題', 'sim_off_toast': '模擬數據已關閉', 'sim_on_toast': '模擬數據已開啟（無真實設備時用於測試）',
     'wp_cleared': '已清除桌布', 'wp_switched': '已切換至「{name}」', 'wp_set_compressed': '桌布已設定（壓縮至 {kb}KB）', 'wp_storage_full': '儲存空間不足，請清除桌布後重試', 'wp_image_load_failed': '圖片載入失敗', 'settings_wallpaper': '自訂桌布', 'wp_hint': '選擇預設或上傳圖片', 'wp_opacity': '透明度', 'wp_blur': '模糊度', 'wp_mask': '遮罩濃度', 'wp_upload': '上傳自訂桌布', 'wp_clear': '清除桌布', 'wp_name_none': '無', 'wp_name_aurora': '極光', 'wp_name_sunset': '日落', 'wp_name_ocean': '深海', 'wp_name_forest': '密林', 'wp_name_galaxy': '星河', 'wp_name_peach': '蜜桃', 'wp_name_mint': '薄荷', 'wp_name_lavender': '薰衣草', 'wp_name_ember': '餘燼', 'wp_name_custom': '自訂',
     'settings_accent_color': '主題色', 'settings_accent_hint': '點擊選擇自訂顏色', 'settings_accent_custom': '自訂', 'settings_accent_reset': '重置',
+    'dashboard_alerts': '庫存預警', 'dashboard_sensor_history': '感測器歷史', 'dashboard_no_alerts': '暫無預警', 'dashboard_alert_critical': '嚴重', 'dashboard_alert_warning': '警告', 'dashboard_export_report': '匯出報告', 'export_html': 'HTML報告', 'export_csv': 'CSV數據', 'export_choose_format': '選擇匯出格式', 'export_done': '匯出成功', 'report_title': 'SparkMinds Lab 實驗報告', 'report_generated': '生成時間', 'shortcut_help': '快捷鍵幫助',
     'user_deleted_with_cleanup': '已刪除使用者並清理：私聊 {msg} 條、群訊息 {gm} 條、好友請求 {req} 條、解散群組 {grp} 個', 'user_deleted_no_chat': '已刪除使用者（無關聯聊天資料）',
     'migrate_uids_btn': 'UID 遷移', 'migrate_uids_confirm': '將重新分配所有使用者 UID（admin 固定 00001，其餘按註冊時間順延），並同步重映射聊天/群組/好友請求中的 UID。\n\n遷移前會自動建立完整備份，可透過資料回滾恢復。\n\n確定執行？', 'migrate_uids_running': '正在遷移 UID，請勿關閉頁面...', 'migrate_uids_done': '遷移完成：{users} 個使用者、重映射私聊 {msgs} 條、群訊息 {gm} 條、群組 {groups} 個、好友請求 {reqs} 條，uid_counter={counter}', 'migrate_uids_failed': '遷移失敗：',
     'txn_records_hint': '{count} 條記錄 · 點擊查看詳情',
@@ -839,6 +866,8 @@ const I18N = {
     'room_3d': '3D列印·操作·倉庫區',
     // Forum
     'nav_forum': '論壇', 'panel_forum': '論壇', 'forum_create': '發帖', 'forum_create_title': '發布新帖', 'forum_title': '標題', 'forum_title_ph': '請輸入標題', 'forum_category': '分類', 'forum_content': '內容', 'forum_content_ph': '請輸入內容...', 'forum_publish': '發布', 'forum_published': '發布成功', 'forum_publish_failed': '發布失敗', 'forum_empty': '標題和內容不能為空', 'forum_no_posts': '暫無帖子，快來發第一篇吧', 'forum_not_found': '帖子不存在', 'forum_like': '點讚', 'forum_liked': '已讚', 'forum_delete': '刪除', 'forum_delete_confirm': '確定要刪除此帖子嗎？', 'forum_deleted': '帖子已刪除', 'forum_comments': '評論', 'forum_no_comments': '暫無評論，快來搶沙發', 'forum_comment_ph': '輸入評論...', 'forum_comment_send': '評論', 'forum_cat_all': '全部', 'forum_cat_general': '綜合討論', 'forum_cat_tech': '技術交流', 'forum_cat_project': '項目展示', 'forum_cat_qa': '問答求助',
+    // Notification Center
+    'notify_center': '通知中心', 'notify_all': '全部', 'notify_messages': '站內信', 'notify_system': '系統', 'notify_mark_all_read': '全部已讀', 'notify_empty': '暫無通知', 'notify_friend_request': '好友申請', 'notify_broadcast': '系統廣播', 'notify_unread_msg': '條未讀訊息',
   },
   'en': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': 'Lab IoT Monitoring Platform',
@@ -870,6 +899,7 @@ const I18N = {
     'forum_post_default': 'Post', 'settings_toggle_theme': 'Toggle Theme', 'sim_off_toast': 'Simulation data disabled', 'sim_on_toast': 'Simulation data enabled (for testing without real devices)',
     'wp_cleared': 'Wallpaper cleared', 'wp_switched': 'Switched to "{name}"', 'wp_set_compressed': 'Wallpaper set (compressed to {kb}KB)', 'wp_storage_full': 'Storage full, please clear wallpaper and retry', 'wp_image_load_failed': 'Image load failed', 'settings_wallpaper': 'Custom Wallpaper', 'wp_hint': 'Choose a preset or upload an image', 'wp_opacity': 'Opacity', 'wp_blur': 'Blur', 'wp_mask': 'Mask Density', 'wp_upload': 'Upload Custom Wallpaper', 'wp_clear': 'Clear Wallpaper', 'wp_name_none': 'None', 'wp_name_aurora': 'Aurora', 'wp_name_sunset': 'Sunset', 'wp_name_ocean': 'Ocean', 'wp_name_forest': 'Forest', 'wp_name_galaxy': 'Galaxy', 'wp_name_peach': 'Peach', 'wp_name_mint': 'Mint', 'wp_name_lavender': 'Lavender', 'wp_name_ember': 'Ember', 'wp_name_custom': 'Custom',
     'settings_accent_color': 'Accent Color', 'settings_accent_hint': 'Click to choose a custom color', 'settings_accent_custom': 'Custom', 'settings_accent_reset': 'Reset',
+    'dashboard_alerts': 'Inventory Alerts', 'dashboard_sensor_history': 'Sensor History', 'dashboard_no_alerts': 'No alerts', 'dashboard_alert_critical': 'Critical', 'dashboard_alert_warning': 'Warning', 'dashboard_export_report': 'Export Report', 'export_html': 'HTML Report', 'export_csv': 'CSV Data', 'export_choose_format': 'Choose export format', 'export_done': 'Export complete', 'report_title': 'SparkMinds Lab Report', 'report_generated': 'Generated at', 'shortcut_help': 'Keyboard Shortcuts',
     'user_deleted_with_cleanup': 'User deleted and cleaned: {msg} DMs, {gm} group msgs, {req} friend requests, {grp} groups dissolved', 'user_deleted_no_chat': 'User deleted (no associated chat data)',
     'migrate_uids_btn': 'Migrate UIDs', 'migrate_uids_confirm': 'This will reassign all user UIDs (admin stays 00001, others by registration time) and remap UIDs in chats/groups/friend requests.\n\nA full backup is created automatically before migration and can be restored via Data Rollback.\n\nProceed?', 'migrate_uids_running': 'Migrating UIDs, please keep this page open...', 'migrate_uids_done': 'Migration done: {users} users, remapped {msgs} DMs, {gm} group msgs, {groups} groups, {reqs} friend requests, uid_counter={counter}', 'migrate_uids_failed': 'Migration failed: ',
     'txn_records_hint': '{count} records · Click for details',
@@ -954,6 +984,8 @@ const I18N = {
     'room_3d': '3D Print · Workshop · Storage',
     // Forum
     'nav_forum': 'Forum', 'panel_forum': 'Forum', 'forum_create': 'New Post', 'forum_create_title': 'Create Post', 'forum_title': 'Title', 'forum_title_ph': 'Enter title', 'forum_category': 'Category', 'forum_content': 'Content', 'forum_content_ph': 'Enter content...', 'forum_publish': 'Publish', 'forum_published': 'Published', 'forum_publish_failed': 'Publish failed', 'forum_empty': 'Title and content required', 'forum_no_posts': 'No posts yet. Be the first!', 'forum_not_found': 'Post not found', 'forum_like': 'Like', 'forum_liked': 'Liked', 'forum_delete': 'Delete', 'forum_delete_confirm': 'Delete this post?', 'forum_deleted': 'Post deleted', 'forum_comments': 'Comments', 'forum_no_comments': 'No comments yet', 'forum_comment_ph': 'Add a comment...', 'forum_comment_send': 'Comment', 'forum_cat_all': 'All', 'forum_cat_general': 'General', 'forum_cat_tech': 'Tech', 'forum_cat_project': 'Projects', 'forum_cat_qa': 'Q&A',
+    // Notification Center
+    'notify_center': 'Notifications', 'notify_all': 'All', 'notify_messages': 'Messages', 'notify_system': 'System', 'notify_mark_all_read': 'Mark all read', 'notify_empty': 'No notifications', 'notify_friend_request': 'Friend request', 'notify_broadcast': 'System broadcast', 'notify_unread_msg': 'unread messages',
   }
 };
 
@@ -998,7 +1030,7 @@ function applyI18n() {
     const lbl = document.getElementById('langLabel');
     if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.3]';
+    document.title = t('app_name') + ' [v2.4]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1062,7 +1094,7 @@ function applyI18n() {
   <!-- Top Bar -->
   <div class="trae-topbar">
     <div class="trae-topbar-left">
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds" style="width:auto;height:22px;flex-shrink:0"> SparkMinds Lab v2.3</span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds" style="width:auto;height:22px;flex-shrink:0"> SparkMinds Lab v2.4</span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1080,6 +1112,22 @@ function applyI18n() {
       </button>
       <button class="trae-icon-btn" id="simBtn" style="color:var(--warning)"><span data-i18n="sim_off">模拟:关</span></button>
       <button class="trae-icon-btn" id="msgBtn"><span data-i18n="nav_messages">站内信</span><span id="msgBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;min-width:12px;text-align:center">0</span></button>
+      <div style="position:relative;display:inline-flex;align-items:center">
+        <button class="trae-icon-btn" id="notifyBtn" title="通知中心" data-i18n-title="notify_center"><span>🔔</span><span id="notifyBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;min-width:12px;text-align:center">0</span></button>
+        <div id="notifyDropdown" class="notify-dropdown" style="display:none">
+          <div class="notify-header">
+            <span class="notify-header-title" data-i18n="notify_center">通知中心</span>
+            <button class="notify-mark-all" id="notifyMarkAllRead" data-i18n="notify_mark_all_read">全部已读</button>
+          </div>
+          <div class="notify-tabs">
+            <button class="notify-tab active" data-notify-tab="all"><span data-i18n="notify_all">全部</span><span class="tab-count" id="notifyCountAll" style="display:none">0</span></button>
+            <button class="notify-tab" data-notify-tab="messages"><span data-i18n="notify_messages">站内信</span><span class="tab-count" id="notifyCountMessages" style="display:none">0</span></button>
+            <button class="notify-tab" data-notify-tab="system"><span data-i18n="notify_system">系统</span><span class="tab-count" id="notifyCountSystem" style="display:none">0</span></button>
+          </div>
+          <div class="notify-list" id="notifyList"></div>
+        </div>
+      </div>
+      <button class="trae-icon-btn" id="shortcutHelpBtn" title="快捷键" data-i18n-title="shortcut_help" style="font-size:14px">⌨️</button>
       <button class="trae-icon-btn" id="myReqBtn" data-i18n="nav_my_req">我的申请</button>
       <div style="position:relative;display:inline-flex;align-items:center">
         <button class="trae-icon-btn" id="langBtn" style="min-width:50px;justify-content:center"><span id="langLabel">简中</span> ▾</button>
@@ -1143,6 +1191,19 @@ function applyI18n() {
       <div class="term-box" data-title="操作分类分布" data-i18n-title="dashboard_action_stacked" style="padding:16px 20px">
         <div style="position:relative;height:260px"><canvas id="chartActionStacked"></canvas></div>
       </div>
+    </div>
+    <!-- 库存预警 + 传感器历史 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px" id="dashboardChartsAlert">
+      <div class="term-box" data-title="库存预警" data-i18n-title="dashboard_alerts" style="padding:16px 20px">
+        <div id="inventoryAlerts" style="max-height:260px;overflow-y:auto"></div>
+      </div>
+      <div class="term-box" data-title="传感器历史" data-i18n-title="dashboard_sensor_history" style="padding:16px 20px">
+        <div style="position:relative;height:260px"><canvas id="chartSensorHistory"></canvas></div>
+      </div>
+    </div>
+    <!-- 导出报告按钮 -->
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="term-btn-sm" id="exportReportBtn" style="border-color:var(--accent);color:var(--accent);font-size:12px;padding:6px 16px" data-i18n="dashboard_export_report">导出报告</button>
     </div>
     <div style="margin-top:20px">
       <div class="panel-title" data-i18n="dashboard_recent_txn">最近库存变动</div>
@@ -1503,7 +1564,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.3</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.4</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -1994,16 +2055,26 @@ function applyI18n() {
     await renderUsers();
     renderProfile();
     initMessaging();
+    initNotificationCenter();
     initBackupAndTxn();
     initGroups();
     initReport();
     initForum();
+    initKeyboardShortcuts();
     renderSidebar();
     renderDashboard();
     updateTraeUser();
     startPolling();
     toast(`${t('t_welcome')}，${currentUser.nickname || currentUser.name} [${currentUser.role}]${currentUser.role !== 'admin' ? t('t_readonly') : ''}`);
   }
+
+  // 导出报告按钮
+  const exportBtn = $('#exportReportBtn');
+  if (exportBtn) exportBtn.addEventListener('click', showExportMenu);
+
+  // 快捷键帮助按钮
+  const shortcutHelpBtn = $('#shortcutHelpBtn');
+  if (shortcutHelpBtn) shortcutHelpBtn.addEventListener('click', showShortcutHelp);
 
   $('#logoutBtn').addEventListener('click', () => {
     sessionStorage.removeItem('lab_session');
@@ -2272,6 +2343,7 @@ function applyI18n() {
     if (!roomEl) return;
     const el = roomEl.querySelector(`[data-k="${key}"]`);
     if (!el) return;
+    if (typeof recordSensorData === 'function') recordSensorData(roomId, key, value);
 
     if (key === 'light') {
       const raw = parseInt(value);
@@ -3272,11 +3344,14 @@ function applyI18n() {
       updateReqBadge();
     }
     updateMsgBadge();
+    refreshNotificationCenter();
     pollTimer = setInterval(() => {
       if (currentUser.role === 'admin') updateReqBadge();
       updateMsgBadge();
       // v2.3 实时刷新当前面板的在线状态
       refreshOnlineStatus();
+      // 刷新通知中心（复用 10 秒轮询）
+      refreshNotificationCenter();
     }, 10000);
   }
 
@@ -4526,9 +4601,345 @@ function applyI18n() {
 
     // 渲染图表
     renderDashboardCharts(materials, components, boards, allTxns);
+    // 渲染库存预警
+    renderInventoryAlerts(materials, components, boards);
+    // 渲染传感器历史
+    renderSensorHistoryChart();
   }
   // 暴露到全局，供 setLang 语言切换时调用
   window.renderDashboard = renderDashboard;
+
+  // ===================== 库存预警 =====================
+  function renderInventoryAlerts(materials, components, boards) {
+    const container = $('#inventoryAlerts');
+    if (!container) return;
+    const alerts = [];
+
+    materials.forEach(m => {
+      if (m.remain < 15) {
+        alerts.push({ name: `${t('nav_3d')}: ${m.type||''} ${m.color||''}`, value: m.remain + '%', level: m.remain < 5 ? 'critical' : 'warning', icon: '🧵' });
+      }
+    });
+    components.forEach(c => {
+      if ((c.qty || 0) <= 5) {
+        alerts.push({ name: `${t('tab_components')}: ${c.name||c.type||''}`, value: String(c.qty||0), level: (c.qty||0) === 0 ? 'critical' : 'warning', icon: '🔌' });
+      }
+    });
+    boards.forEach(b => {
+      if ((b.qty || 0) <= 5) {
+        alerts.push({ name: `${t('tab_boards')}: ${b.name||b.type||''}`, value: String(b.qty||0), level: (b.qty||0) === 0 ? 'critical' : 'warning', icon: '🔲' });
+      }
+    });
+
+    if (alerts.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:13px">' +
+        '<span style="font-size:28px;display:block;margin-bottom:8px">✅</span>' + t('dashboard_no_alerts') + '</div>';
+      return;
+    }
+
+    const levelColor = { critical: 'var(--danger)', warning: 'var(--warning)' };
+    const levelBg = { critical: 'rgba(239,68,68,.08)', warning: 'rgba(245,158,11,.08)' };
+    const levelLabel = { critical: t('dashboard_alert_critical'), warning: t('dashboard_alert_warning') };
+
+    container.innerHTML = alerts.map(a => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:${levelBg[a.level]};margin-bottom:8px;border-left:3px solid ${levelColor[a.level]}">
+        <span style="font-size:18px">${a.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(a.name)}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">${levelLabel[a.level]}</div>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:${levelColor[a.level]}">${a.value}</span>
+      </div>
+    `).join('');
+  }
+
+  // ===================== 传感器历史曲线 =====================
+  let sensorHistoryData = {};
+  const SENSOR_HISTORY_MAX = 20;
+
+  function recordSensorData(roomId, key, value) {
+    if (!sensorHistoryData[roomId]) sensorHistoryData[roomId] = [];
+    const numVal = parseFloat(value);
+    if (isNaN(numVal)) return;
+    sensorHistoryData[roomId].push({ time: Date.now(), key, value: numVal });
+    if (sensorHistoryData[roomId].length > SENSOR_HISTORY_MAX * 6) {
+      sensorHistoryData[roomId] = sensorHistoryData[roomId].slice(-SENSOR_HISTORY_MAX * 6);
+    }
+  }
+
+  function renderSensorHistoryChart() {
+    const ctx = document.getElementById('chartSensorHistory');
+    if (!ctx) return;
+    if (dashboardCharts.sensorHistory) { try { dashboardCharts.sensorHistory.destroy(); } catch(e){} }
+
+    const colors = getChartColors();
+    const sensorKeys = ['temp', 'humi'];
+    const sensorLabels = { temp: t('sensor_temp'), humi: t('sensor_humi') };
+    const sensorColors = { temp: colors.danger, humi: colors.info };
+
+    const datasets = [];
+    let labels = [];
+
+    ROOMS.slice(0, 4).forEach((room, idx) => {
+      sensorKeys.forEach(key => {
+        const history = (sensorHistoryData[room.id] || []).filter(d => d.key === key);
+        if (history.length === 0) return;
+        if (history.length > labels.length) {
+          labels = history.map(d => {
+            const dt = new Date(d.time);
+            return dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0') + ':' + dt.getSeconds().toString().padStart(2,'0');
+          });
+        }
+        datasets.push({
+          label: `${room.name} ${sensorLabels[key]}`,
+          data: history.map(d => d.value),
+          borderColor: sensorColors[key],
+          backgroundColor: sensorColors[key] + '15',
+          borderWidth: 1.5,
+          pointRadius: 2,
+          tension: 0.3,
+          fill: false,
+        });
+      });
+    });
+
+    if (datasets.length === 0) {
+      datasets.push({
+        label: t('sensor_temp'),
+        data: Array.from({length:10}, (_,i) => 25 + Math.sin(i/2)*3),
+        borderColor: colors.danger,
+        backgroundColor: colors.danger + '15',
+        borderWidth: 1.5,
+        pointRadius: 2,
+        tension: 0.3,
+        fill: false,
+      });
+      labels = Array.from({length:10}, (_,i) => '--:--');
+    }
+
+    dashboardCharts.sensorHistory = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'bottom', labels: { font:{size:9}, color: colors.fgDim, boxWidth:12, padding:6 } },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: { ticks: { font:{size:9}, color: colors.fgLight, maxTicksLimit:6 }, grid: { color: colors.gridColor } },
+          y: { ticks: { font:{size:9}, color: colors.fgLight }, grid: { color: colors.gridColor } },
+        },
+        animation: { duration: 400 },
+      },
+    });
+  }
+
+  // ===================== 报告导出 =====================
+  function showExportMenu() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:320px;box-shadow:var(--shadow-lg)';
+    modal.innerHTML = `
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px">${t('export_choose_format')}</div>
+      <div style="display:flex;gap:10px">
+        <button id="exportHTMLBtn" class="term-btn-sm" style="flex:1;border-color:var(--accent);color:var(--accent);padding:10px;font-size:13px">📄 ${t('export_html')}</button>
+        <button id="exportCSVBtn" class="term-btn-sm" style="flex:1;border-color:var(--success);color:var(--success);padding:10px;font-size:13px">📊 ${t('export_csv')}</button>
+      </div>
+      <button id="exportCancelBtn" style="margin-top:12px;width:100%;padding:8px;border:1px solid var(--border);background:transparent;border-radius:var(--radius-sm);color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--font)">${t('cancel')}</button>
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.style.opacity = '1');
+
+    function close() { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 200); }
+    $('#exportHTMLBtn', modal).addEventListener('click', () => { close(); exportHTMLReport(); });
+    $('#exportCSVBtn', modal).addEventListener('click', () => { close(); exportCSVReport(); });
+    $('#exportCancelBtn', modal).addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  }
+
+  function exportHTMLReport() {
+    const materials = getMaterials();
+    const components = getComponents();
+    const boards = getBoards();
+    const now = new Date();
+    const datetime = now.toLocaleString();
+
+    const totalMats = materials.length;
+    const lowMats = materials.filter(m => m.remain < 15).length;
+    const totalComp = components.reduce((s,c) => s + (c.qty||0), 0);
+    const totalBoards = boards.reduce((s,b) => s + (b.qty||0), 0);
+
+    let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${t('report_title')}</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:900px;margin:0 auto;padding:40px;color:#1a1a2e;background:#f8f9fa}
+h1{text-align:center;color:#6366f1;border-bottom:2px solid #6366f1;padding-bottom:12px}
+.meta{text-align:center;color:#888;font-size:13px;margin-bottom:30px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:30px}
+.summary-card{background:#fff;border-radius:8px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.summary-card .num{font-size:28px;font-weight:700;color:#6366f1}
+.summary-card .label{font-size:12px;color:#888;margin-top:4px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:24px}
+th{background:#6366f1;color:#fff;padding:10px 12px;text-align:left;font-size:13px}
+td{padding:8px 12px;border-bottom:1px solid #eee;font-size:13px}
+tr:hover{background:#f5f5ff}
+.warn{color:#f59e0b;font-weight:600}
+.crit{color:#ef4444;font-weight:600}
+.section-title{font-size:16px;font-weight:700;margin:24px 0 10px;color:#1a1a2e}
+</style></head><body>
+<h1>🔬 ${t('report_title')}</h1>
+<div class="meta">${t('report_generated')}: ${datetime}</div>
+<div class="summary">
+<div class="summary-card"><div class="num">${totalMats}</div><div class="label">${t('nav_3d')}</div></div>
+<div class="summary-card"><div class="num">${totalComp}</div><div class="label">${t('tab_components')}</div></div>
+<div class="summary-card"><div class="num">${totalBoards}</div><div class="label">${t('tab_boards')}</div></div>
+<div class="summary-card"><div class="num" style="color:#ef4444">${lowMats}</div><div class="label">${t('dashboard_low')}</div></div>
+</div>`;
+
+    if (materials.length > 0) {
+      html += `<div class="section-title">🧵 ${t('nav_3d')}</div><table><thead><tr><th>${t('type')}</th><th>${t('color')}</th><th>${t('diameter')}</th><th>${t('weight')}</th><th>${t('remain')}</th></tr></thead><tbody>`;
+      materials.forEach(m => {
+        const cls = m.remain < 5 ? 'crit' : m.remain < 15 ? 'warn' : '';
+        html += `<tr><td>${m.type||''}</td><td>${m.color||''}</td><td>${m.diameter||''}</td><td>${m.weight||''}g</td><td class="${cls}">${m.remain||0}%</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    if (components.length > 0) {
+      html += `<div class="section-title">🔌 ${t('tab_components')}</div><table><thead><tr><th>${t('name')}</th><th>${t('type')}</th><th>${t('qty')}</th></tr></thead><tbody>`;
+      components.forEach(c => {
+        const cls = (c.qty||0) === 0 ? 'crit' : (c.qty||0) <= 5 ? 'warn' : '';
+        html += `<tr><td>${c.name||c.type||''}</td><td>${c.type||''}</td><td class="${cls}">${c.qty||0}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    if (boards.length > 0) {
+      html += `<div class="section-title">🔲 ${t('tab_boards')}</div><table><thead><tr><th>${t('name')}</th><th>${t('type')}</th><th>${t('qty')}</th></tr></thead><tbody>`;
+      boards.forEach(b => {
+        const cls = (b.qty||0) === 0 ? 'crit' : (b.qty||0) <= 5 ? 'warn' : '';
+        html += `<tr><td>${b.name||b.type||''}</td><td>${b.type||''}</td><td class="${cls}">${b.qty||0}</td></tr>`;
+      });
+      html += '</tbody></table>';
+    }
+
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.4 · Generated by TRAE</div></body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SparkMindsLab_Report_${now.toISOString().slice(0,10)}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(t('export_done'));
+  }
+
+  function exportCSVReport() {
+    const materials = getMaterials();
+    const components = getComponents();
+    const boards = getBoards();
+    const now = new Date();
+    let csv = `SparkMinds Lab Report\nGenerated: ${now.toLocaleString()}\n\n`;
+
+    csv += `3D Print Materials\nType,Color,Diameter,Weight(g),Remain(%)\n`;
+    materials.forEach(m => { csv += `${m.type||''},${m.color||''},${m.diameter||''},${m.weight||''},${m.remain||0}\n`; });
+    csv += '\n';
+
+    csv += `Components\nName,Type,Quantity\n`;
+    components.forEach(c => { csv += `${c.name||c.type||''},${c.type||''},${c.qty||0}\n`; });
+    csv += '\n';
+
+    csv += `Boards\nName,Type,Quantity\n`;
+    boards.forEach(b => { csv += `${b.name||b.type||''},${b.type||''},${b.qty||0}\n`; });
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SparkMindsLab_Data_${now.toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(t('export_done'));
+  }
+
+  // ===================== 快捷键支持 =====================
+  const SHORTCUT_MAP = {
+    '1': () => { switchCategory('lab'); switchPanel('dashboard'); },
+    '2': () => { switchCategory('lab'); switchPanel('lab'); },
+    '3': () => { switchCategory('inventory'); switchPanel('print3d'); },
+    '4': () => { switchCategory('inventory'); switchPanel('warehouse'); },
+    '5': () => { switchCategory('user'); switchPanel('profile'); },
+    '6': () => { switchCategory('user'); switchPanel('messages'); },
+    '7': () => { switchCategory('user'); switchPanel('forum'); },
+    '8': () => { switchCategory('user'); switchPanel('settings'); },
+    'd': () => switchPanel('dashboard'),
+    'l': () => switchPanel('lab'),
+    'n': () => showExportMenu(),
+    '?': () => showShortcutHelp(),
+    '/': () => { switchCategory('user'); switchPanel('messages'); setTimeout(() => { const s = $('#msgSearchInput'); if (s) s.focus(); }, 100); },
+  };
+
+  function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (e.key === 'Escape') {
+        const dd = $('#notifyDropdown');
+        if (dd && dd.style.display !== 'none') { dd.style.display = 'none'; return; }
+        const reqP = $('#reqPanel');
+        if (reqP && reqP.style.display !== 'none') { reqP.style.display = 'none'; return; }
+        return;
+      }
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const action = SHORTCUT_MAP[key];
+      if (action) {
+        e.preventDefault();
+        action();
+      }
+    });
+  }
+
+  function showShortcutHelp() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:360px;max-width:440px;box-shadow:var(--shadow-lg)';
+    const shortcuts = [
+      { key: '1-2', desc: t('nav_lab') + ' / ' + t('nav_dashboard') },
+      { key: '3-4', desc: t('nav_inventory') },
+      { key: '5-7', desc: t('nav_user_center') },
+      { key: '8', desc: t('nav_settings') },
+      { key: 'D', desc: t('nav_dashboard') },
+      { key: 'L', desc: t('nav_lab') },
+      { key: 'N', desc: t('dashboard_export_report') },
+      { key: '/', desc: t('search') || 'Search' },
+      { key: 'Esc', desc: t('cancel') || 'Close' },
+      { key: '?', desc: t('shortcut_help') || 'Shortcut Help' },
+    ];
+    modal.innerHTML = `
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">⌨️ ${t('shortcut_help')||'快捷键'}</div>
+      <div style="display:grid;gap:8px">
+        ${shortcuts.map(s => `
+          <div style="display:flex;align-items:center;gap:12px;padding:6px 0">
+            <kbd style="display:inline-block;min-width:36px;text-align:center;padding:3px 8px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg-soft);font-size:11px;font-weight:600;color:var(--fg)">${s.key}</kbd>
+            <span style="font-size:12px;color:var(--fg-dim)">${s.desc}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button id="shortcutCloseBtn" style="margin-top:16px;width:100%;padding:8px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:var(--font);font-weight:600">${t('cancel')||'关闭'}</button>
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.style.opacity = '1');
+    function close() { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 200); }
+    $('#shortcutCloseBtn', modal).addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  }
 
   // ===================== 数据回滚 =====================
   async function renderBackups() {
@@ -5526,6 +5937,245 @@ function applyI18n() {
     } else {
       area.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:40px 0">'+t('msg_select_contact')+'</div>';
     }
+  }
+
+  // ===================== 通知中心 =====================
+  let notifyCurrentTab = 'all';
+  let notifyData = { messages: [], system: [] };
+  let notifyInitialized = false;
+
+  function initNotificationCenter() {
+    if (notifyInitialized) return;
+    notifyInitialized = true;
+    const notifyBtn = $('#notifyBtn');
+    const notifyDropdown = $('#notifyDropdown');
+    if (!notifyBtn || !notifyDropdown) return;
+
+    // 按钮点击切换下拉
+    notifyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = notifyDropdown.style.display !== 'none';
+      if (!isOpen) {
+        refreshNotificationCenter();
+      }
+      notifyDropdown.style.display = isOpen ? 'none' : 'block';
+    });
+
+    // 点击外部关闭
+    document.addEventListener('click', (e) => {
+      if (!notifyDropdown.contains(e.target) && !notifyBtn.contains(e.target)) {
+        notifyDropdown.style.display = 'none';
+      }
+    });
+
+    // Tab 切换
+    notifyDropdown.querySelectorAll('.notify-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        notifyDropdown.querySelectorAll('.notify-tab').forEach(t2 => t2.classList.remove('active'));
+        tab.classList.add('active');
+        notifyCurrentTab = tab.dataset.notifyTab;
+        renderNotifyList();
+      });
+    });
+
+    // 全部已读按钮
+    const markAllBtn = $('#notifyMarkAllRead');
+    if (markAllBtn) {
+      markAllBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await markAllNotifyRead();
+      });
+    }
+  }
+
+  // 刷新通知中心数据（复用现有 API）
+  async function refreshNotificationCenter() {
+    if (!currentUser) return;
+    try {
+      // 并行获取三类数据
+      const [contactsRes, friendReqRes, broadcastRes] = await Promise.all([
+        apiGetContacts(currentUser.uid),
+        apiGetFriendReqs(currentUser.uid),
+        apiGetBroadcasts(currentUser.uid)
+      ]);
+
+      const messages = [];
+      const system = [];
+
+      // 1. 站内信未读（从联系人列表中筛选 unread > 0）
+      if (contactsRes.ok && contactsRes.contacts) {
+        contactsRes.contacts.forEach(c => {
+          if (c.unread && c.unread > 0) {
+            messages.push({
+              type: 'message',
+              icon: '💬',
+              title: c.nickname || c.uid,
+              summary: (c.lastMsg || '') + ' · ' + c.unread + t('notify_unread_msg'),
+              time: c.lastTime || 0,
+              unread: true,
+              uid: c.uid,
+              name: c.nickname,
+              avatar: c.avatar
+            });
+          }
+        });
+        // 按时间倒序
+        messages.sort((a, b) => (b.time || 0) - (a.time || 0));
+      }
+
+      // 2. 好友申请待处理
+      if (friendReqRes.ok && friendReqRes.requests) {
+        friendReqRes.requests.forEach(req => {
+          system.push({
+            type: 'friend_request',
+            icon: '👤',
+            title: t('notify_friend_request'),
+            summary: req.fromName || '',
+            time: req.createdAt || req.time || 0,
+            unread: true,
+            reqId: req.id
+          });
+        });
+      }
+
+      // 3. 系统广播未读（用 localStorage 过滤已读）
+      if (broadcastRes.ok && broadcastRes.broadcasts) {
+        const readSet = getReadBroadcasts();
+        broadcastRes.broadcasts.forEach(b => {
+          if (!readSet.has(b.id)) {
+            system.push({
+              type: 'broadcast',
+              icon: '📢',
+              title: t('notify_broadcast'),
+              summary: b.content || '',
+              time: b.timestamp || b.createdAt || 0,
+              unread: true,
+              msgId: b.id,
+              from: b.from,
+              content: b.content
+            });
+          }
+        });
+      }
+
+      // 系统通知按时间倒序
+      system.sort((a, b) => (b.time || 0) - (a.time || 0));
+
+      notifyData = { messages, system };
+
+      // 更新角标
+      const totalUnread = messages.length + system.length;
+      const badge = $('#notifyBadge');
+      if (badge) {
+        if (totalUnread > 0) {
+          badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      // 更新 Tab 角标计数
+      updateNotifyTabCount('notifyCountAll', messages.length + system.length);
+      updateNotifyTabCount('notifyCountMessages', messages.length);
+      updateNotifyTabCount('notifyCountSystem', system.length);
+
+      // 渲染列表
+      renderNotifyList();
+    } catch(e) {
+      // 静默失败
+    }
+  }
+
+  function updateNotifyTabCount(elId, count) {
+    const el = $('#' + elId);
+    if (!el) return;
+    if (count > 0) { el.textContent = count; el.style.display = 'inline-block'; }
+    else { el.style.display = 'none'; }
+  }
+
+  function renderNotifyList() {
+    const list = $('#notifyList');
+    if (!list) return;
+    let items = [];
+    if (notifyCurrentTab === 'all') {
+      // 合并并按时间排序
+      items = [...notifyData.messages, ...notifyData.system].sort((a, b) => (b.time || 0) - (a.time || 0));
+    } else if (notifyCurrentTab === 'messages') {
+      items = notifyData.messages;
+    } else if (notifyCurrentTab === 'system') {
+      items = notifyData.system;
+    }
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="notify-empty">' + t('notify_empty') + '</div>';
+      return;
+    }
+
+    list.innerHTML = items.map((item) => {
+      const unreadCls = item.unread ? ' unread' : '';
+      const timeStr = item.time ? fmtTime(item.time) : '';
+      return `<div class="notify-item${unreadCls}" data-notify-type="${item.type}">
+        <div class="notify-icon">${item.icon}</div>
+        <div class="notify-body">
+          <div class="notify-title">${escapeHtml(item.title)}</div>
+          <div class="notify-summary">${escapeHtml(item.summary)}</div>
+        </div>
+        <div class="notify-time">${timeStr}</div>
+      </div>`;
+    }).join('');
+
+    // 绑定点击事件 — 直接将 item 引用存储在 DOM 元素上，避免轮询刷新导致索引错位
+    const itemEls = list.querySelectorAll('.notify-item');
+    itemEls.forEach((el, i) => {
+      el._notifyItem = items[i];
+      el.addEventListener('click', () => {
+        if (el._notifyItem) handleNotifyClick(el._notifyItem);
+      });
+    });
+  }
+
+  function handleNotifyClick(item) {
+    const notifyDropdown = $('#notifyDropdown');
+    if (notifyDropdown) notifyDropdown.style.display = 'none';
+
+    if (item.type === 'message') {
+      // 跳转到站内信面板
+      switchPanel('messages');
+      // 如果有 uid，打开对应聊天
+      if (item.uid) {
+        setTimeout(() => openChat(item.uid, item.name, item.avatar), 100);
+      }
+    } else if (item.type === 'friend_request') {
+      // 跳转到站内信面板（好友请求列表在那里）
+      switchPanel('messages');
+    } else if (item.type === 'broadcast') {
+      // 显示广播横幅
+      if (item.msgId && item.content) {
+        showBroadcastBanner({ id: item.msgId, from: item.from, content: item.content });
+      }
+    }
+  }
+
+  // 全部已读
+  async function markAllNotifyRead() {
+    if (!currentUser) return;
+    // 1. 标记所有未读私聊消息为已读
+    for (const msg of notifyData.messages) {
+      if (msg.uid) {
+        try { await apiSendReadReceipt(currentUser.uid, msg.uid); } catch(e) {}
+      }
+    }
+    // 2. 标记所有未读广播为已读
+    const broadcastIds = notifyData.system.filter(s => s.type === 'broadcast').map(s => s.msgId).filter(Boolean);
+    if (broadcastIds.length > 0) {
+      saveReadBroadcasts(broadcastIds);
+      try { await apiMarkRead(currentUser.uid, broadcastIds); } catch(e) {}
+    }
+    // 3. 刷新
+    await refreshNotificationCenter();
+    updateMsgBadge();
+    toast(t('notify_mark_all_read'));
   }
 
   function initMessaging() {
