@@ -247,72 +247,76 @@ export default {
               }
             }
           }
-          await saveUsers(env, users);
-          // 级联清理该用户的关联数据，避免 UID 被新用户复用后串联历史聊天记录
+          // 级联清理该用户的关联数据（合并写入，减少 KV put 次数）
           let cleaned = { messages: 0, groupMessages: 0, friendReqs: 0, groupsDissolved: 0 };
+          let needSaveUsers = false;
+          let needSaveMessages = false;
+          let needSaveFriendReqs = false;
+          let needSaveGroups = false;
+          let needSaveGroupMsgs = false;
+
           if (removedUid) {
-            // 1. 清理私聊消息（该用户收发的）及定向广播副本
+            needSaveUsers = true;
+            // 1. 清理私聊消息
             let msgs = await loadMessages(env);
             const beforeMsg = msgs.length;
             msgs = msgs.filter(m => {
-              if (m.broadcast) return m.to !== removedUid;          // 删除发给该用户的广播副本
-              return m.from !== removedUid && m.to !== removedUid;  // 删除该用户参与的私聊
+              if (m.broadcast) return m.to !== removedUid;
+              return m.from !== removedUid && m.to !== removedUid;
             });
             cleaned.messages = beforeMsg - msgs.length;
-            if (cleaned.messages > 0) await saveMessages(env, msgs);
-            // 2. 清理该用户发送的群组消息（避免新用户复用 UID 后显示成新用户所发）
+            if (cleaned.messages > 0) { await saveMessages(env, msgs); }
+
+            // 2. 一次性读取群消息 + 群组，合并过滤后只写一次
+            let gmsgs = [];
             try {
               const gRaw = await env.USERS.get('group_messages');
-              if (gRaw) {
-                let gmsgs = JSON.parse(gRaw);
-                if (Array.isArray(gmsgs)) {
-                  const beforeG = gmsgs.length;
-                  gmsgs = gmsgs.filter(m => m.from !== removedUid);
-                  cleaned.groupMessages = beforeG - gmsgs.length;
-                  if (cleaned.groupMessages > 0) await env.USERS.put('group_messages', JSON.stringify(gmsgs));
-                }
+              if (gRaw) gmsgs = JSON.parse(gRaw);
+              if (!Array.isArray(gmsgs)) gmsgs = [];
+            } catch(e) { gmsgs = []; }
+
+            let groups = [];
+            try {
+              const grRaw = await env.USERS.get('groups');
+              if (grRaw) groups = JSON.parse(grRaw);
+              if (!Array.isArray(groups)) groups = [];
+            } catch(e) { groups = []; }
+
+            const dissolvedIds = [];
+            let memberChanged = false;
+            groups = groups.filter(g => {
+              if (g.creator === removedUid) { dissolvedIds.push(g.id); return false; }
+              if (g.members && g.members.includes(removedUid)) {
+                g.members = g.members.filter(m => m !== removedUid);
+                memberChanged = true;
               }
-            } catch(e) {}
+              return true;
+            });
+            cleaned.groupsDissolved = dissolvedIds.length;
+            if (dissolvedIds.length || memberChanged) needSaveGroups = true;
+
+            // 合并两种群消息过滤：移除该用户发的 + 解散群的消息
+            const beforeG = gmsgs.length;
+            gmsgs = gmsgs.filter(m => m.from !== removedUid && !dissolvedIds.includes(m.gid));
+            cleaned.groupMessages = beforeG - gmsgs.length;
+            if (cleaned.groupMessages > 0) needSaveGroupMsgs = true;
+
             // 3. 清理好友请求
             let reqs = await loadFriendReqs(env);
             const beforeR = reqs.length;
             reqs = reqs.filter(r => r.from !== removedUid && r.to !== removedUid);
             cleaned.friendReqs = beforeR - reqs.length;
-            if (cleaned.friendReqs > 0) await saveFriendReqs(env, reqs);
-            // 4. 群组成员资格：群主被删则解散群（并清群消息），普通成员则移除
-            try {
-              const grRaw = await env.USERS.get('groups');
-              if (grRaw) {
-                let groups = JSON.parse(grRaw);
-                if (Array.isArray(groups)) {
-                  const dissolvedIds = [];
-                  let memberChanged = false;
-                  groups = groups.filter(g => {
-                    if (g.creator === removedUid) { dissolvedIds.push(g.id); return false; }
-                    if (g.members && g.members.includes(removedUid)) {
-                      g.members = g.members.filter(m => m !== removedUid);
-                      memberChanged = true;
-                    }
-                    return true;
-                  });
-                  cleaned.groupsDissolved = dissolvedIds.length;
-                  if (dissolvedIds.length || memberChanged) {
-                    await env.USERS.put('groups', JSON.stringify(groups));
-                  }
-                  // 解散的群同步清理其群消息
-                  if (dissolvedIds.length) {
-                    const gmRaw2 = await env.USERS.get('group_messages');
-                    if (gmRaw2) {
-                      let gmsgs2 = JSON.parse(gmRaw2);
-                      if (Array.isArray(gmsgs2)) {
-                        gmsgs2 = gmsgs2.filter(m => !dissolvedIds.includes(m.gid));
-                        await env.USERS.put('group_messages', JSON.stringify(gmsgs2));
-                      }
-                    }
-                  }
-                }
-              }
-            } catch(e) {}
+            if (cleaned.friendReqs > 0) needSaveFriendReqs = true;
+          }
+
+          // 统一批量写入（最多 5 次 KV put，而非原来的 6 次+重复读）
+          try {
+            if (needSaveUsers) await saveUsers(env, users);
+            if (needSaveFriendReqs) await saveFriendReqs(env, reqs);
+            if (needSaveGroups) await env.USERS.put('groups', JSON.stringify(groups));
+            if (needSaveGroupMsgs) await env.USERS.put('group_messages', JSON.stringify(gmsgs));
+          } catch(e) {
+            return json({ ok: false, msg: '服务器存储配额已用尽，请明天 UTC 0:00 后重试' });
           }
           return json({ ok: true, cleaned });
         }
@@ -1456,6 +1460,36 @@ export default {
           if (!Array.isArray(posts)) posts = [];
           posts = posts.filter(p => p.id !== postId);
           await env.USERS.put('forum_posts', JSON.stringify(posts));
+          return json({ ok: true });
+        }
+
+        // ========== 库存数据同步 ==========
+        // GET /api/inventory — 获取库存（materials/components/boards）
+        if (url.pathname === '/api/inventory' && request.method === 'GET') {
+          const type = url.searchParams.get('type') || 'all';
+          const result = {};
+          if (type === 'all' || type === 'materials') {
+            const raw = await env.USERS.get('inventory_materials');
+            result.materials = raw ? JSON.parse(raw) : [];
+          }
+          if (type === 'all' || type === 'components') {
+            const raw = await env.USERS.get('inventory_components');
+            result.components = raw ? JSON.parse(raw) : [];
+          }
+          if (type === 'all' || type === 'boards') {
+            const raw = await env.USERS.get('inventory_boards');
+            result.boards = raw ? JSON.parse(raw) : [];
+          }
+          return json({ ok: true, ...result });
+        }
+
+        // PUT /api/inventory — 保存库存（body: { type, data }）
+        if (url.pathname === '/api/inventory' && request.method === 'PUT') {
+          const { type, data } = await readBody(request);
+          if (!['materials', 'components', 'boards'].includes(type)) {
+            return json({ ok: false, msg: '无效的库存类型' });
+          }
+          await env.USERS.put('inventory_' + type, JSON.stringify(data));
           return json({ ok: true });
         }
 
