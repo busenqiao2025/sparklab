@@ -1,0 +1,26 @@
+appId: com.sparkminds.lab
+productName: SparkMinds Lab
+directories:
+  output: release
+files:
+  - electron/**/*
+  - public/**/*
+  - src/**/*
+  - wrangler.toml
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: SparkMindsLab-Setup-${version}.${ext}
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: SparkMinds Lab
+publish:
+  provider: github
+  owner: wuyuzhou
+  repo: sparkminds-lab
+  releaseType: release

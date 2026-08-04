@@ -1,13 +1,64 @@
 {
   "name": "sparkminds-lab",
-  "version": "1.5.0",
-  "private": true,
-  "description": "SparkMinds Lab — Cloudflare Workers 版",
+  "version": "2.4.0",
+  "private": false,
+  "description": "SparkMinds Lab — 实验室物联网监控平台桌面版",
+  "author": "SparkMinds",
+  "license": "MIT",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "start": "electron .",
+    "start:dev": "cross-env NODE_ENV=development electron .",
+    "build": "electron-builder --win --publish never",
+    "build:portable": "electron-builder --win portable --publish never",
+    "build:all": "electron-builder --win nsis portable --publish never",
+    "publish": "electron-builder --win --publish always",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.sparkminds.lab",
+    "productName": "SparkMinds Lab",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "public/**/*",
+      "src/**/*",
+      "wrangler.toml"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "SparkMindsLab-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SparkMinds Lab"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "wuyuzhou",
+      "repo": "sparkminds-lab",
+      "releaseType": "release"
+    }
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
     "wrangler": "^3.90.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.2.1"
   }
 }
