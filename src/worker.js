@@ -1493,6 +1493,31 @@ export default {
           return json({ ok: true });
         }
 
+        // ========== 公告与更新日志 ==========
+        // GET /api/notice — 获取公告和更新日志（公开接口，登录页可用）
+        if (url.pathname === '/api/notice' && request.method === 'GET') {
+          const announcement = await env.USERS.get('announcement');
+          const changelog = await env.USERS.get('changelog');
+          return json({
+            ok: true,
+            announcement: announcement ? JSON.parse(announcement) : { content: '', updated: 0 },
+            changelog: changelog ? JSON.parse(changelog) : { content: '', updated: 0 },
+          });
+        }
+
+        // PUT /api/notice — 修改公告或更新日志（仅管理员）
+        if (url.pathname === '/api/notice' && request.method === 'PUT') {
+          const { uid, type, content } = await readBody(request);
+          if (!uid || !type || content === undefined) return json({ ok: false, msg: '缺少参数' });
+          if (!['announcement', 'changelog'].includes(type)) return json({ ok: false, msg: '无效的类型' });
+          const users = await loadUsers(env);
+          const user = users.find(u => u.uid === uid);
+          if (!user || user.role !== 'admin') return json({ ok: false, msg: '仅管理员可修改' });
+          const data = { content, updated: Date.now(), author: user.name };
+          await env.USERS.put(type, JSON.stringify(data));
+          return json({ ok: true, data });
+        }
+
         return json({ ok: false, msg: 'not found' }, 404);
       } catch (e) {
         return json({ ok: false, msg: '服务器错误: ' + e.message }, 500);

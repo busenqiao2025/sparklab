@@ -290,6 +290,14 @@
   .login-feature:nth-child(1) .login-feature-dot{background:#a855f7}
   .login-feature:nth-child(2) .login-feature-dot{background:#06b6d4}
   .login-feature:nth-child(3) .login-feature-dot{background:#f59e0b}
+  .login-notice-section{margin-top:28px;position:relative;z-index:1;max-width:380px}
+  .login-notice-tabs{display:flex;gap:0;margin-bottom:0}
+  .login-notice-tab{flex:1;padding:7px 12px;font-size:11px;font-weight:600;color:var(--fg-light);cursor:pointer;border:none;background:var(--bg-soft);border-bottom:2px solid transparent;transition:var(--transition);font-family:var(--font);border-radius:var(--radius-xs) var(--radius-xs) 0 0}
+  .login-notice-tab:hover{color:var(--fg-dim)}
+  .login-notice-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg2)}
+  .login-notice-body{background:var(--bg2);border:1px solid var(--border-light);border-top:none;border-radius:0 0 var(--radius-xs) var(--radius-xs);padding:14px 16px;max-height:160px;overflow-y:auto;font-size:12px;color:var(--fg-dim);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+  .login-notice-body:empty::after{content:attr(data-empty);color:var(--fg-light);font-style:italic}
+  .login-notice-meta{font-size:10px;color:var(--fg-light);margin-top:8px;text-align:right}
   .login-right{flex:.9;display:flex;align-items:center;justify-content:center;padding:56px 48px;background:var(--bg);position:relative}
   .login-wrap{max-width:320px;width:100%}
   .login-card{background:transparent;box-shadow:none;border:none;padding:0;animation:loginFadeIn .4s ease}
@@ -618,13 +626,13 @@ const I18N = {
     // Login
     'app_name': 'SparkMinds Lab', 'app_subtitle': '实验室物联网监控平台',
     'username': '用户名', 'password': '密码', 'login': '登 录',
-    'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续',
+    'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续', 'notice_announcement': '系统公告', 'notice_changelog': '更新日志', 'notice_empty': '暂无内容', 'notice_edit': '编辑', 'notice_save': '保存', 'notice_cancel': '取消', 'notice_saved': '保存成功', 'notice_save_failed': '保存失败', 'notice_edit_announcement': '编辑系统公告', 'notice_edit_changelog': '编辑更新日志', 'notice_updated': '更新于',
     'login_hint': '默认账号：admin / admin123 | user / user123',
     'login_error_user_pass': '请输入用户名和密码', 'login_error_wrong': '用户名或密码错误',
     // Nav
     'nav_lab': '实验室监控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件仓库',
     'nav_users': '用户管理', 'nav_approval': '审批', 'nav_my_req': '我的申请',
-    'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_backup': '数据回滚', 'nav_transactions': '库存流水', 'nav_logout': '退出',
+    'nav_profile': '个人主页', 'nav_messages': '站内信', 'nav_backup': '数据回滚', 'nav_transactions': '库存流水', 'nav_logout': '退出', 'nav_notice': '公告管理',
     'nav_inventory': '库存管理', 'nav_user_center': '用户中心', 'nav_admin': '管理后台',
     'conn_online': '● 在线', 'conn_offline': '● 离线',
     'sim_on': '模拟:开', 'sim_off': '模拟:关',
@@ -754,12 +762,12 @@ const I18N = {
   'zh-TW': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': '實驗室物聯網監控平台',
     'username': '用戶名', 'password': '密碼', 'login': '登 入',
-    'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續',
+    'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續', 'notice_announcement': '系統公告', 'notice_changelog': '更新日誌', 'notice_empty': '暫無內容', 'notice_edit': '編輯', 'notice_save': '儲存', 'notice_cancel': '取消', 'notice_saved': '儲存成功', 'notice_save_failed': '儲存失敗', 'notice_edit_announcement': '編輯系統公告', 'notice_edit_changelog': '編輯更新日誌', 'notice_updated': '更新於',
     'login_hint': '預設帳號：admin / admin123 | user / user123',
     'login_error_user_pass': '請輸入用戶名和密碼', 'login_error_wrong': '用戶名或密碼錯誤',
     'nav_lab': '實驗室監控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件倉庫',
     'nav_users': '用戶管理', 'nav_approval': '審批', 'nav_my_req': '我的申請',
-    'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_backup': '數據回滾', 'nav_transactions': '庫存流水', 'nav_logout': '退出',
+    'nav_profile': '個人主頁', 'nav_messages': '站內信', 'nav_backup': '數據回滾', 'nav_transactions': '庫存流水', 'nav_logout': '退出', 'nav_notice': '公告管理',
     'nav_inventory': '庫存管理', 'nav_user_center': '用戶中心', 'nav_admin': '管理後台',
     'conn_online': '● 在線', 'conn_offline': '● 離線',
     'sim_on': '模擬:開', 'sim_off': '模擬:關',
@@ -872,12 +880,12 @@ const I18N = {
   'en': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': 'Lab IoT Monitoring Platform',
     'username': 'Username', 'password': 'Password', 'login': 'Log In',
-    'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue',
+    'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue', 'notice_announcement': 'Announcements', 'notice_changelog': 'Changelog', 'notice_empty': 'No content', 'notice_edit': 'Edit', 'notice_save': 'Save', 'notice_cancel': 'Cancel', 'notice_saved': 'Saved', 'notice_save_failed': 'Save failed', 'notice_edit_announcement': 'Edit Announcement', 'notice_edit_changelog': 'Edit Changelog', 'notice_updated': 'Updated',
     'login_hint': 'Default: admin / admin123 | user / user123',
     'login_error_user_pass': 'Please enter username and password', 'login_error_wrong': 'Invalid username or password',
     'nav_lab': 'Lab Monitor', 'nav_3d': '3D Materials', 'nav_warehouse': 'Components',
     'nav_users': 'User Mgmt', 'nav_approval': 'Approvals', 'nav_my_req': 'My Requests',
-    'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_backup': 'Backup', 'nav_transactions': 'Transactions', 'nav_logout': 'Logout',
+    'nav_profile': 'Profile', 'nav_messages': 'Messages', 'nav_backup': 'Backup', 'nav_transactions': 'Transactions', 'nav_logout': 'Logout', 'nav_notice': 'Notice',
     'nav_inventory': 'Inventory', 'nav_user_center': 'User Center', 'nav_admin': 'Admin',
     'conn_online': '● Online', 'conn_offline': '● Offline',
     'sim_on': 'Sim:ON', 'sim_off': 'Sim:OFF',
@@ -1003,6 +1011,8 @@ function setLang(lang) {
   currentLang = lang;
   localStorage.setItem('lab_lang', lang);
   applyI18n();
+  if (typeof renderLoginNotice === 'function') renderLoginNotice();
+  if (typeof renderNoticeAdmin === 'function') renderNoticeAdmin();
   // 语言切换后重绘仪表盘图表（图表内部标签需要重新渲染）
   const dashPanel = document.querySelector('#panel-dashboard');
   if (dashPanel && dashPanel.classList.contains('active') && typeof renderDashboard === 'function') {
@@ -1057,6 +1067,14 @@ function applyI18n() {
         <div class="login-feature"><div class="login-feature-dot"></div><span data-i18n="login_feature1">实时环境数据监控</span></div>
         <div class="login-feature"><div class="login-feature-dot"></div><span data-i18n="login_feature2">耗材库存跨设备同步</span></div>
         <div class="login-feature"><div class="login-feature-dot"></div><span data-i18n="login_feature3">多用户协作与站内信</span></div>
+      </div>
+      <div class="login-notice-section">
+        <div class="login-notice-tabs">
+          <button class="login-notice-tab active" id="loginTabAnnouncement" data-i18n="notice_announcement">系统公告</button>
+          <button class="login-notice-tab" id="loginTabChangelog" data-i18n="notice_changelog">更新日志</button>
+        </div>
+        <div class="login-notice-body" id="loginNoticeBody" data-empty="暂无内容"></div>
+        <div class="login-notice-meta" id="loginNoticeMeta"></div>
       </div>
     </div>
     <!-- 右侧登录表单 -->
@@ -1604,6 +1622,29 @@ function applyI18n() {
     </div>
     <div id="txnList" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
   </div>
+
+  <!-- NOTICE MANAGEMENT (Admin) -->
+  <div id="panel-notice" class="panel">
+    <div class="panel-title" data-i18n="nav_notice">公告管理</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+      <div class="term-box" data-title="系统公告" data-i18n-title="notice_announcement" style="padding:16px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;font-weight:600;color:var(--fg)"><span data-i18n="notice_announcement">系统公告</span></span>
+          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="editAnnouncementBtn" data-i18n="notice_edit">编辑</button>
+        </div>
+        <div id="adminAnnouncementView" style="font-size:12px;color:var(--fg-dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:100px;padding:12px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-xs);max-height:300px;overflow-y:auto"></div>
+        <div id="adminAnnouncementMeta" style="font-size:10px;color:var(--fg-light);margin-top:8px;text-align:right"></div>
+      </div>
+      <div class="term-box" data-title="更新日志" data-i18n-title="notice_changelog" style="padding:16px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;font-weight:600;color:var(--fg)"><span data-i18n="notice_changelog">更新日志</span></span>
+          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="editChangelogBtn" data-i18n="notice_edit">编辑</button>
+        </div>
+        <div id="adminChangelogView" style="font-size:12px;color:var(--fg-dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:100px;padding:12px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-xs);max-height:300px;overflow-y:auto"></div>
+        <div id="adminChangelogMeta" style="font-size:10px;color:var(--fg-light);margin-top:8px;text-align:right"></div>
+      </div>
+    </div>
+  </div>
     </div><!-- /.trae-content -->
   </div><!-- /.trae-body -->
 </div>
@@ -1995,10 +2036,135 @@ function applyI18n() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
+  // ===================== 公告与更新日志 =====================
+  let noticeData = { announcement: { content: '', updated: 0 }, changelog: { content: '', updated: 0 } };
+  let loginNoticeTab = 'announcement';
+
+  async function loadNotice() {
+    try {
+      const r = await fetch(`${API}/notice`);
+      const j = await r.json();
+      if (j.ok) {
+        noticeData = j;
+        renderLoginNotice();
+      }
+    } catch (e) {}
+  }
+
+  function renderLoginNotice() {
+    const body = $('#loginNoticeBody');
+    const meta = $('#loginNoticeMeta');
+    if (!body || !meta) return;
+    const data = noticeData[loginNoticeTab] || { content: '', updated: 0 };
+    body.textContent = data.content || '';
+    body.setAttribute('data-empty', t('notice_empty'));
+    if (data.updated) {
+      const d = new Date(data.updated);
+      const timeStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+      meta.textContent = t('notice_updated') + ': ' + timeStr + (data.author ? ' · ' + data.author : '');
+    } else {
+      meta.textContent = '';
+    }
+  }
+
+  function initLoginNoticeTabs() {
+    const tabAnn = $('#loginTabAnnouncement');
+    const tabLog = $('#loginTabChangelog');
+    if (!tabAnn || !tabLog) return;
+    tabAnn.addEventListener('click', () => {
+      loginNoticeTab = 'announcement';
+      tabAnn.classList.add('active');
+      tabLog.classList.remove('active');
+      renderLoginNotice();
+    });
+    tabLog.addEventListener('click', () => {
+      loginNoticeTab = 'changelog';
+      tabLog.classList.add('active');
+      tabAnn.classList.remove('active');
+      renderLoginNotice();
+    });
+  }
+
+  function openNoticeEditor(type) {
+    if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
+    const overlay = document.createElement('div');
+    overlay.setAttribute('data-shortcut-overlay', '1');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:520px;box-shadow:var(--shadow-lg)';
+    const title = type === 'announcement' ? t('notice_edit_announcement') : t('notice_edit_changelog');
+    const currentContent = (noticeData[type] || {}).content || '';
+    modal.innerHTML = `
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px">${title}</div>
+      <textarea id="noticeEditArea" style="width:100%;min-height:200px;max-height:400px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:var(--font);font-size:13px;padding:12px;resize:vertical;outline:none;box-sizing:border-box" placeholder="${t('notice_empty')}...">${escapeHtml(currentContent)}</textarea>
+      <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+        <button id="noticeCancelBtn" style="padding:8px 16px;border:1px solid var(--border);background:transparent;border-radius:var(--radius-sm);color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--font)">${t('notice_cancel')}</button>
+        <button id="noticeSaveBtn" style="padding:8px 20px;border:none;background:var(--accent);color:#fff;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:var(--font);font-weight:600">${t('notice_save')}</button>
+      </div>
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.style.opacity = '1');
+
+    function close() { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 200); }
+    $('#noticeCancelBtn', modal).addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    $('#noticeSaveBtn', modal).addEventListener('click', async () => {
+      const content = $('#noticeEditArea', modal).value.trim();
+      try {
+        const r = await fetch(`${API}/notice`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid: currentUser.uid, type, content })
+        });
+        const j = await r.json();
+        if (j.ok) {
+          noticeData[type] = j.data;
+          renderLoginNotice();
+          renderNoticeAdmin();
+          if (typeof refreshNotificationCenter === 'function') refreshNotificationCenter();
+          toast(t('notice_saved'));
+          close();
+        } else {
+          toast(j.msg || t('notice_save_failed'));
+        }
+      } catch (e) {
+        toast(t('notice_save_failed'));
+      }
+    });
+  }
+
+  function renderNoticeAdmin() {
+    const annView = $('#adminAnnouncementView');
+    const annMeta = $('#adminAnnouncementMeta');
+    const logView = $('#adminChangelogView');
+    const logMeta = $('#adminChangelogMeta');
+    if (annView) {
+      const ann = noticeData.announcement || { content: '', updated: 0 };
+      annView.textContent = ann.content || '';
+      annView.setAttribute('data-empty', t('notice_empty'));
+      if (ann.updated) {
+        const d = new Date(ann.updated);
+        annMeta.textContent = t('notice_updated') + ': ' + d.toLocaleString() + (ann.author ? ' · ' + ann.author : '');
+      } else { annMeta.textContent = ''; }
+    }
+    if (logView) {
+      const log = noticeData.changelog || { content: '', updated: 0 };
+      logView.textContent = log.content || '';
+      logView.setAttribute('data-empty', t('notice_empty'));
+      if (log.updated) {
+        const d = new Date(log.updated);
+        logMeta.textContent = t('notice_updated') + ': ' + d.toLocaleString() + (log.author ? ' · ' + log.author : '');
+      } else { logMeta.textContent = ''; }
+    }
+  }
+
   // ===================== LOGIN =====================
   function initLogin() {
     $('#loginBtn').addEventListener('click', doLogin);
     $('#loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    initLoginNoticeTabs();
+    loadNotice();
 
     const sess = sessionStorage.getItem('lab_session');
     if (sess) {
@@ -2061,6 +2227,11 @@ function applyI18n() {
     initReport();
     initForum();
     initKeyboardShortcuts();
+    const editAnnBtn = $('#editAnnouncementBtn');
+    if (editAnnBtn) editAnnBtn.addEventListener('click', () => openNoticeEditor('announcement'));
+    const editLogBtn = $('#editChangelogBtn');
+    if (editLogBtn) editLogBtn.addEventListener('click', () => openNoticeEditor('changelog'));
+    await loadNotice();
     renderSidebar();
     renderDashboard();
     updateTraeUser();
@@ -2114,6 +2285,7 @@ function applyI18n() {
       { id: 'users', icon: '👥', label: 'nav_users' },
       { id: 'approval', icon: '✅', label: 'nav_approval', badgeId: 'reqBadge' },
       { id: 'reports', icon: '🚨', label: 'nav_reports' },
+      { id: 'notice', icon: '📢', label: 'nav_notice' },
       { id: 'backup', icon: '💾', label: 'nav_backup' },
       { id: 'transactions', icon: '📋', label: 'nav_transactions' },
     ],
@@ -2184,6 +2356,7 @@ function applyI18n() {
     if (p === 'reports') renderReports();
     if (p === 'mypunish') renderMyPunishments();
     if (p === 'settings') initSettings();
+    if (p === 'notice') renderNoticeAdmin();
     // v2.3 切换面板时立即刷新在线状态
     refreshOnlineStatus();
   }
@@ -4739,6 +4912,7 @@ function applyI18n() {
   // ===================== 报告导出 =====================
   function showExportMenu() {
     const overlay = document.createElement('div');
+    overlay.setAttribute('data-shortcut-overlay','1');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
     const modal = document.createElement('div');
     modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:320px;box-shadow:var(--shadow-lg)';
@@ -4886,15 +5060,20 @@ tr:hover{background:#f5f5ff}
   function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const tag = (e.target.tagName || '').toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
       if (e.key === 'Escape') {
         const dd = $('#notifyDropdown');
         if (dd && dd.style.display !== 'none') { dd.style.display = 'none'; return; }
-        const reqP = $('#reqPanel');
-        if (reqP && reqP.style.display !== 'none') { reqP.style.display = 'none'; return; }
+        const modalIds = ['reqPanel','reportModal','reqModal','broadcastModal','searchUserModal','createPostModal','postDetailModal','groupChatModal','reportDetailModal'];
+        for (const id of modalIds) {
+          const m = $('#' + id);
+          if (m && m.style.display !== 'none') { m.style.display = 'none'; return; }
+        }
+        const dynOverlays = document.querySelectorAll('[data-shortcut-overlay]');
+        if (dynOverlays.length > 0) { dynOverlays[0].remove(); return; }
         return;
       }
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       const action = SHORTCUT_MAP[key];
       if (action) {
@@ -4906,6 +5085,7 @@ tr:hover{background:#f5f5ff}
 
   function showShortcutHelp() {
     const overlay = document.createElement('div');
+    overlay.setAttribute('data-shortcut-overlay','1');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
     const modal = document.createElement('div');
     modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:360px;max-width:440px;box-shadow:var(--shadow-lg)';
@@ -6506,7 +6686,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.3\n' +
+      '\n  🔬 SparkMinds Lab v2.4\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -6516,9 +6696,10 @@ tr:hover{background:#f5f5ff}
     // --- Egg 4: Type "spark" anywhere ---
     let sparkBuffer = '';
     document.addEventListener('keydown', (e) => {
-      // Only when NOT typing in input/textarea
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       const tag = (e.target.tagName || '').toLowerCase();
-      if (tag === 'input' || tag === 'textarea') return;
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+      if (e.defaultPrevented) return;
       if (e.key.length === 1) {
         sparkBuffer += e.key.toLowerCase();
         if (sparkBuffer.length > 5) sparkBuffer = sparkBuffer.slice(-5);
@@ -6552,7 +6733,8 @@ tr:hover{background:#f5f5ff}
           ['v2.0', 'UI Redesign + Wallpaper', '07-25', 'design'],
           ['v2.1', 'Glassmorphism + Animations', '07-25', 'glass'],
           ['v2.2', 'File Transfer + Report System', '07-26', 'shield'],
-          ['v2.3', 'Read Receipts + Online + Search', '08-01', 'chat']
+          ['v2.3', 'Read Receipts + Online + Search', '08-01', 'chat'],
+          ['v2.4', 'Notifications + Shortcuts + Reports', '08-05', 'spark']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -6566,7 +6748,8 @@ tr:hover{background:#f5f5ff}
           ['v2.0', 'UI 重構 + 壁紙', '07-25', '設計'],
           ['v2.1', '毛玻璃 + 動畫', '07-25', '玻璃'],
           ['v2.2', '文件傳輸 + 舉報系統', '07-26', '盾牌'],
-          ['v2.3', '已讀回執 + 在線 + 搜尋', '08-01', '聊天']
+          ['v2.3', '已讀回執 + 在線 + 搜尋', '08-01', '聊天'],
+          ['v2.4', '通知中心 + 快捷鍵 + 報告導出', '08-05', '火花']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -6580,10 +6763,11 @@ tr:hover{background:#f5f5ff}
           ['v2.0', 'UI 重构 + 壁纸', '07-25', '设计'],
           ['v2.1', '毛玻璃 + 动画', '07-25', '玻璃'],
           ['v2.2', '文件传输 + 举报系统', '07-26', '盾牌'],
-          ['v2.3', '已读回执 + 在线 + 搜索', '08-01', '聊天']
+          ['v2.3', '已读回执 + 在线 + 搜索', '08-01', '聊天'],
+          ['v2.4', '通知中心 + 快捷键 + 报告导出', '08-05', '火花']
         ]
       };
-      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬' };
+      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨' };
       modal.innerHTML =
         '<h2><span class="ee-badge">🔬</span>' + content.title + '</h2>' +
         '<div class="ee-ver">' + content.ver + '</div>' +
