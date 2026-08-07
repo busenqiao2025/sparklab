@@ -1043,6 +1043,8 @@ function applyI18n() {
     // Update lang selector label
     const lbl = document.getElementById('langLabel');
     if (lbl) lbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
+    const loginLbl = document.getElementById('loginLangLabel');
+    if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
     document.title = t('app_name') + ' [v2.4]';
     // Re-render sidebar for language update (if in main app)
@@ -1059,6 +1061,18 @@ function applyI18n() {
 
 <!-- ========== LOGIN SCREEN ========== -->
 <div id="loginScreen" class="screen active">
+  <div id="loginLangSelect" style="position:fixed;top:16px;right:20px;z-index:1000">
+    <div style="position:relative">
+      <button id="loginLangBtn" style="display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:12px;color:var(--fg-dim);transition:var(--transition)">
+        <span id="loginLangLabel">简中</span> &#9662;
+      </button>
+      <div id="loginLangDropdown" style="display:none;position:absolute;top:100%;right:0;margin-top:4px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-lg);z-index:100;overflow:hidden;min-width:120px">
+        <div class="lang-option" data-lang="zh-CN" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">简体中文</div>
+        <div class="lang-option" data-lang="zh-TW" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">繁體中文</div>
+        <div class="lang-option" data-lang="en" style="padding:8px 16px;cursor:pointer;font-size:13px;transition:var(--transition)">English</div>
+      </div>
+    </div>
+  </div>
   <div class="login-split">
     <!-- 左侧品牌区 -->
     <div class="login-left">
@@ -1099,12 +1113,6 @@ function applyI18n() {
           </div>
           <button class="login-btn" id="loginBtn" data-i18n="login">登 录</button>
           <div class="error-msg" id="loginError"></div>
-          <div class="hint" data-i18n="login_hint">默认账号：admin / admin123 &nbsp;|&nbsp; user / user123</div>
-          <div class="login-lang-row">
-            <button onclick="setLang('zh-CN')">简体中文</button>
-            <button onclick="setLang('zh-TW')">繁體中文</button>
-            <button onclick="setLang('en')">English</button>
-          </div>
         </div>
       </div>
     </div>
@@ -1867,7 +1875,7 @@ function applyI18n() {
         body: JSON.stringify({ name, pass })
       });
       return await r.json();
-    } catch (e) { return { ok: false, msg: '无法连接服务器: ' + e.message }; }
+    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
   }
 
   async function apiAddUser(name, pass, role) {
@@ -2062,7 +2070,7 @@ function applyI18n() {
         renderLoginNotice();
         if (typeof renderNoticeAdmin === 'function') renderNoticeAdmin();
       }
-    } catch (e) { console.warn('loadNotice error:', e.message); }
+    } catch (e) {}
   }
 
   function renderLoginNotice() {
@@ -6675,6 +6683,24 @@ tr:hover{background:#f5f5ff}
       opt.addEventListener('click', () => {
         setLang(opt.dataset.lang);
         langDropdown.style.display = 'none';
+      });
+      opt.addEventListener('mouseenter', () => { opt.style.background = 'var(--accent-soft)'; });
+      opt.addEventListener('mouseleave', () => { opt.style.background = 'transparent'; });
+    });
+  }
+
+  const loginLangBtn = document.getElementById('loginLangBtn');
+  const loginLangDropdown = document.getElementById('loginLangDropdown');
+  if (loginLangBtn) {
+    loginLangBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      loginLangDropdown.style.display = loginLangDropdown.style.display === 'none' ? 'block' : 'none';
+    });
+    document.addEventListener('click', () => { loginLangDropdown.style.display = 'none'; });
+    loginLangDropdown.querySelectorAll('.lang-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        setLang(opt.dataset.lang);
+        loginLangDropdown.style.display = 'none';
       });
       opt.addEventListener('mouseenter', () => { opt.style.background = 'var(--accent-soft)'; });
       opt.addEventListener('mouseleave', () => { opt.style.background = 'transparent'; });
