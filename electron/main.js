@@ -56,17 +56,17 @@ async function checkForUpdates() {
     if (lastVersion === data.version) return;
 
     console.log('[Update] New version detected:', data.version, '(was:', lastVersion + ')');
-    saveLastKnownVersion(data.version);
 
     const loggedIn = await mainWindow.webContents.executeJavaScript(
       'var ms = document.getElementById("mainScreen"); return !!(ms && ms.offsetParent !== null);'
     ).catch(() => false);
 
     if (!loggedIn) {
-      console.log('[Update] User not logged in, skipping refresh');
+      console.log('[Update] User not logged in, deferring notification');
       return;
     }
 
+    saveLastKnownVersion(data.version);
     pendingChangelog = data;
 
     if (Notification.isSupported()) {
@@ -219,6 +219,7 @@ function checkAndInject() {
         clearInterval(pollTimer);
         pollTimer = null;
       }
+      setTimeout(() => { checkForUpdates(); }, 2000);
     }
   }).catch((e) => {
     console.error('[Desktop UI] Polling error:', e.message);

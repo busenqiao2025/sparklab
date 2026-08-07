@@ -5744,11 +5744,15 @@ tr:hover{background:#f5f5ff}
   function applyAccentColor(hex) {
     const { h, s, l } = hexToHsl(hex);
     const root = document.documentElement;
-    root.style.setProperty('--accent', hslString(h, s, l));
+    root.style.setProperty('--accent', hex);
     root.style.setProperty('--accent-light', hslString(h, s, Math.min(l + 12, 85)));
     root.style.setProperty('--accent-dark', hslString(h, s, Math.max(l - 12, 25)));
     root.style.setProperty('--accent-soft', hslString(h, s, l, 0.12));
     localStorage.setItem('lab_accent', hex);
+    var dashPanel = document.querySelector('#panel-dashboard');
+    if (dashPanel && dashPanel.classList.contains('active') && typeof renderDashboard === 'function') {
+      setTimeout(function() { renderDashboard(); }, 100);
+    }
   }
 
   function initAccentColor() {
