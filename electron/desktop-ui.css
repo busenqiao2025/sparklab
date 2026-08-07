@@ -1,0 +1,559 @@
+/* ============================================================
+   SparkMinds Lab — Desktop UI Overlay
+   Injected via Electron for desktop-specific styling
+   ============================================================ */
+
+:root {
+  --desktop-titlebar-h: 0px;
+  --desktop-statusbar-h: 28px;
+  --desktop-rail-w: 52px;
+  --desktop-topbar-h: 44px;
+}
+
+/* ===== Body ===== */
+body {
+  padding-top: var(--desktop-titlebar-h) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Custom Titlebar ===== */
+.desktop-titlebar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: var(--desktop-titlebar-h) !important;
+  background: var(--bg2) !important;
+  border-bottom: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 0 0 14px !important;
+  z-index: 99999 !important;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.desktop-titlebar-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-dim);
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.desktop-titlebar-title img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.desktop-titlebar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+  height: 100%;
+}
+
+.desktop-titlebar-btn {
+  width: 46px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--fg-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background 0.12s ease;
+  font-family: var(--font);
+}
+
+.desktop-titlebar-btn:hover {
+  background: var(--bg-hover);
+}
+
+.desktop-titlebar-btn.close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+.desktop-titlebar-btn svg {
+  width: 11px;
+  height: 11px;
+  fill: currentColor;
+}
+
+/* ===== Screen Adjustments ===== */
+.screen {
+  height: calc(100vh - var(--desktop-titlebar-h)) !important;
+}
+
+#mainScreen {
+  padding-bottom: var(--desktop-statusbar-h);
+}
+
+/* ===== Topbar — Simplified ===== */
+.trae-topbar {
+  height: var(--desktop-topbar-h) !important;
+  background: var(--bg2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0 16px !important;
+}
+
+.trae-brand {
+  font-size: 13px !important;
+  margin-right: 16px !important;
+}
+
+.trae-brand img {
+  height: 20px !important;
+}
+
+/* Hide category tabs — moved to sidebar */
+.trae-cat {
+  display: none !important;
+}
+
+.trae-topbar-right {
+  gap: 4px !important;
+}
+
+.trae-icon-btn {
+  padding: 6px 8px !important;
+  font-size: 11px !important;
+  border-radius: var(--radius-xs) !important;
+}
+
+/* ===== Sidebar — Icon Rail ===== */
+.trae-sidebar {
+  width: var(--desktop-rail-w) !important;
+  background: var(--bg2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-right: 1px solid var(--border) !important;
+  transition: width 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.trae-sidebar:hover {
+  width: var(--sidebar-w) !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Category rail at sidebar top */
+.desktop-cat-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.desktop-cat-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: var(--fg-dim);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.12s ease;
+  position: relative;
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+.desktop-cat-btn .cat-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.desktop-cat-btn .cat-label {
+  opacity: 0;
+  transition: opacity 0.15s ease 0.08s;
+  white-space: nowrap;
+}
+
+.trae-sidebar:hover .desktop-cat-btn .cat-label {
+  opacity: 1;
+}
+
+.desktop-cat-btn:hover {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+.desktop-cat-btn.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.desktop-cat-btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Sidebar nav items */
+.trae-sidebar-nav {
+  padding: 6px 6px !important;
+}
+
+.trae-sidebar-item {
+  padding: 8px 10px !important;
+  justify-content: flex-start !important;
+}
+
+.trae-sidebar-item span:not(.icon):not(.badge) {
+  opacity: 0;
+  transition: opacity 0.15s ease 0.08s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.trae-sidebar:hover .trae-sidebar-item span:not(.icon):not(.badge) {
+  opacity: 1;
+}
+
+.trae-sidebar-item .icon {
+  font-size: 16px !important;
+}
+
+.trae-sidebar-label {
+  display: none !important;
+}
+
+/* User card */
+.trae-user {
+  background: var(--bg-soft) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: 1px solid var(--border) !important;
+  padding: 8px 10px !important;
+  justify-content: center !important;
+}
+
+.trae-sidebar:hover .trae-user {
+  justify-content: flex-start !important;
+}
+
+.trae-user-info,
+.trae-user-actions {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  transition: opacity 0.15s ease 0.08s, max-width 0.18s ease 0.08s;
+}
+
+.trae-sidebar:hover .trae-user-info,
+.trae-sidebar:hover .trae-user-actions {
+  opacity: 1;
+  max-width: 200px;
+}
+
+/* ===== Content Area ===== */
+.trae-content {
+  padding: 20px !important;
+  gap: 14px !important;
+}
+
+/* ===== Status Bar ===== */
+.desktop-statusbar {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: var(--desktop-statusbar-h) !important;
+  background: var(--bg2) !important;
+  border-top: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 16px !important;
+  font-size: 11px !important;
+  color: var(--fg-dim) !important;
+  z-index: 9999 !important;
+  font-family: var(--font) !important;
+}
+
+.desktop-statusbar-left,
+.desktop-statusbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.desktop-statusbar-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.desktop-statusbar-item .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.desktop-statusbar-item .dot.online {
+  background: var(--success);
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+}
+
+.desktop-statusbar-item .dot.offline {
+  background: var(--danger);
+}
+
+.desktop-statusbar-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border);
+}
+
+/* ===== Remove All Backdrop Filter ===== */
+.term-box,
+.dash-card,
+.dash-txn-list,
+.dash-txn-empty,
+.inv-card,
+.detail-panel,
+.profile-card,
+.req-item,
+.room-term,
+.term-table,
+.modal-card,
+.term-toast,
+.trae-user,
+.panel-title,
+.nav-btn,
+.term-form,
+.lab-corridor,
+.chat-bubble.other,
+.contact-item,
+.trae-sidebar,
+.trae-topbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Solid backgrounds — Light mode */
+.term-box,
+.dash-card,
+.inv-card,
+.detail-panel,
+.profile-card,
+.req-item,
+.room-term,
+.panel-title,
+.modal-card {
+  background: var(--bg2) !important;
+}
+
+.dash-txn-list,
+.dash-txn-empty,
+.term-form,
+.lab-corridor {
+  background: var(--bg-soft) !important;
+}
+
+.term-table {
+  background: var(--bg2) !important;
+}
+
+.term-table th {
+  background: var(--bg-soft) !important;
+}
+
+.chat-bubble.other {
+  background: var(--bg-soft) !important;
+}
+
+/* ===== Reduce Hover Animations ===== */
+.room-term:hover,
+.inv-card:hover,
+.req-item:hover {
+  transform: translateY(-2px) !important;
+}
+
+.inv-card:hover {
+  transform: translateY(-3px) !important;
+}
+
+/* ===== Desktop Scrollbars ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong) !important;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted) !important;
+}
+
+/* ===== Login Screen ===== */
+#loginScreen {
+  padding-top: 0 !important;
+}
+
+/* ===== Tooltip for Icon Rail ===== */
+.trae-sidebar:not(:hover) .trae-sidebar-item {
+  position: relative;
+}
+
+.trae-sidebar:not(:hover) .trae-sidebar-item::after,
+.trae-sidebar:not(:hover) .desktop-cat-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--fg);
+  color: var(--bg2);
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10000;
+  transition: opacity 0.15s ease 0.3s;
+}
+
+.trae-sidebar:not(:hover) .trae-sidebar-item:hover::after,
+.trae-sidebar:not(:hover) .desktop-cat-btn:hover::after {
+  opacity: 1;
+}
+
+/* ===== Notification Dropdown Adjust ===== */
+.notify-dropdown {
+  top: calc(100% + 2px) !important;
+}
+
+/* ===== Profile Card — Desktop Enhancement ===== */
+.profile-card {
+  border-radius: 20px !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+  padding: 32px !important;
+}
+
+.profile-header {
+  padding-bottom: 24px !important;
+  margin-bottom: 28px !important;
+}
+
+.profile-avatar {
+  border-radius: 16px !important;
+}
+
+.profile-info .uid {
+  border-radius: 10px !important;
+  padding: 4px 12px !important;
+}
+
+.profile-row {
+  padding: 14px 16px !important;
+  border-radius: 10px !important;
+  margin-bottom: 4px;
+  transition: background 0.15s ease;
+}
+
+.profile-row:hover {
+  background: var(--bg-soft) !important;
+}
+
+.profile-row:last-child {
+  margin-bottom: 0;
+}
+
+#profileNicknameInput {
+  border-radius: 10px !important;
+  padding: 12px 16px !important;
+}
+
+.avatar-option {
+  border-radius: 12px !important;
+}
+
+#saveProfileBtn {
+  border-radius: 10px !important;
+  padding: 10px 24px !important;
+}
+
+/* ===== Modal Adjust ===== */
+.modal-overlay {
+  padding-top: var(--desktop-titlebar-h);
+}
+
+/* ===== Responsive Override — Always Desktop ===== */
+@media (max-width: 768px) {
+  .trae-topbar {
+    flex-direction: row !important;
+    align-items: center !important;
+    height: var(--desktop-topbar-h) !important;
+    padding: 0 16px !important;
+  }
+
+  .trae-brand {
+    margin-right: 16px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .trae-topbar-right {
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+  }
+
+  .trae-sidebar {
+    width: var(--desktop-rail-w) !important;
+  }
+
+  .trae-content {
+    padding: 20px !important;
+  }
+
+  .term-form {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  }
+
+  .lab-map {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .card-stack {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  }
+}

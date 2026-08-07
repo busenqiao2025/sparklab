@@ -295,9 +295,13 @@
   .login-notice-tab{flex:1;padding:9px 14px;font-size:13px;font-weight:600;color:var(--fg-light);cursor:pointer;border:none;background:var(--bg-soft);border-bottom:2px solid transparent;transition:var(--transition);font-family:var(--font);border-radius:var(--radius-xs) var(--radius-xs) 0 0}
   .login-notice-tab:hover{color:var(--fg-dim)}
   .login-notice-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg2)}
-  .login-notice-body{background:var(--bg2);border:1px solid var(--border-light);border-top:none;border-radius:0 0 var(--radius-xs) var(--radius-xs);padding:18px 20px;max-height:280px;overflow-y:auto;font-size:14px;color:var(--fg-dim);line-height:1.8;white-space:pre-wrap;word-break:break-word}
+  .login-notice-body{background:var(--bg2);border:1px solid var(--border-light);border-top:none;border-radius:0 0 var(--radius-xs) var(--radius-xs);padding:12px 16px;max-height:320px;overflow-y:auto;font-size:13px;color:var(--fg-dim);line-height:1.6}
   .login-notice-body:empty::after{content:attr(data-empty);color:var(--fg-light);font-style:italic}
+  .login-notice-item{padding:10px 12px;border-radius:var(--radius-xs);cursor:pointer;transition:var(--transition);border:1px solid var(--border-light);margin-bottom:8px;background:var(--bg);white-space:normal;word-break:break-word}
+  .login-notice-item:hover{border-color:var(--accent);background:var(--bg-soft)}
+  .login-notice-item:last-child{margin-bottom:0}
   .login-notice-meta{font-size:11px;color:var(--fg-light);margin-top:8px;text-align:right}
+  #adminAnnouncementView:empty::after,#adminChangelogView:empty::after{content:attr(data-empty);color:var(--fg-light);font-style:italic;font-size:12px;display:block;padding:24px 0;text-align:center}
   .login-right{flex:.9;display:flex;align-items:center;justify-content:center;padding:56px 48px;background:var(--bg);position:relative}
   .login-wrap{max-width:320px;width:100%}
   .login-card{background:transparent;box-shadow:none;border:none;padding:0;animation:loginFadeIn .4s ease}
@@ -626,7 +630,7 @@ const I18N = {
     // Login
     'app_name': 'SparkMinds Lab', 'app_subtitle': '实验室物联网监控平台',
     'username': '用户名', 'password': '密码', 'login': '登 录',
-    'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续', 'notice_announcement': '系统公告', 'notice_changelog': '更新日志', 'notice_empty': '暂无内容', 'notice_edit': '编辑', 'notice_save': '保存', 'notice_cancel': '取消', 'notice_saved': '保存成功', 'notice_save_failed': '保存失败', 'notice_edit_announcement': '编辑系统公告', 'notice_edit_changelog': '编辑更新日志', 'notice_updated': '更新于',
+    'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续', 'notice_announcement': '系统公告', 'notice_changelog': '更新日志', 'notice_empty': '暂无内容', 'notice_edit': '编辑', 'notice_save': '保存', 'notice_cancel': '取消', 'notice_saved': '保存成功', 'notice_save_failed': '保存失败', 'notice_edit_announcement': '编辑系统公告', 'notice_edit_changelog': '编辑更新日志', 'notice_updated': '更新于', 'notice_add': '新增', 'notice_delete': '删除', 'notice_confirm_delete': '确定删除此条目？', 'notice_title': '标题', 'notice_title_placeholder': '输入标题（可选）', 'notice_content': '内容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日志', 'notice_edit_item': '编辑条目', 'notice_no_title': '无标题',
     'login_hint': '默认账号：admin / admin123 | user / user123',
     'login_error_user_pass': '请输入用户名和密码', 'login_error_wrong': '用户名或密码错误',
     // Nav
@@ -762,7 +766,7 @@ const I18N = {
   'zh-TW': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': '實驗室物聯網監控平台',
     'username': '用戶名', 'password': '密碼', 'login': '登 入',
-    'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續', 'notice_announcement': '系統公告', 'notice_changelog': '更新日誌', 'notice_empty': '暫無內容', 'notice_edit': '編輯', 'notice_save': '儲存', 'notice_cancel': '取消', 'notice_saved': '儲存成功', 'notice_save_failed': '儲存失敗', 'notice_edit_announcement': '編輯系統公告', 'notice_edit_changelog': '編輯更新日誌', 'notice_updated': '更新於',
+    'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續', 'notice_announcement': '系統公告', 'notice_changelog': '更新日誌', 'notice_empty': '暫無內容', 'notice_edit': '編輯', 'notice_save': '儲存', 'notice_cancel': '取消', 'notice_saved': '儲存成功', 'notice_save_failed': '儲存失敗', 'notice_edit_announcement': '編輯系統公告', 'notice_edit_changelog': '編輯更新日誌', 'notice_updated': '更新於', 'notice_add': '新增', 'notice_delete': '刪除', 'notice_confirm_delete': '確定刪除此條目？', 'notice_title': '標題', 'notice_title_placeholder': '輸入標題（可選）', 'notice_content': '內容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日誌', 'notice_edit_item': '編輯條目', 'notice_no_title': '無標題',
     'login_hint': '預設帳號：admin / admin123 | user / user123',
     'login_error_user_pass': '請輸入用戶名和密碼', 'login_error_wrong': '用戶名或密碼錯誤',
     'nav_lab': '實驗室監控', 'nav_3d': '3D材料', 'nav_warehouse': '元器件倉庫',
@@ -880,7 +884,7 @@ const I18N = {
   'en': {
     'app_name': 'SparkMinds Lab', 'app_subtitle': 'Lab IoT Monitoring Platform',
     'username': 'Username', 'password': 'Password', 'login': 'Log In',
-    'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue', 'notice_announcement': 'Announcements', 'notice_changelog': 'Changelog', 'notice_empty': 'No content', 'notice_edit': 'Edit', 'notice_save': 'Save', 'notice_cancel': 'Cancel', 'notice_saved': 'Saved', 'notice_save_failed': 'Save failed', 'notice_edit_announcement': 'Edit Announcement', 'notice_edit_changelog': 'Edit Changelog', 'notice_updated': 'Updated',
+    'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue', 'notice_announcement': 'Announcements', 'notice_changelog': 'Changelog', 'notice_empty': 'No content', 'notice_edit': 'Edit', 'notice_save': 'Save', 'notice_cancel': 'Cancel', 'notice_saved': 'Saved', 'notice_save_failed': 'Save failed', 'notice_edit_announcement': 'Edit Announcement', 'notice_edit_changelog': 'Edit Changelog', 'notice_updated': 'Updated', 'notice_add': 'Add', 'notice_delete': 'Delete', 'notice_confirm_delete': 'Delete this item?', 'notice_title': 'Title', 'notice_title_placeholder': 'Enter title (optional)', 'notice_content': 'Content', 'notice_new_announcement': 'New Announcement', 'notice_new_changelog': 'New Changelog', 'notice_edit_item': 'Edit Item', 'notice_no_title': 'Untitled',
     'login_hint': 'Default: admin / admin123 | user / user123',
     'login_error_user_pass': 'Please enter username and password', 'login_error_wrong': 'Invalid username or password',
     'nav_lab': 'Lab Monitor', 'nav_3d': '3D Materials', 'nav_warehouse': 'Components',
@@ -1630,18 +1634,16 @@ function applyI18n() {
       <div class="term-box" data-title="系统公告" data-i18n-title="notice_announcement" style="padding:16px 20px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <span style="font-size:13px;font-weight:600;color:var(--fg)"><span data-i18n="notice_announcement">系统公告</span></span>
-          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="editAnnouncementBtn" data-i18n="notice_edit">编辑</button>
+          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="addAnnouncementBtn" data-i18n="notice_add">新增</button>
         </div>
-        <div id="adminAnnouncementView" style="font-size:12px;color:var(--fg-dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:100px;padding:12px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-xs);max-height:300px;overflow-y:auto"></div>
-        <div id="adminAnnouncementMeta" style="font-size:10px;color:var(--fg-light);margin-top:8px;text-align:right"></div>
+        <div id="adminAnnouncementView" style="min-height:100px;max-height:400px;overflow-y:auto"></div>
       </div>
       <div class="term-box" data-title="更新日志" data-i18n-title="notice_changelog" style="padding:16px 20px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <span style="font-size:13px;font-weight:600;color:var(--fg)"><span data-i18n="notice_changelog">更新日志</span></span>
-          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="editChangelogBtn" data-i18n="notice_edit">编辑</button>
+          <button class="term-btn-sm" style="border-color:var(--accent);color:var(--accent);font-size:11px;padding:4px 12px" id="addChangelogBtn" data-i18n="notice_add">新增</button>
         </div>
-        <div id="adminChangelogView" style="font-size:12px;color:var(--fg-dim);line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:100px;padding:12px;background:var(--bg);border:1px solid var(--border-light);border-radius:var(--radius-xs);max-height:300px;overflow-y:auto"></div>
-        <div id="adminChangelogMeta" style="font-size:10px;color:var(--fg-light);margin-top:8px;text-align:right"></div>
+        <div id="adminChangelogView" style="min-height:100px;max-height:400px;overflow-y:auto"></div>
       </div>
     </div>
   </div>
@@ -1844,10 +1846,10 @@ function applyI18n() {
 
   // ===================== STORAGE =====================
   // 用户数据存服务端（跨设备同步），库存数据仍存浏览器 localStorage
-  // 桌面端 (Electron) 使用远程 Worker URL，浏览器端使用相对路径
-  const WORKER_URL = 'https://sparkminds-lab.wuyuzhou.workers.dev';
+  // 桌面端 (Electron) 和浏览器端统一使用远程 Worker URL，确保数据同步
+  const WORKER_URL = 'https://ankomon.dpdns.org';
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
-  const API = isElectron ? 'http://localhost:18765/api' : '/api';
+  const API = `${WORKER_URL}/api`;
 
   async function apiGetUsers(withPass = false) {
     try {
@@ -1865,7 +1867,7 @@ function applyI18n() {
         body: JSON.stringify({ name, pass })
       });
       return await r.json();
-    } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
+    } catch (e) { return { ok: false, msg: '无法连接服务器: ' + e.message }; }
   }
 
   async function apiAddUser(name, pass, role) {
@@ -2037,34 +2039,63 @@ function applyI18n() {
   }
 
   // ===================== 公告与更新日志 =====================
-  let noticeData = { announcement: { content: '', updated: 0 }, changelog: { content: '', updated: 0 } };
+  let noticeData = { announcements: [], changelogs: [] };
   let loginNoticeTab = 'announcement';
+
+  function noticeListKey(type) {
+    return type === 'announcement' ? 'announcements' : 'changelogs';
+  }
+
+  function formatNoticeTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
 
   async function loadNotice() {
     try {
       const r = await fetch(`${API}/notice`);
       const j = await r.json();
       if (j.ok) {
-        noticeData = j;
+        noticeData.announcements = j.announcements || [];
+        noticeData.changelogs = j.changelogs || [];
         renderLoginNotice();
+        if (typeof renderNoticeAdmin === 'function') renderNoticeAdmin();
       }
-    } catch (e) {}
+    } catch (e) { console.warn('loadNotice error:', e.message); }
   }
 
   function renderLoginNotice() {
     const body = $('#loginNoticeBody');
     const meta = $('#loginNoticeMeta');
-    if (!body || !meta) return;
-    const data = noticeData[loginNoticeTab] || { content: '', updated: 0 };
-    body.textContent = data.content || '';
-    body.setAttribute('data-empty', t('notice_empty'));
-    if (data.updated) {
-      const d = new Date(data.updated);
-      const timeStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-      meta.textContent = t('notice_updated') + ': ' + timeStr + (data.author ? ' · ' + data.author : '');
-    } else {
-      meta.textContent = '';
+    if (!body) return;
+    const list = noticeData[noticeListKey(loginNoticeTab)] || [];
+    if (list.length === 0) {
+      body.innerHTML = '';
+      body.setAttribute('data-empty', t('notice_empty'));
+      if (meta) meta.textContent = '';
+      return;
     }
+    body.removeAttribute('data-empty');
+    body.innerHTML = list.map((item, i) => {
+      const title = item.title || t('notice_no_title');
+      const preview = (item.content || '').substring(0, 100);
+      const time = formatNoticeTime(item.updated);
+      const pinned = item.pinned ? '📌 ' : '';
+      return `<div class="login-notice-item" data-idx="${i}">
+        <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${pinned}${escapeHtml(title)}</div>
+        <div style="font-size:11px;color:var(--fg-dim);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escapeHtml(preview)}</div>
+        ${time ? `<div style="font-size:10px;color:var(--fg-light);margin-top:4px;text-align:right">${time}</div>` : ''}
+      </div>`;
+    }).join('');
+    if (meta) meta.textContent = '';
+    body.querySelectorAll('.login-notice-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const idx = parseInt(el.dataset.idx);
+        const items = noticeData[noticeListKey(loginNoticeTab)] || [];
+        if (items[idx]) showNoticeDetailModal(loginNoticeTab, items[idx].id);
+      });
+    });
   }
 
   function initLoginNoticeTabs() {
@@ -2085,18 +2116,64 @@ function applyI18n() {
     });
   }
 
-  function openNoticeEditor(type) {
+  function showNoticeDetailModal(type, itemId) {
+    const list = noticeData[noticeListKey(type)] || [];
+    const item = list.find(x => x.id === itemId);
+    if (!item) return;
+    const overlay = document.createElement('div');
+    overlay.setAttribute('data-shortcut-overlay', '1');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;width:90%;max-width:600px;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);transform:scale(.95);transition:transform .2s ease';
+    const titleText = item.title || (type === 'announcement' ? t('notice_announcement') : t('notice_changelog'));
+    let metaStr = '';
+    if (item.updated) {
+      const d = new Date(item.updated);
+      metaStr = t('notice_updated') + ': ' + d.toLocaleString() + (item.author ? ' · ' + item.author : '');
+    }
+    modal.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border-light)">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+          <span style="font-size:20px;flex-shrink:0">${type === 'announcement' ? '📢' : '📋'}</span>
+          <span style="font-size:17px;font-weight:700;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(titleText)}</span>
+        </div>
+        <button id="noticeDetailClose" style="width:32px;height:32px;border:none;background:var(--bg-soft);border-radius:var(--radius-xs);cursor:pointer;font-size:16px;color:var(--fg-light);display:flex;align-items:center;justify-content:center;transition:var(--transition);font-family:var(--font);flex-shrink:0">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;font-size:14px;color:var(--fg-dim);line-height:1.85;white-space:pre-wrap;word-break:break-word;padding:4px 4px 12px 0">${escapeHtml(item.content || '')}</div>
+      ${metaStr ? `<div style="font-size:11px;color:var(--fg-light);text-align:right;padding-top:10px;border-top:1px solid var(--border-light)">${metaStr}</div>` : ''}
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; modal.style.transform = 'scale(1)'; });
+
+    function close() {
+      overlay.style.opacity = '0';
+      modal.style.transform = 'scale(.95)';
+      setTimeout(() => overlay.remove(), 200);
+    }
+    $('#noticeDetailClose', modal).addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  }
+
+  function openNoticeEditor(type, itemId) {
     if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
+    const list = noticeData[noticeListKey(type)] || [];
+    const existing = itemId ? list.find(x => x.id === itemId) : null;
+    const isEdit = !!existing;
     const overlay = document.createElement('div');
     overlay.setAttribute('data-shortcut-overlay', '1');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
     const modal = document.createElement('div');
     modal.style.cssText = 'background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:90%;max-width:520px;box-shadow:var(--shadow-lg)';
-    const title = type === 'announcement' ? t('notice_edit_announcement') : t('notice_edit_changelog');
-    const currentContent = (noticeData[type] || {}).content || '';
+    const title = isEdit
+      ? t('notice_edit_item')
+      : (type === 'announcement' ? t('notice_new_announcement') : t('notice_new_changelog'));
+    const currentTitle = existing ? (existing.title || '') : '';
+    const currentContent = existing ? (existing.content || '') : '';
     modal.innerHTML = `
       <div style="font-size:15px;font-weight:700;margin-bottom:14px">${title}</div>
-      <textarea id="noticeEditArea" style="width:100%;min-height:200px;max-height:400px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:var(--font);font-size:13px;padding:12px;resize:vertical;outline:none;box-sizing:border-box" placeholder="${t('notice_empty')}...">${escapeHtml(currentContent)}</textarea>
+      <input id="noticeEditTitle" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:var(--font);font-size:13px;padding:10px 12px;margin-bottom:10px;outline:none;box-sizing:border-box" placeholder="${t('notice_title_placeholder')}" value="${escapeHtml(currentTitle)}">
+      <textarea id="noticeEditArea" style="width:100%;min-height:200px;max-height:400px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--fg);font-family:var(--font);font-size:13px;padding:12px;resize:vertical;outline:none;box-sizing:border-box" placeholder="${t('notice_content')}...">${escapeHtml(currentContent)}</textarea>
       <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
         <button id="noticeCancelBtn" style="padding:8px 16px;border:1px solid var(--border);background:transparent;border-radius:var(--radius-sm);color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--font)">${t('notice_cancel')}</button>
         <button id="noticeSaveBtn" style="padding:8px 20px;border:none;background:var(--accent);color:#fff;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;font-family:var(--font);font-weight:600">${t('notice_save')}</button>
@@ -2110,16 +2187,20 @@ function applyI18n() {
     $('#noticeCancelBtn', modal).addEventListener('click', close);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     $('#noticeSaveBtn', modal).addEventListener('click', async () => {
+      const titleVal = $('#noticeEditTitle', modal).value.trim();
       const content = $('#noticeEditArea', modal).value.trim();
+      if (!content) { toast(t('notice_empty')); return; }
       try {
+        const action = isEdit ? 'update' : 'add';
+        const item = isEdit ? { id: existing.id, title: titleVal, content } : { title: titleVal, content };
         const r = await fetch(`${API}/notice`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid: currentUser.uid, type, content })
+          body: JSON.stringify({ uid: currentUser.uid, type, action, item })
         });
         const j = await r.json();
         if (j.ok) {
-          noticeData[type] = j.data;
+          noticeData[noticeListKey(type)] = j.list || [];
           renderLoginNotice();
           renderNoticeAdmin();
           if (typeof refreshNotificationCenter === 'function') refreshNotificationCenter();
@@ -2134,29 +2215,68 @@ function applyI18n() {
     });
   }
 
+  async function deleteNoticeItem(type, itemId) {
+    if (currentUser.role !== 'admin') { toast(t('t_permission_denied')); return; }
+    if (!confirm(t('notice_confirm_delete'))) return;
+    try {
+      const r = await fetch(`${API}/notice`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: currentUser.uid, type, action: 'delete', item: { id: itemId } })
+      });
+      const j = await r.json();
+      if (j.ok) {
+        noticeData[noticeListKey(type)] = j.list || [];
+        renderLoginNotice();
+        renderNoticeAdmin();
+        if (typeof refreshNotificationCenter === 'function') refreshNotificationCenter();
+        toast(t('notice_saved'));
+      } else {
+        toast(j.msg || t('notice_save_failed'));
+      }
+    } catch (e) {
+      toast(t('notice_save_failed'));
+    }
+  }
+
   function renderNoticeAdmin() {
-    const annView = $('#adminAnnouncementView');
-    const annMeta = $('#adminAnnouncementMeta');
-    const logView = $('#adminChangelogView');
-    const logMeta = $('#adminChangelogMeta');
-    if (annView) {
-      const ann = noticeData.announcement || { content: '', updated: 0 };
-      annView.textContent = ann.content || '';
-      annView.setAttribute('data-empty', t('notice_empty'));
-      if (ann.updated) {
-        const d = new Date(ann.updated);
-        annMeta.textContent = t('notice_updated') + ': ' + d.toLocaleString() + (ann.author ? ' · ' + ann.author : '');
-      } else { annMeta.textContent = ''; }
-    }
-    if (logView) {
-      const log = noticeData.changelog || { content: '', updated: 0 };
-      logView.textContent = log.content || '';
-      logView.setAttribute('data-empty', t('notice_empty'));
-      if (log.updated) {
-        const d = new Date(log.updated);
-        logMeta.textContent = t('notice_updated') + ': ' + d.toLocaleString() + (log.author ? ' · ' + log.author : '');
-      } else { logMeta.textContent = ''; }
-    }
+    ['announcement', 'changelog'].forEach(type => {
+      const viewId = type === 'announcement' ? 'adminAnnouncementView' : 'adminChangelogView';
+      const view = $('#' + viewId);
+      if (!view) return;
+      const list = noticeData[noticeListKey(type)] || [];
+      if (list.length === 0) {
+        view.innerHTML = '';
+        view.setAttribute('data-empty', t('notice_empty'));
+        return;
+      }
+      view.removeAttribute('data-empty');
+      view.innerHTML = list.map(item => {
+        const title = item.title || t('notice_no_title');
+        const preview = (item.content || '').substring(0, 120);
+        const time = formatNoticeTime(item.updated);
+        const pinned = item.pinned ? '📌 ' : '';
+        return `<div style="padding:10px 12px;border:1px solid var(--border-light);border-radius:var(--radius-xs);margin-bottom:8px;background:var(--bg2)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;color:var(--fg);margin-bottom:4px">${pinned}${escapeHtml(title)}</div>
+              <div style="font-size:11px;color:var(--fg-dim);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${escapeHtml(preview)}</div>
+              ${time ? `<div style="font-size:10px;color:var(--fg-light);margin-top:4px">${time}${item.author ? ' · ' + escapeHtml(item.author) : ''}</div>` : ''}
+            </div>
+            <div style="display:flex;gap:4px;flex-shrink:0">
+              <button class="term-btn-sm notice-edit-btn" data-type="${type}" data-id="${item.id}" style="border-color:var(--accent);color:var(--accent);font-size:10px;padding:3px 8px">${t('notice_edit')}</button>
+              <button class="term-btn-sm notice-del-btn" data-type="${type}" data-id="${item.id}" style="border-color:var(--danger);color:var(--danger);font-size:10px;padding:3px 8px">${t('notice_delete')}</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      view.querySelectorAll('.notice-edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => openNoticeEditor(btn.dataset.type, parseInt(btn.dataset.id)));
+      });
+      view.querySelectorAll('.notice-del-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteNoticeItem(btn.dataset.type, parseInt(btn.dataset.id)));
+      });
+    });
   }
 
   // ===================== LOGIN =====================
@@ -2227,10 +2347,10 @@ function applyI18n() {
     initReport();
     initForum();
     initKeyboardShortcuts();
-    const editAnnBtn = $('#editAnnouncementBtn');
-    if (editAnnBtn) editAnnBtn.addEventListener('click', () => openNoticeEditor('announcement'));
-    const editLogBtn = $('#editChangelogBtn');
-    if (editLogBtn) editLogBtn.addEventListener('click', () => openNoticeEditor('changelog'));
+    const addAnnBtn = $('#addAnnouncementBtn');
+    if (addAnnBtn) addAnnBtn.addEventListener('click', () => openNoticeEditor('announcement'));
+    const addLogBtn = $('#addChangelogBtn');
+    if (addLogBtn) addLogBtn.addEventListener('click', () => openNoticeEditor('changelog'));
     await loadNotice();
     renderSidebar();
     renderDashboard();

@@ -1496,26 +1496,55 @@ export default {
         // ========== 公告与更新日志 ==========
         // GET /api/notice — 获取公告和更新日志（公开接口，登录页可用）
         if (url.pathname === '/api/notice' && request.method === 'GET') {
-          const announcement = await env.USERS.get('announcement');
-          const changelog = await env.USERS.get('changelog');
-          return json({
-            ok: true,
-            announcement: announcement ? JSON.parse(announcement) : { content: '', updated: 0 },
-            changelog: changelog ? JSON.parse(changelog) : { content: '', updated: 0 },
-          });
+          const annRaw = await env.USERS.get('announcement');
+          const logRaw = await env.USERS.get('changelog');
+          let announcements = [];
+          let changelogs = [];
+          if (annRaw) {
+            const parsed = JSON.parse(annRaw);
+            announcements = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+          }
+          if (logRaw) {
+            const parsed = JSON.parse(logRaw);
+            changelogs = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+          }
+          return json({ ok: true, announcements, changelogs });
         }
 
-        // PUT /api/notice — 修改公告或更新日志（仅管理员）
+        // PUT /api/notice — 增删改公告或更新日志（仅管理员）
         if (url.pathname === '/api/notice' && request.method === 'PUT') {
-          const { uid, type, content } = await readBody(request);
-          if (!uid || !type || content === undefined) return json({ ok: false, msg: '缺少参数' });
+          const { uid, type, action, item } = await readBody(request);
+          if (!uid || !type || !action) return json({ ok: false, msg: '缺少参数' });
           if (!['announcement', 'changelog'].includes(type)) return json({ ok: false, msg: '无效的类型' });
+          if (!['add', 'update', 'delete', 'reorder'].includes(action)) return json({ ok: false, msg: '无效的操作' });
           const users = await loadUsers(env);
           const user = users.find(u => u.uid === uid);
           if (!user || user.role !== 'admin') return json({ ok: false, msg: '仅管理员可修改' });
-          const data = { content, updated: Date.now(), author: user.name };
-          await env.USERS.put(type, JSON.stringify(data));
-          return json({ ok: true, data });
+          const key = type;
+          const raw = await env.USERS.get(key);
+          let list = [];
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            list = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+          }
+          if (action === 'add') {
+            const newItem = { id: Date.now(), title: (item && item.title) || '', content: (item && item.content) || '', updated: Date.now(), author: user.name, pinned: !!(item && item.pinned) };
+            list.unshift(newItem);
+          } else if (action === 'update') {
+            if (!item || !item.id) return json({ ok: false, msg: '缺少 item.id' });
+            const idx = list.findIndex(x => x.id === item.id);
+            if (idx === -1) return json({ ok: false, msg: '条目不存在' });
+            list[idx] = { ...list[idx], title: item.title ?? list[idx].title, content: item.content ?? list[idx].content, pinned: item.pinned ?? list[idx].pinned, updated: Date.now(), author: user.name };
+          } else if (action === 'delete') {
+            if (!item || !item.id) return json({ ok: false, msg: '缺少 item.id' });
+            list = list.filter(x => x.id !== item.id);
+          } else if (action === 'reorder') {
+            if (!item || !Array.isArray(item.ids)) return json({ ok: false, msg: '缺少 item.ids' });
+            const map = new Map(list.map(x => [x.id, x]));
+            list = item.ids.map(id => map.get(id)).filter(Boolean);
+          }
+          await env.USERS.put(key, JSON.stringify(list));
+          return json({ ok: true, list });
         }
 
         return json({ ok: false, msg: 'not found' }, 404);

@@ -19,8 +19,3 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: SparkMinds Lab
-publish:
-  provider: github
-  owner: wuyuzhou
-  repo: sparkminds-lab
-  releaseType: release
