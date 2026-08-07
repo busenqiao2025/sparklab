@@ -13,80 +13,15 @@ const APP_URL = 'https://ankomon.dpdns.org';
 const versionFilePath = path.join(app.getPath('userData'), 'last-version.json');
 
 app.commandLine.appendSwitch('no-proxy-server');
+app.disableHardwareAcceleration();
 
 function setupRequestRedirect() {
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
-    console.log('[REQ]', details.method, details.url);
     if (details.url.startsWith('http://localhost:18765/api/')) {
       callback({ redirectURL: details.url.replace('http://localhost:18765/api/', APP_URL + '/api/') });
     } else {
       callback({});
     }
-  });
-}
-
-function injectDiagnostics() {
-  if (!mainWindow) return;
-
-  const diagScript = `
-    (function() {
-      if (window.__diagInjected) return;
-      window.__diagInjected = true;
-      console.log('[DIAG] Diagnostics injected');
-
-      var origFetch = window.fetch;
-      if (origFetch) {
-        window.fetch = function() {
-          var url = typeof arguments[0] === 'string' ? arguments[0] : (arguments[0] && arguments[0].url) || String(arguments[0]);
-          var opts = arguments[1] || {};
-          console.log('[DIAG] fetch:', opts.method || 'GET', url);
-          return origFetch.apply(this, arguments).then(function(res) {
-            console.log('[DIAG] fetch response:', res.status, res.statusText, url);
-            return res;
-          }).catch(function(err) {
-            console.log('[DIAG] fetch error:', err.message, url);
-            throw err;
-          });
-        };
-      } else {
-        console.log('[DIAG] window.fetch not found!');
-      }
-
-      var origOpen = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function(method, url) {
-        console.log('[DIAG] XHR:', method, url);
-        this.addEventListener('load', function() {
-          console.log('[DIAG] XHR response:', this.status, this.statusText);
-        });
-        this.addEventListener('error', function() {
-          console.log('[DIAG] XHR error:', method, url);
-        });
-        return origOpen.apply(this, arguments);
-      };
-
-      document.addEventListener('click', function(e) {
-        var t = e.target;
-        var tag = t.tagName;
-        var type = t.type || '';
-        var id = t.id || '';
-        var cls = typeof t.className === 'string' ? t.className : '';
-        var text = (t.textContent || '').trim().substring(0, 50);
-        if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'A' || t.onclick) {
-          console.log('[DIAG] Click:', tag, 'type=' + type, 'id=' + id, 'class=' + cls, 'text=' + text);
-        }
-      }, true);
-
-      document.addEventListener('submit', function(e) {
-        console.log('[DIAG] Form submit:', e.target.id || e.target.className || 'unknown');
-      }, true);
-
-      console.log('[DIAG] fetch type:', typeof window.fetch);
-      console.log('[DIAG] XHR type:', typeof window.XMLHttpRequest);
-    })();
-  `;
-
-  mainWindow.webContents.executeJavaScript(diagScript).catch((e) => {
-    console.error('[DIAG] Injection failed:', e.message);
   });
 }
 
@@ -112,6 +47,8 @@ async function checkForUpdates() {
   try {
     const response = await fetch(APP_URL + '/version.json');
     if (!response.ok) return;
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return;
     const data = await response.json();
     lastVersionData = data;
 
@@ -313,32 +250,50 @@ async function createWindow() {
     },
   });
 
+  console.log('[App] Loading URL:', APP_URL);
   mainWindow.loadURL(APP_URL);
-  mainWindow.once('ready-to-show', () => mainWindow.show());
-  setTimeout(() => { if (mainWindow && !mainWindow.isVisible()) mainWindow.show(); }, 5000);
+
+  mainWindow.once('ready-to-show', () => {
+    console.log('[App] ready-to-show triggered');
+    mainWindow.show();
+  });
+  setTimeout(() => {
+    if (mainWindow && !mainWindow.isVisible()) {
+      console.log('[App] Force showing window after 5s timeout');
+      mainWindow.show();
+    }
+  }, 5000);
+
+  mainWindow.webContents.on('did-start-loading', () => {
+    console.log('[App] Page started loading');
+  });
 
   mainWindow.webContents.on('did-finish-load', () => {
-    injectDiagnostics();
+    console.log('[App] Page finished loading');
     startLoginPolling();
-    startUpdateChecking();
 
     if (pendingChangelog) {
       var cl = pendingChangelog;
       pendingChangelog = null;
       setTimeout(() => { showChangelog(cl); }, 1500);
-    } else {
-      checkForUpdates();
     }
+
+    setTimeout(() => {
+      checkForUpdates();
+      startUpdateChecking();
+    }, 5000);
   });
 
-  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
-    console.log('[Page]', message);
-  });
-
-  mainWindow.webContents.on('did-fail-load', () => {
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('[App] Load failed:', errorCode, errorDescription, validatedURL);
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     if (updateCheckTimer) { clearInterval(updateCheckTimer); updateCheckTimer = null; }
-    mainWindow.loadURL(APP_URL);
+    setTimeout(() => {
+      if (mainWindow) {
+        console.log('[App] Retrying load in 2s...');
+        mainWindow.loadURL(APP_URL);
+      }
+    }, 2000);
   });
 
   mainWindow.webContents.on('before-input-event', (event, input) => {
