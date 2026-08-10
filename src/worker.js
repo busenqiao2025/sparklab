@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SparkMinds Lab v2.4 — Cloudflare Worker
  * API 路由 + KV 用户存储 + 申请授权 + 用户主页 + 好友 + 站内信
  */
@@ -54,10 +54,19 @@ async function readBody(request) {
 }
 
 const AVATARS = ['😀','😎','🤓','🧑‍💻','👨‍🔬','👩‍🔬','🧑‍🔧','👷','🦊','🐱','🐧','🤖','🦉','🐯','🐨','🦁','🐸','🐙','🦄','🐲'];
+const SPACES = ['A', 'B'];
+const SPACE_LABELS = { 'A': '空间 A', 'B': '空间 B' };
 const DEFAULT_USERS = [
-  { name: 'admin', pass: 'admin123', role: 'admin', uid: '00001', nickname: '管理员', avatar: '👨‍💼', friends: [], created: 1783588201655 },
-  { name: 'user', pass: 'user123', role: 'user', uid: '00002', nickname: '普通用户', avatar: '😀', friends: [], created: 1783588201655 },
+  { name: 'admin', pass: 'admin123', role: 'admin', uid: '00001', nickname: '管理员', avatar: '👨‍💼', friends: [], space: '*', created: 1783588201655 },
+  { name: 'user', pass: 'user123', role: 'user', uid: '00002', nickname: '普通用户', avatar: '😀', friends: [], space: 'A', created: 1783588201655 },
 ];
+
+// 从请求中解析空间参数（admin 可指定空间，普通用户用自身空间）
+function resolveSpace(url, body) {
+  if (body && body.space) return body.space;
+  const sp = url.searchParams.get('space');
+  return sp || 'A';
+}
 
 async function loadUsers(env) {
   const raw = await env.USERS.get('users');
@@ -77,6 +86,7 @@ async function loadUsers(env) {
           if (!u.nickname) { u.nickname = u.name; modified = true; }
           if (!u.avatar) { u.avatar = AVATARS[Math.floor(Math.random()*AVATARS.length)]; modified = true; }
           if (!u.friends) { u.friends = []; modified = true; }
+          if (!u.space) { u.space = u.role === 'admin' ? '*' : 'A'; modified = true; }
         }
         if (modified) await env.USERS.put('users', JSON.stringify(parsed));
         return parsed;
@@ -208,17 +218,23 @@ export default {
         if (url.pathname === '/api/users' && request.method === 'GET') {
           const users = await loadUsers(env);
           const withPass = url.searchParams.get('with_pass') === '1';
-          if (withPass) return json({ ok: true, users });
-          return json({ ok: true, users: users.map(sanitize) });
+          const spaceFilter = url.searchParams.get('space');
+          let filtered = users;
+          if (spaceFilter && spaceFilter !== '*') {
+            filtered = users.filter(u => u.space === spaceFilter || u.space === '*');
+          }
+          if (withPass) return json({ ok: true, users: filtered });
+          return json({ ok: true, users: filtered.map(sanitize) });
         }
 
         if (url.pathname === '/api/users' && request.method === 'POST') {
-          const { name, pass, role } = await readBody(request);
+          const { name, pass, role, space } = await readBody(request);
           if (!name || !pass) return json({ ok: false, msg: '用户名和密码不能为空' });
           const users = await loadUsers(env);
           if (users.find(u => u.name === name)) return json({ ok: false, msg: '用户已存在' });
           const uid = await genUid(env, users);
-          const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], created: Date.now() };
+          const userSpace = role === 'admin' ? '*' : (space || 'A');
+          const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], space: userSpace, created: Date.now() };
           // 自动与 admin 建立双向好友关系
           const adminUser = users.find(u => u.role === 'admin');
           if (adminUser && adminUser.uid !== uid) {
@@ -394,15 +410,17 @@ export default {
         }
 
         // ========== 好友系统 ==========
-        // GET /api/friends?uid=xxx — 获取好友列表（含好友信息）
+        // GET /api/friends?uid=xxx&space=A — 获取好友列表（含好友信息）
         if (url.pathname === '/api/friends' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           const users = await loadUsers(env);
           const user = users.find(u => u.uid === uid);
           if (!user) return json({ ok: false, msg: '用户不存在' });
+          const spaceUsers = users.filter(u => u.space === sp || u.space === '*');
           const friends = (user.friends || []).map(fuid => {
-            const f = users.find(u => u.uid === fuid);
+            const f = spaceUsers.find(u => u.uid === fuid);
             return f ? { uid: f.uid, name: f.name, nickname: f.nickname, avatar: f.avatar } : null;
           }).filter(Boolean);
           return json({ ok: true, friends });
@@ -487,13 +505,16 @@ export default {
           return json({ ok: true });
         }
 
-        // ========== 站内信系统 ==========
-        // GET /api/messages?uid=xxx&peerUid=yyy — 获取与某人的聊天记录
+        // ========== 站内信系统（按空间隔离） ==========
+        // GET /api/messages?uid=xxx&peerUid=yyy&space=A — 获取与某人的聊天记录
         if (url.pathname === '/api/messages' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
           const peerUid = url.searchParams.get('peerUid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           let msgs = await loadMessages(env);
+          // 按空间过滤
+          msgs = msgs.filter(m => !m.space || m.space === sp);
           let result;
           if (peerUid) {
             // 两人私聊
@@ -514,14 +535,17 @@ export default {
           return json({ ok: true, messages: result.sort((a,b) => a.created - b.created) });
         }
 
-        // GET /api/messages/search?uid=xxx&q=keyword&peerUid=yyy — 搜索私聊消息
+        // GET /api/messages/search?uid=xxx&q=keyword&peerUid=yyy&space=A — 搜索私聊消息
         if (url.pathname === '/api/messages/search' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
           const q = url.searchParams.get('q') || '';
           const peerUid = url.searchParams.get('peerUid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           if (!q) return json({ ok: false, msg: '缺少搜索关键词 q' });
           let msgs = await loadMessages(env);
+          // 按空间过滤
+          msgs = msgs.filter(m => !m.space || m.space === sp);
           // 仅搜索与我相关的私聊消息（排除广播），且内容包含关键词
           let result = msgs.filter(m => !m.broadcast && (m.from === uid || m.to === uid) && m.content && m.content.includes(q));
           // 若指定了 peerUid，则进一步限定为与该用户的对话
@@ -533,16 +557,16 @@ export default {
           return json({ ok: true, messages: result });
         }
 
-        // POST /api/messages — 发送私聊消息
+        // POST /api/messages — 发送私聊消息（body 含 space）
         if (url.pathname === '/api/messages' && request.method === 'POST') {
-          const { from, to, content, fileId, fileName } = await readBody(request);
+          const { from, to, content, fileId, fileName, space } = await readBody(request);
           if (!from || !to) return json({ ok: false, msg: '缺少参数' });
           if (!content && !fileId) return json({ ok: false, msg: '缺少内容' });
           // 禁言检查
           const mute = await checkMuted(env, from);
           if (mute.muted) return json({ ok: false, msg: mute.msg, muted: true });
           let msgs = await loadMessages(env);
-          const newMsg = { id: Date.now(), from, to, content: content || '', fileId: fileId || null, fileName: fileName || null, broadcast: false, read: false, created: Date.now() };
+          const newMsg = { id: Date.now(), from, to, content: content || '', fileId: fileId || null, fileName: fileName || null, broadcast: false, read: false, space: space || 'A', created: Date.now() };
           msgs.push(newMsg);
           await saveMessages(env, msgs);
           return json({ ok: true, message: newMsg });
@@ -573,51 +597,56 @@ export default {
           return json({ ok: true });
         }
 
-        // POST /api/messages/broadcast — 管理员广播
+        // POST /api/messages/broadcast — 管理员广播（body 含 space）
         // to: 'all_including_admin' | 'all_users' | UID 数组
         if (url.pathname === '/api/messages/broadcast' && request.method === 'POST') {
-          const { from, to, content } = await readBody(request);
+          const { from, to, content, space } = await readBody(request);
           if (!from || !content) return json({ ok: false, msg: '缺少参数' });
+          const sp = space || 'A';
           const users = await loadUsers(env);
+          // 按空间过滤目标用户
+          let spaceUsers = users.filter(u => u.space === sp || u.space === '*');
           let targets;
           if (to === 'all_including_admin') {
-            // 全体用户（含管理员自己）
-            targets = users.map(u => u.uid);
+            // 全体用户（含管理员自己，仅当前空间）
+            targets = spaceUsers.map(u => u.uid);
           } if (to === 'all_users') {
-            // 仅普通用户
-            targets = users.filter(u => u.role !== 'admin').map(u => u.uid);
+            // 仅普通用户（仅当前空间）
+            targets = spaceUsers.filter(u => u.role !== 'admin').map(u => u.uid);
           } else {
             // 指定 UID 数组
             targets = Array.isArray(to) ? to : [to];
             // 验证 UID 是否存在
-            const validUids = users.map(u => u.uid);
+            const validUids = spaceUsers.map(u => u.uid);
             const invalid = targets.filter(t => !validUids.includes(t));
             if (invalid.length > 0) return json({ ok: false, msg: `UID 不存在: ${invalid.join(', ')}` });
           }
           let msgs = await loadMessages(env);
           const baseTime = Date.now();
           for (const t of targets) {
-            msgs.push({ id: baseTime + Math.random(), from, to: t, content, broadcast: true, read: false, created: baseTime });
+            msgs.push({ id: baseTime + Math.random(), from, to: t, content, broadcast: true, read: false, space: sp, created: baseTime });
           }
           await saveMessages(env, msgs);
           return json({ ok: true, count: targets.length });
         }
 
-        // GET /api/messages/unread?uid=xxx — 获取未读消息数
+        // GET /api/messages/unread?uid=xxx&space=A — 获取未读消息数
         if (url.pathname === '/api/messages/unread' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           let msgs = await loadMessages(env);
-          const count = msgs.filter(m => m.to === uid && !m.read).length;
+          const count = msgs.filter(m => m.to === uid && !m.read && (!m.space || m.space === sp)).length;
           return json({ ok: true, count });
         }
 
-        // GET /api/messages/broadcasts?uid=xxx — 获取所有广播消息（不标记已读，客户端用 localStorage 控制已读）
+        // GET /api/messages/broadcasts?uid=xxx&space=A — 获取所有广播消息
         if (url.pathname === '/api/messages/broadcasts' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           let msgs = await loadMessages(env);
-          const broadcasts = msgs.filter(m => m.broadcast && m.to === uid && m.from !== uid)
+          const broadcasts = msgs.filter(m => m.broadcast && m.to === uid && m.from !== uid && (!m.space || m.space === sp))
             .map(m => ({ id: m.id, from: m.from, content: m.content, created: m.created }));
           return json({ ok: true, broadcasts });
         }
@@ -636,18 +665,23 @@ export default {
           return json({ ok: true });
         }
 
-        // GET /api/messages/contacts?uid=xxx — 获取联系人列表（好友+有过私聊的人+广播）
+        // GET /api/messages/contacts?uid=xxx&space=A — 获取联系人列表（好友+有过私聊的人+广播）
         if (url.pathname === '/api/messages/contacts' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           const users = await loadUsers(env);
           const user = users.find(u => u.uid === uid);
           let msgs = await loadMessages(env);
+          // 按空间过滤消息
+          msgs = msgs.filter(m => !m.space || m.space === sp);
+          // 按空间过滤用户列表
+          let spaceUsers = users.filter(u => u.space === sp || u.space === '*');
           // 好友列表
           let contacts = [];
           if (user && user.friends) {
             for (const fuid of user.friends) {
-              const f = users.find(u => u.uid === fuid);
+              const f = spaceUsers.find(u => u.uid === fuid);
               if (f) {
                 const fMsgs = msgs.filter(m => (m.from === uid && m.to === fuid) || (m.from === fuid && m.to === uid));
                 const lastMsg = fMsgs.sort((a,b) => b.created - a.created)[0];
@@ -658,7 +692,7 @@ export default {
           }
           // 加上管理员（如果当前用户不是管理员）— 自动修复双向好友关系
           if (user && user.role !== 'admin') {
-            const admin = users.find(u => u.role === 'admin');
+            const admin = spaceUsers.find(u => u.role === 'admin');
             if (admin && admin.uid !== uid) {
               // 如果用户没有 admin 好友，自动补上双向关系
               let needSave = false;
@@ -682,7 +716,7 @@ export default {
             const broadcastTargets = msgs.filter(m => m.broadcast && m.from === uid).map(m => m.to);
             for (const tUid of [...new Set(broadcastTargets)]) {
               if (contacts.find(c => c.uid === tUid)) continue;
-              const t = users.find(u => u.uid === tUid);
+              const t = spaceUsers.find(u => u.uid === tUid);
               if (t) {
                 const tMsgs = msgs.filter(m => (m.from === uid && m.to === tUid) || (m.from === tUid && m.to === uid));
                 const lastMsg = tMsgs.sort((a,b) => b.created - a.created)[0];
@@ -872,13 +906,15 @@ export default {
           }});
         }
 
-        // ========== 库存流水记录系统 ==========
-        // GET /api/transactions?type=material|component|board — 获取流水记录
+        // ========== 库存流水记录系统（按空间隔离） ==========
+        // GET /api/transactions?type=material|component|board&space=A — 获取流水记录
         if (url.pathname === '/api/transactions' && request.method === 'GET') {
           const type = url.searchParams.get('type') || 'all';
+          const sp = url.searchParams.get('space') || 'A';
           const raw = await env.USERS.get('transactions');
           let txns = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(txns)) txns = [];
+          txns = txns.filter(t => !t.space || t.space === sp);
           let result = txns;
           if (type !== 'all') result = txns.filter(t => t.category === type);
           // 按时间倒序
@@ -886,9 +922,9 @@ export default {
           return json({ ok: true, transactions: result });
         }
 
-        // POST /api/transactions — 记录一条库存变动
+        // POST /api/transactions — 记录一条库存变动（body 含 space）
         if (url.pathname === '/api/transactions' && request.method === 'POST') {
-          const { category, itemId, itemName, action, change, before, after, operator, note } = await readBody(request);
+          const { category, itemId, itemName, action, change, before, after, operator, note, space } = await readBody(request);
           if (!category || !action) return json({ ok: false, msg: '缺少参数' });
           const raw = await env.USERS.get('transactions');
           let txns = raw ? JSON.parse(raw) : [];
@@ -904,6 +940,7 @@ export default {
             after,          // 变化后值
             operator: operator || 'unknown',
             note: note || '',
+            space: space || 'A',
             created: Date.now()
           };
           txns.push(txn);
@@ -913,16 +950,18 @@ export default {
           return json({ ok: true, transaction: txn });
         }
 
-        // ========== 申请授权系统（v1.7 保留） ==========
+        // ========== 申请授权系统（按空间隔离） ==========
         if (url.pathname === '/api/requests' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
           const raw = await env.USERS.get('requests');
           let requests = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(requests)) requests = [];
+          requests = requests.filter(r => !r.space || r.space === sp);
           return json({ ok: true, requests });
         }
 
         if (url.pathname === '/api/requests' && request.method === 'POST') {
-          const { user, type, target, detail } = await readBody(request);
+          const { user, type, target, detail, space } = await readBody(request);
           if (!user || !type) return json({ ok: false, msg: '缺少必要参数' });
           // 禁言检查：user 可能是用户名或 UID，统一解析为 UID
           let _reqUid = user;
@@ -938,7 +977,7 @@ export default {
           const raw = await env.USERS.get('requests');
           let requests = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(requests)) requests = [];
-          const newReq = { id: Date.now(), user, type, target: target || '', detail: detail || '', status: 'pending', created: Date.now(), reviewedBy: '', reviewedAt: null, adminNote: '' };
+          const newReq = { id: Date.now(), user, type, target: target || '', detail: detail || '', status: 'pending', space: space || 'A', created: Date.now(), reviewedBy: '', reviewedAt: null, adminNote: '' };
           requests.push(newReq);
           await env.USERS.put('requests', JSON.stringify(requests));
           return json({ ok: true, request: newReq });
@@ -971,10 +1010,11 @@ export default {
         }
 
         if (url.pathname === '/api/requests/pending' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
           const raw = await env.USERS.get('requests');
           let requests = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(requests)) requests = [];
-          const count = requests.filter(r => r.status === 'pending').length;
+          const count = requests.filter(r => r.status === 'pending' && (!r.space || r.space === sp)).length;
           return json({ ok: true, count });
         }
 
@@ -1066,27 +1106,28 @@ export default {
           return json({ ok: false, msg: '文件不存在' }, 404);
         }
 
-        // ========== 群组系统 ==========
-        // GET /api/groups?uid=xxx — 获取用户所在群组
+        // ========== 群组系统（按空间隔离） ==========
+        // GET /api/groups?uid=xxx&space=A — 获取用户所在群组
         if (url.pathname === '/api/groups' && request.method === 'GET') {
           const uid = url.searchParams.get('uid');
+          const sp = url.searchParams.get('space') || 'A';
           if (!uid) return json({ ok: false, msg: '缺少 uid' });
           const raw = await env.USERS.get('groups');
           let groups = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(groups)) groups = [];
-          const myGroups = groups.filter(g => g.members.includes(uid));
+          const myGroups = groups.filter(g => g.members.includes(uid) && (!g.space || g.space === sp));
           return json({ ok: true, groups: myGroups });
         }
 
-        // POST /api/groups — 创建群组
+        // POST /api/groups — 创建群组（body 含 space）
         if (url.pathname === '/api/groups' && request.method === 'POST') {
-          const { name, type, creator, description } = await readBody(request);
+          const { name, type, creator, description, space } = await readBody(request);
           if (!name || !creator) return json({ ok: false, msg: '缺少参数' });
           const raw = await env.USERS.get('groups');
           let groups = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(groups)) groups = [];
           const gid = 'grp_' + Date.now();
-          const group = { id: gid, name, type: type || 'normal', creator, description: description || '', members: [creator], created: Date.now() };
+          const group = { id: gid, name, type: type || 'normal', creator, description: description || '', members: [creator], space: space || 'A', created: Date.now() };
           groups.push(group);
           await env.USERS.put('groups', JSON.stringify(groups));
           return json({ ok: true, group });
@@ -1142,12 +1183,14 @@ export default {
           return json({ ok: true });
         }
 
-        // GET /api/groups/search?q=xxx — 搜索群组
+        // GET /api/groups/search?q=xxx&space=A — 搜索群组
         if (url.pathname === '/api/groups/search' && request.method === 'GET') {
           const q = (url.searchParams.get('q') || '').toLowerCase();
+          const sp = url.searchParams.get('space') || 'A';
           const raw = await env.USERS.get('groups');
           let groups = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(groups)) groups = [];
+          groups = groups.filter(g => !g.space || g.space === sp);
           const result = q ? groups.filter(g => g.name.toLowerCase().includes(q) || (g.description||'').toLowerCase().includes(q)) : groups.slice(-20);
           return json({ ok: true, groups: result });
         }
@@ -1380,24 +1423,26 @@ export default {
           return json({ ok: true, punishment: p });
         }
 
-        // ========== 论坛系统 ==========
-        // GET /api/forum — 获取帖子列表
+        // ========== 论坛系统（按空间隔离） ==========
+        // GET /api/forum?space=A — 获取帖子列表
         if (url.pathname === '/api/forum' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
           const raw = await env.USERS.get('forum_posts');
           let posts = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(posts)) posts = [];
+          posts = posts.filter(p => !p.space || p.space === sp);
           posts.sort((a,b) => b.created - a.created);
           return json({ ok: true, posts });
         }
 
-        // POST /api/forum — 发帖
+        // POST /api/forum — 发帖（body 含 space）
         if (url.pathname === '/api/forum' && request.method === 'POST') {
-          const { author, authorUid, title, content, category } = await readBody(request);
+          const { author, authorUid, title, content, category, space } = await readBody(request);
           if (!author || !title || !content) return json({ ok: false, msg: '缺少参数' });
           const raw = await env.USERS.get('forum_posts');
           let posts = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(posts)) posts = [];
-          const post = { id: 'post_' + Date.now(), author, authorUid, title, content, category: category || 'general', likes: [], views: 0, comments: [], created: Date.now() };
+          const post = { id: 'post_' + Date.now(), author, authorUid, title, content, category: category || 'general', space: space || 'A', likes: [], views: 0, comments: [], created: Date.now() };
           posts.push(post);
           if (posts.length > 500) posts = posts.slice(-500);
           await env.USERS.put('forum_posts', JSON.stringify(posts));
@@ -1461,41 +1506,50 @@ export default {
           return json({ ok: true });
         }
 
-        // ========== 库存数据同步 ==========
-        // GET /api/inventory — 获取库存（materials/components/boards）
+        // ========== 库存数据同步（按空间隔离） ==========
+        // GET /api/inventory?space=A — 获取库存（materials/components/boards）
         if (url.pathname === '/api/inventory' && request.method === 'GET') {
           const type = url.searchParams.get('type') || 'all';
+          const sp = url.searchParams.get('space') || 'A';
           const result = {};
           if (type === 'all' || type === 'materials') {
-            const raw = await env.USERS.get('inventory_materials');
+            let raw = await env.USERS.get(`inventory_materials_${sp}`);
+            // 兼容旧数据：空间键不存在时回退到无空间前缀的旧键
+            if (raw === null && sp === 'A') raw = await env.USERS.get('inventory_materials');
             result.materials = raw ? JSON.parse(raw) : [];
           }
           if (type === 'all' || type === 'components') {
-            const raw = await env.USERS.get('inventory_components');
+            let raw = await env.USERS.get(`inventory_components_${sp}`);
+            if (raw === null && sp === 'A') raw = await env.USERS.get('inventory_components');
             result.components = raw ? JSON.parse(raw) : [];
           }
           if (type === 'all' || type === 'boards') {
-            const raw = await env.USERS.get('inventory_boards');
+            let raw = await env.USERS.get(`inventory_boards_${sp}`);
+            if (raw === null && sp === 'A') raw = await env.USERS.get('inventory_boards');
             result.boards = raw ? JSON.parse(raw) : [];
           }
           return json({ ok: true, ...result });
         }
 
-        // PUT /api/inventory — 保存库存（body: { type, data }）
+        // PUT /api/inventory — 保存库存（body: { type, data, space }）
         if (url.pathname === '/api/inventory' && request.method === 'PUT') {
-          const { type, data } = await readBody(request);
+          const { type, data, space } = await readBody(request);
           if (!['materials', 'components', 'boards'].includes(type)) {
             return json({ ok: false, msg: '无效的库存类型' });
           }
-          await env.USERS.put('inventory_' + type, JSON.stringify(data));
+          const sp = space || 'A';
+          await env.USERS.put(`inventory_${type}_${sp}`, JSON.stringify(data));
           return json({ ok: true });
         }
 
-        // ========== 公告与更新日志 ==========
-        // GET /api/notice — 获取公告和更新日志（公开接口，登录页可用）
+        // ========== 公告与更新日志（按空间隔离） ==========
+        // GET /api/notice?space=A — 获取公告和更新日志（公开接口，登录页可用）
         if (url.pathname === '/api/notice' && request.method === 'GET') {
-          const annRaw = await env.USERS.get('announcement');
-          const logRaw = await env.USERS.get('changelog');
+          const sp = url.searchParams.get('space') || 'A';
+          let annRaw = await env.USERS.get(`announcement_${sp}`);
+          if (annRaw === null && sp === 'A') annRaw = await env.USERS.get('announcement');
+          let logRaw = await env.USERS.get(`changelog_${sp}`);
+          if (logRaw === null && sp === 'A') logRaw = await env.USERS.get('changelog');
           let announcements = [];
           let changelogs = [];
           if (annRaw) {
@@ -1509,16 +1563,17 @@ export default {
           return json({ ok: true, announcements, changelogs });
         }
 
-        // PUT /api/notice — 增删改公告或更新日志（仅管理员）
+        // PUT /api/notice — 增删改公告或更新日志（仅管理员，body 含 space）
         if (url.pathname === '/api/notice' && request.method === 'PUT') {
-          const { uid, type, action, item } = await readBody(request);
+          const { uid, type, action, item, space } = await readBody(request);
           if (!uid || !type || !action) return json({ ok: false, msg: '缺少参数' });
           if (!['announcement', 'changelog'].includes(type)) return json({ ok: false, msg: '无效的类型' });
           if (!['add', 'update', 'delete', 'reorder'].includes(action)) return json({ ok: false, msg: '无效的操作' });
           const users = await loadUsers(env);
           const user = users.find(u => u.uid === uid);
           if (!user || user.role !== 'admin') return json({ ok: false, msg: '仅管理员可修改' });
-          const key = type;
+          const sp = space || 'A';
+          const key = `${type}_${sp}`;
           const raw = await env.USERS.get(key);
           let list = [];
           if (raw) {

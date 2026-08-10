@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -205,6 +205,12 @@
 
   /* ===== Sidebar ===== */
   .trae-sidebar{width:var(--sidebar-w);background:rgba(255,255,255,.78);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);border-right:1px solid rgba(226,232,240,.5);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:background .3s ease}
+  .space-switcher{display:flex;gap:4px;padding:8px 10px 4px;border-bottom:1px solid rgba(226,232,240,.3)}
+  .space-btn{flex:1;padding:6px 10px;border:1px solid rgba(226,232,240,.5);border-radius:var(--radius-sm);background:transparent;color:var(--fg-dim);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;transition:var(--transition)}
+  .space-btn:hover{background:var(--bg-hover);color:var(--fg)}
+  .space-btn.active{background:linear-gradient(135deg,var(--accent-soft),rgba(129,140,248,.08));color:var(--accent);border-color:var(--accent-soft)}
+  [data-theme="dark"] .space-btn{border-color:rgba(30,36,51,.5)}
+  [data-theme="dark"] .space-switcher{border-bottom-color:rgba(30,36,51,.3)}
 [data-theme="dark"] .trae-sidebar{background:rgba(20,24,33,.78);border-right-color:rgba(30,36,51,.5)}
   .trae-sidebar-nav{flex:1;overflow-y:auto;padding:8px 10px}
   .trae-sidebar-group{padding:4px 0}
@@ -1174,6 +1180,11 @@ function applyI18n() {
   <div class="trae-body">
     <!-- Sidebar -->
     <div class="trae-sidebar">
+      <!-- Space Switcher (admin only) -->
+      <div class="space-switcher" id="spaceSwitcher" style="display:none">
+        <button class="space-btn active" data-space="A">空间 A</button>
+        <button class="space-btn" data-space="B">空间 B</button>
+      </div>
       <div class="trae-sidebar-nav" id="sidebarNav">
         <!-- Dynamically populated -->
       </div>
@@ -1811,6 +1822,7 @@ function applyI18n() {
 
   // ===================== STATE =====================
   let currentUser = null;
+  let currentSpace = 'A'; // 当前空间（admin可切换）
   let client = null;
   const lightState = {};
   const lightRawCache = {};
@@ -1861,7 +1873,8 @@ function applyI18n() {
 
   async function apiGetUsers(withPass = false) {
     try {
-      const url = withPass ? `${API}/users?with_pass=1` : `${API}/users`;
+      let url = `${API}/users?space=${currentSpace}`;
+      if (withPass) url += '&with_pass=1';
       const r = await fetch(url);
       const j = await r.json();
       return j.ok ? j.users : [];
@@ -1878,11 +1891,11 @@ function applyI18n() {
     } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
   }
 
-  async function apiAddUser(name, pass, role) {
+  async function apiAddUser(name, pass, role, space) {
     try {
       const r = await fetch(`${API}/users`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pass, role })
+        body: JSON.stringify({ name, pass, role, space })
       });
       return await r.json();
     } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
@@ -1910,7 +1923,7 @@ function applyI18n() {
     try {
       const r = await fetch(`${API}/requests`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: currentUser.name, type, target, detail })
+        body: JSON.stringify({ user: currentUser.name, type, target, detail, space: currentSpace })
       });
       return await r.json();
     } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
@@ -1918,7 +1931,7 @@ function applyI18n() {
 
   async function apiGetRequests() {
     try {
-      const r = await fetch(`${API}/requests`);
+      const r = await fetch(`${API}/requests?space=${currentSpace}`);
       const j = await r.json();
       return j.ok ? j.requests : [];
     } catch (e) { return []; }
@@ -1975,7 +1988,7 @@ function applyI18n() {
 
   async function apiPendingCount() {
     try {
-      const r = await fetch(`${API}/requests/pending`);
+      const r = await fetch(`${API}/requests/pending?space=${currentSpace}`);
       const j = await r.json();
       return j.ok ? j.count : 0;
     } catch (e) { return 0; }
@@ -1986,40 +1999,40 @@ function applyI18n() {
 
   function getMaterials() {
     if (_invCache.materials) return _invCache.materials;
-    const raw = localStorage.getItem('lab_materials');
+    const raw = localStorage.getItem('lab_materials_' + currentSpace);
     const data = raw ? JSON.parse(raw) : [];
     _invCache.materials = data;
     return data;
   }
   function saveMaterials(m) {
     _invCache.materials = m;
-    localStorage.setItem('lab_materials', JSON.stringify(m));
+    localStorage.setItem('lab_materials_' + currentSpace, JSON.stringify(m));
     syncInventory('materials', m);
   }
 
   function getComponents() {
     if (_invCache.components) return _invCache.components;
-    const raw = localStorage.getItem('lab_components');
+    const raw = localStorage.getItem('lab_components_' + currentSpace);
     const data = raw ? JSON.parse(raw) : [];
     _invCache.components = data;
     return data;
   }
   function saveComponents(c) {
     _invCache.components = c;
-    localStorage.setItem('lab_components', JSON.stringify(c));
+    localStorage.setItem('lab_components_' + currentSpace, JSON.stringify(c));
     syncInventory('components', c);
   }
 
   function getBoards() {
     if (_invCache.boards) return _invCache.boards;
-    const raw = localStorage.getItem('lab_boards');
+    const raw = localStorage.getItem('lab_boards_' + currentSpace);
     const data = raw ? JSON.parse(raw) : [];
     _invCache.boards = data;
     return data;
   }
   function saveBoards(b) {
     _invCache.boards = b;
-    localStorage.setItem('lab_boards', JSON.stringify(b));
+    localStorage.setItem('lab_boards_' + currentSpace, JSON.stringify(b));
     syncInventory('boards', b);
   }
 
@@ -2032,7 +2045,7 @@ function applyI18n() {
         await fetch(`${API}/inventory`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, data }),
+          body: JSON.stringify({ type, data, space: currentSpace }),
         });
       } catch (e) { console.warn('库存同步失败:', type, e.message); }
     }, 800);
@@ -2041,12 +2054,12 @@ function applyI18n() {
   // 从服务端拉取库存数据（登录后调用）
   async function loadInventoryFromServer() {
     try {
-      const r = await fetch(`${API}/inventory`);
+      const r = await fetch(`${API}/inventory?space=${currentSpace}`);
       const j = await r.json();
       if (!j.ok) return;
-      if (j.materials) { _invCache.materials = j.materials; localStorage.setItem('lab_materials', JSON.stringify(j.materials)); }
-      if (j.components) { _invCache.components = j.components; localStorage.setItem('lab_components', JSON.stringify(j.components)); }
-      if (j.boards) { _invCache.boards = j.boards; localStorage.setItem('lab_boards', JSON.stringify(j.boards)); }
+      if (j.materials) { _invCache.materials = j.materials; localStorage.setItem('lab_materials_' + currentSpace, JSON.stringify(j.materials)); }
+      if (j.components) { _invCache.components = j.components; localStorage.setItem('lab_components_' + currentSpace, JSON.stringify(j.components)); }
+      if (j.boards) { _invCache.boards = j.boards; localStorage.setItem('lab_boards_' + currentSpace, JSON.stringify(j.boards)); }
     } catch (e) { console.warn('库存拉取失败:', e.message); }
   }
 
@@ -2091,7 +2104,7 @@ function applyI18n() {
 
   async function loadNotice() {
     try {
-      const r = await fetch(`${API}/notice`);
+      const r = await fetch(`${API}/notice?space=${currentSpace}`);
       const j = await r.json();
       if (j.ok) {
         noticeData.announcements = j.announcements || [];
@@ -2233,7 +2246,7 @@ function applyI18n() {
         const r = await fetch(`${API}/notice`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid: currentUser.uid, type, action, item })
+          body: JSON.stringify({ uid: currentUser.uid, type, action, item, space: currentSpace })
         });
         const j = await r.json();
         if (j.ok) {
@@ -2259,7 +2272,7 @@ function applyI18n() {
       const r = await fetch(`${API}/notice`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: currentUser.uid, type, action: 'delete', item: { id: itemId } })
+        body: JSON.stringify({ uid: currentUser.uid, type, action: 'delete', item: { id: itemId }, space: currentSpace })
       });
       const j = await r.json();
       if (j.ok) {
@@ -2327,6 +2340,7 @@ function applyI18n() {
     if (sess) {
       const u = JSON.parse(sess);
       currentUser = u;
+      currentSpace = u.space === '*' ? (sessionStorage.getItem('lab_space') || 'A') : (u.space || 'A');
       enterApp();
     }
   }
@@ -2342,6 +2356,7 @@ function applyI18n() {
       return;
     }
     currentUser = res.user;
+    currentSpace = currentUser.space === '*' ? 'A' : (currentUser.space || 'A');
     // 个人主页需要密码，管理员可通过 with_pass 获取
     if (currentUser.role === 'admin') {
       try {
@@ -2365,6 +2380,38 @@ function applyI18n() {
     // 管理员不需要"我的申请"按钮（管理员有直接操作权限），直接从 DOM 移除
     const myReqBtn = $('#myReqBtn');
     if (myReqBtn && currentUser.role === 'admin') myReqBtn.remove();
+    // 空间切换器：仅 admin 且 space='*' 可见
+    const spaceSwitcher = $('#spaceSwitcher');
+    if (spaceSwitcher && currentUser.role === 'admin' && currentUser.space === '*') {
+      spaceSwitcher.style.display = 'flex';
+      // 恢复之前选择的空间
+      spaceSwitcher.querySelectorAll('.space-btn').forEach(b => b.classList.toggle('active', b.dataset.space === currentSpace));
+      spaceSwitcher.querySelectorAll('.space-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sp = btn.dataset.space;
+          if (sp === currentSpace) return;
+          currentSpace = sp;
+          sessionStorage.setItem('lab_space', sp);
+          spaceSwitcher.querySelectorAll('.space-btn').forEach(b => b.classList.toggle('active', b.dataset.space === sp));
+          // 清空库存缓存，重新加载
+          _invCache = { materials: null, components: null, boards: null };
+          loadInventoryFromServer().then(() => {
+            renderMaterialCards();
+            renderCompCards();
+            renderBoardCards();
+          });
+          // 重新渲染各面板
+          renderUsers();
+          renderContacts();
+          renderForum();
+          renderNoticeAdmin();
+          renderDashboard();
+          renderTransactions();
+          renderGroups();
+          toast('已切换到空间 ' + sp);
+        });
+      });
+    }
     initRooms();
     initMQTT();
     await loadUserGrants();
@@ -3550,7 +3597,7 @@ function applyI18n() {
     const pass = $('#uPass').value.trim();
     const role = $('#uRole').value;
     if (!name || !pass) { toast(t('t_user_pass_required')); return; }
-    const res = await apiAddUser(name, pass, role);
+    const res = await apiAddUser(name, pass, role, currentSpace);
     if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
     $('#uName').value = '';
@@ -3775,7 +3822,7 @@ function applyI18n() {
     try { const r = await fetch('/api/profile', { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, nickname, avatar }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiGetFriends(uid) {
-    try { const r = await fetch(`/api/friends?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, friends:[] }; }
+    try { const r = await fetch(`/api/friends?uid=${uid}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, friends:[] }; }
   }
   async function apiFriendRequest(fromUid, toUid) {
     try { const r = await fetch('/api/friends/request', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ fromUid, toUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
@@ -3790,22 +3837,22 @@ function applyI18n() {
     try { const r = await fetch(`/api/friends/requests?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, requests:[] }; }
   }
   async function apiGetMessages(uid, peerUid) {
-    try { const r = await fetch(`/api/messages?uid=${uid}&peerUid=${peerUid||''}`); return await r.json(); } catch(e) { return { ok:false, messages:[] }; }
+    try { const r = await fetch(`/api/messages?uid=${uid}&peerUid=${peerUid||''}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, messages:[] }; }
   }
   async function apiSendMessage(from, to, content, fileId, fileName) {
-    try { const r = await fetch('/api/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content, fileId, fileName }) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch('/api/messages', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content, fileId, fileName, space: currentSpace }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiBroadcast(from, to, content) {
-    try { const r = await fetch('/api/messages/broadcast', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content }) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch('/api/messages/broadcast', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ from, to, content, space: currentSpace }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiGetContacts(uid) {
-    try { const r = await fetch(`/api/messages/contacts?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, contacts:[] }; }
+    try { const r = await fetch(`/api/messages/contacts?uid=${uid}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, contacts:[] }; }
   }
   async function apiGetUnread(uid) {
-    try { const r = await fetch(`/api/messages/unread?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, count:0 }; }
+    try { const r = await fetch(`/api/messages/unread?uid=${uid}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, count:0 }; }
   }
   async function apiGetBroadcasts(uid) {
-    try { const r = await fetch(`/api/messages/broadcasts?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, broadcasts:[] }; }
+    try { const r = await fetch(`/api/messages/broadcasts?uid=${uid}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, broadcasts:[] }; }
   }
   async function apiMarkRead(uid, msgIds) {
     try { const r = await fetch('/api/messages/mark-read', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, msgIds }) }); return await r.json(); } catch(e) { return { ok:false }; }
@@ -3824,7 +3871,7 @@ function applyI18n() {
     try { const r = await fetch(`/api/online-batch?uids=${encodeURIComponent(uids.join(','))}`); return await r.json(); } catch(e) { return { ok:false, statuses:{} }; }
   }
   async function apiSearchMessages(uid, q, peerUid) {
-    try { const params = new URLSearchParams({ uid, q }); if (peerUid) params.set('peerUid', peerUid); const r = await fetch(`/api/messages/search?${params.toString()}`); return await r.json(); } catch(e) { return { ok:false, results:[] }; }
+    try { const params = new URLSearchParams({ uid, q, space: currentSpace }); if (peerUid) params.set('peerUid', peerUid); const r = await fetch(`/api/messages/search?${params.toString()}`); return await r.json(); } catch(e) { return { ok:false, results:[] }; }
   }
   async function apiRemoveFriend(uid, friendUid) {
     try { const r = await fetch('/api/friends/remove', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ uid, friendUid }) }); return await r.json(); } catch(e) { return { ok:false }; }
@@ -3843,17 +3890,17 @@ function applyI18n() {
     try { const r = await fetch(`/api/backup?id=${id}`, { method:'DELETE' }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiGetTransactions(type) {
-    try { const r = await fetch(`/api/transactions?type=${type||'all'}`); return await r.json(); } catch(e) { return { ok:false, transactions:[] }; }
+    try { const r = await fetch(`/api/transactions?type=${type||'all'}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, transactions:[] }; }
   }
   async function apiAddTransaction(data) {
-    try { const r = await fetch('/api/transactions', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch('/api/transactions', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ ...data, space: currentSpace }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   // ===================== 论坛 API =====================
   async function apiGetPosts() {
-    try { const r = await fetch('/api/forum'); return await r.json(); } catch(e) { return { ok:false, posts:[] }; }
+    try { const r = await fetch(`/api/forum?space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, posts:[] }; }
   }
   async function apiCreatePost(title, content, category) {
-    try { const r = await fetch('/api/forum', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ author:currentUser.nickname||currentUser.name, authorUid:currentUser.uid, title, content, category }) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch('/api/forum', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ author:currentUser.nickname||currentUser.name, authorUid:currentUser.uid, title, content, category, space: currentSpace }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiGetPost(id) {
     try { const r = await fetch(`/api/forum/post?id=${id}`); return await r.json(); } catch(e) { return { ok:false }; }
@@ -3882,10 +3929,10 @@ function applyI18n() {
     try { const r = await fetch(`/api/download?id=${fileId}`); return await r.json(); } catch(e) { return { ok:false, msg: e.message }; }
   }
   async function apiGetGroups(uid) {
-    try { const r = await fetch(`/api/groups?uid=${uid}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
+    try { const r = await fetch(`/api/groups?uid=${uid}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
   }
   async function apiCreateGroup(name, type, creator, description) {
-    try { const r = await fetch('/api/groups', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name, type, creator, description }) }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const r = await fetch('/api/groups', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ name, type, creator, description, space: currentSpace }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiJoinGroup(gid, uid) {
     try { const r = await fetch('/api/groups/join', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ gid, uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
@@ -3897,7 +3944,7 @@ function applyI18n() {
     try { const r = await fetch('/api/groups/dissolve', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ gid, uid }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiSearchGroups(q) {
-    try { const r = await fetch(`/api/groups/search?q=${encodeURIComponent(q)}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
+    try { const r = await fetch(`/api/groups/search?q=${encodeURIComponent(q)}&space=${currentSpace}`); return await r.json(); } catch(e) { return { ok:false, groups:[] }; }
   }
   async function apiGetGroupMessages(gid) {
     try { const r = await fetch(`/api/groups/messages?gid=${gid}`); return await r.json(); } catch(e) { return { ok:false, messages:[] }; }
