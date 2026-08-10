@@ -1944,6 +1944,35 @@ function applyI18n() {
     } catch (e) { return { ok: false, msg: '无法连接服务器' }; }
   }
 
+  // ===== 授权令牌系统 =====
+  let userGrants = [];
+  let grantPollTimer = null;
+
+  async function loadUserGrants() {
+    if (!currentUser) return;
+    const allReqs = await apiGetRequests();
+    const now = Date.now();
+    userGrants = allReqs.filter(r =>
+      r.user === currentUser.name &&
+      r.status === 'approved' &&
+      r.grantExpires &&
+      now < r.grantExpires
+    );
+  }
+
+  function hasGrant(type) {
+    return userGrants.some(g => g.type === type);
+  }
+
+  function startGrantPolling() {
+    if (grantPollTimer) clearInterval(grantPollTimer);
+    grantPollTimer = setInterval(loadUserGrants, 30000);
+  }
+
+  function stopGrantPolling() {
+    if (grantPollTimer) { clearInterval(grantPollTimer); grantPollTimer = null; }
+  }
+
   async function apiPendingCount() {
     try {
       const r = await fetch(`${API}/requests/pending`);
@@ -2338,6 +2367,8 @@ function applyI18n() {
     if (myReqBtn && currentUser.role === 'admin') myReqBtn.remove();
     initRooms();
     initMQTT();
+    await loadUserGrants();
+    startGrantPolling();
     // 从服务端拉取库存数据（跨设备同步）
     await loadInventoryFromServer();
     renderMaterialCards();
@@ -2386,6 +2417,8 @@ function applyI18n() {
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
     stopHeartbeat(); // v2.3 清除在线状态心跳
+    stopGrantPolling();
+    userGrants = [];
     currentChatPeer = null;
   });
 
@@ -2613,7 +2646,7 @@ function applyI18n() {
   }
 
   function sendLightCmd(roomId, lightIdx) {
-    if (currentUser.role !== 'admin') { const rm = ROOMS.find(r=>r.id===roomId); openRequestModal('light_control', rm ? rm.name : roomId); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('light_control')) { const rm = ROOMS.find(r=>r.id===roomId); openRequestModal('light_control', rm ? rm.name : roomId); return; }
     const key = lightIdx === 1 && ROOMS.find(r=>r.id===roomId).lights===1 ? roomId : roomId+'_'+lightIdx;
     const isOn = !!lightState[key];
     const cmd = { room: roomId, light: lightIdx, cmd: isOn ? 'off' : 'on', user: currentUser.name, role: currentUser.role };
@@ -2782,6 +2815,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin' && !hasGrant('material_edit')) { openRequestModal('material_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         let items = getMaterials();
         const typeItems = items.filter(x => x.type === type);
@@ -2799,6 +2833,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin' && !hasGrant('material_edit')) { openRequestModal('material_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         const items = getMaterials();
         items.push({ id: Date.now(), type, color: '新增', diameter: '1.75mm', weight: 1000, remain: 100, note: '快速添加', created: Date.now() });
@@ -2814,7 +2849,7 @@ function applyI18n() {
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('material_del', btn.dataset.type); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('material_del')) { openRequestModal('material_del', btn.dataset.type); return; }
         const type = btn.dataset.type;
         if (!confirm(`确定删除所有 ${type} 吗？`)) return;
         let items = getMaterials();
@@ -2828,6 +2863,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
+        if (currentUser.role !== 'admin' && !hasGrant('material_edit')) { openRequestModal('material_edit', inp.dataset.type); return; }
         const type = inp.dataset.type;
         const newCount = parseInt(inp.value) || 0;
         let items = getMaterials();
@@ -2876,7 +2912,7 @@ function applyI18n() {
   }
 
   window.editMaterial = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('material_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('material_edit')) { openRequestModal('material_edit', ''); return; }
     const items = getMaterials();
     const m = items.find(x => x.id === id);
     if (!m) return;
@@ -2891,7 +2927,7 @@ function applyI18n() {
   };
 
   window.deleteMaterial = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('material_del', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('material_del')) { openRequestModal('material_del', ''); return; }
     let items = getMaterials();
     const m = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
@@ -2909,7 +2945,7 @@ function applyI18n() {
   };
 
   $('#addMaterialBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { openRequestModal('material_add', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('material_add')) { openRequestModal('material_add', ''); return; }
     const type = $('#mType').value;
     const color = $('#mColor').value.trim() || 'unknown';
     const diameter = $('#mDia').value;
@@ -2994,7 +3030,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', btn.dataset.cat); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         let items = getComponents();
         const catItems = items.filter(x => x.category === cat);
@@ -3014,7 +3050,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', btn.dataset.cat); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         let items = getComponents();
         const catItems = items.filter(x => x.category === cat);
@@ -3035,7 +3071,7 @@ function applyI18n() {
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('comp_del', btn.dataset.cat); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('comp_del')) { openRequestModal('comp_del', btn.dataset.cat); return; }
         const cat = btn.dataset.cat;
         if (!confirm(`确定删除所有 ${cat} 吗？`)) return;
         let items = getComponents();
@@ -3049,7 +3085,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('comp_edit', inp.dataset.cat); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', inp.dataset.cat); return; }
         const cat = inp.dataset.cat;
         const newTotal = parseInt(inp.value) || 0;
         let items = getComponents();
@@ -3094,7 +3130,7 @@ function applyI18n() {
   }
 
   window.editComponent = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('comp_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', ''); return; }
     const items = getComponents();
     const c = items.find(x => x.id === id);
     if (!c) return;
@@ -3109,7 +3145,7 @@ function applyI18n() {
   };
 
   window.adjustCompQty = function(id, delta) {
-    if (currentUser.role !== 'admin') { openRequestModal('comp_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', ''); return; }
     const items = getComponents();
     const c = items.find(x => x.id === id);
     if (!c) return;
@@ -3124,7 +3160,7 @@ function applyI18n() {
   };
 
   window.adjustBoardQty = function(id, delta) {
-    if (currentUser.role !== 'admin') { openRequestModal('board_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('board_edit')) { openRequestModal('board_edit', ''); return; }
     const items = getBoards();
     const b = items.find(x => x.id === id);
     if (!b) return;
@@ -3139,7 +3175,7 @@ function applyI18n() {
   };
 
   window.adjustMaterialRemain = function(id, delta) {
-    if (currentUser.role !== 'admin') { openRequestModal('material_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('material_edit')) { openRequestModal('material_edit', ''); return; }
     const items = getMaterials();
     const m = items.find(x => x.id === id);
     if (!m) return;
@@ -3154,7 +3190,7 @@ function applyI18n() {
   };
 
   window.deleteComponent = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('comp_del', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('comp_del')) { openRequestModal('comp_del', ''); return; }
     let items = getComponents();
     const c = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
@@ -3172,7 +3208,7 @@ function applyI18n() {
   };
 
   $('#addCompBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { openRequestModal('comp_add', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('comp_add')) { openRequestModal('comp_add', ''); return; }
     const category = $('#cCat').value;
     const customName = $('#cCustomName').value.trim();
     if (!customName) { toast('名称不能为空'); return; }
@@ -3237,7 +3273,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('board_edit', btn.dataset.type); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('board_edit')) { openRequestModal('board_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         let items = getBoards();
         const typeItems = items.filter(x => x.type === type);
@@ -3257,7 +3293,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-btn.plus').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('board_edit', btn.dataset.type); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('board_edit')) { openRequestModal('board_edit', btn.dataset.type); return; }
         const type = btn.dataset.type;
         let items = getBoards();
         const typeItems = items.filter(x => x.type === type);
@@ -3278,7 +3314,7 @@ function applyI18n() {
     container.querySelectorAll('.card-del-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('board_del', btn.dataset.type); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('board_del')) { openRequestModal('board_del', btn.dataset.type); return; }
         const type = btn.dataset.type;
         if (!confirm(`确定删除所有 ${type} 吗？`)) return;
         let items = getBoards();
@@ -3292,7 +3328,7 @@ function applyI18n() {
     container.querySelectorAll('.qty-display').forEach(inp => {
       inp.addEventListener('change', (e) => {
         e.stopPropagation();
-        if (currentUser.role !== 'admin') { openRequestModal('board_edit', inp.dataset.type); return; }
+        if (currentUser.role !== 'admin' && !hasGrant('board_edit')) { openRequestModal('board_edit', inp.dataset.type); return; }
         const type = inp.dataset.type;
         const newTotal = parseInt(inp.value) || 0;
         let items = getBoards();
@@ -3338,7 +3374,7 @@ function applyI18n() {
   }
 
   window.editBoard = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('board_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('board_edit')) { openRequestModal('board_edit', ''); return; }
     const items = getBoards();
     const b = items.find(x => x.id === id);
     if (!b) return;
@@ -3353,7 +3389,7 @@ function applyI18n() {
   };
 
   window.deleteBoard = function(id) {
-    if (currentUser.role !== 'admin') { openRequestModal('board_del', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('board_del')) { openRequestModal('board_del', ''); return; }
     let items = getBoards();
     const b = items.find(x => x.id === id);
     items = items.filter(x => x.id !== id);
@@ -3371,7 +3407,7 @@ function applyI18n() {
   };
 
   window.updateItemQty = function(el) {
-    if (currentUser.role !== 'admin') { openRequestModal('comp_edit', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('comp_edit')) { openRequestModal('comp_edit', ''); return; }
     const id = parseInt(el.dataset.id);
     const newQty = parseInt(el.value) || 0;
     // 尝试更新 materials
@@ -3389,7 +3425,7 @@ function applyI18n() {
   };
 
   $('#addBoardBtn').addEventListener('click', () => {
-    if (currentUser.role !== 'admin') { openRequestModal('board_add', ''); return; }
+    if (currentUser.role !== 'admin' && !hasGrant('board_add')) { openRequestModal('board_add', ''); return; }
     const type = $('#bType').value;
     const model = $('#bModel').value.trim();
     const qty = parseInt($('#bQty').value) || 0;
