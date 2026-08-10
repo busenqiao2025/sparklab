@@ -952,7 +952,7 @@ export default {
           const req = requests.find(r => r.id === id);
           if (!req) return json({ ok: false, msg: '申请不存在' });
           if (req.status !== 'pending') return json({ ok: false, msg: '该申请已处理' });
-          req.status = 'approved'; req.reviewedBy = reviewer || 'admin'; req.reviewedAt = Date.now(); req.adminNote = note || '';
+          req.status = 'approved'; req.reviewedBy = reviewer || 'admin'; req.reviewedAt = Date.now(); req.adminNote = note || ''; req.grantExpires = Date.now() + 300000;
           await env.USERS.put('requests', JSON.stringify(requests));
           return json({ ok: true, request: req });
         }
