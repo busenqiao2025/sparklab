@@ -86,7 +86,9 @@ async function loadUsers(env) {
           if (!u.nickname) { u.nickname = u.name; modified = true; }
           if (!u.avatar) { u.avatar = AVATARS[Math.floor(Math.random()*AVATARS.length)]; modified = true; }
           if (!u.friends) { u.friends = []; modified = true; }
-          if (!u.space) { u.space = u.role === 'admin' ? '*' : 'A'; modified = true; }
+          if (!u.space) { u.space = (u.role === 'admin' && u.uid === '00001') ? '*' : 'A'; modified = true; }
+          // 确保只有 UID 00001 的 admin 拥有 space='*'（超级管理员）
+          if (u.space === '*' && u.uid !== '00001') { u.space = 'A'; modified = true; }
         }
         if (modified) await env.USERS.put('users', JSON.stringify(parsed));
         return parsed;
@@ -233,7 +235,8 @@ export default {
           const users = await loadUsers(env);
           if (users.find(u => u.name === name)) return json({ ok: false, msg: '用户已存在' });
           const uid = await genUid(env, users);
-          const userSpace = role === 'admin' ? '*' : (space || 'A');
+          // 普通管理员只能管理自己空间，space='*' 仅超级管理员（UID 00001）持有
+          const userSpace = space || 'A';
           const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], space: userSpace, created: Date.now() };
           // 自动与 admin 建立双向好友关系
           const adminUser = users.find(u => u.role === 'admin');

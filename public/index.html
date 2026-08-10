@@ -1352,6 +1352,7 @@ function applyI18n() {
         <div><label data-i18n="th_username">用户名</label><input type="text" id="uName" placeholder="新用户"></div>
         <div><label data-i18n="password">密码</label><input type="password" id="uPass" placeholder="********"></div>
         <div><label data-i18n="role">角色</label><select id="uRole"><option value="admin" data-i18n="role_admin">管理员</option><option value="user" data-i18n="role_user">普通用户</option></select></div>
+        <div><label>空间</label><select id="uSpace"><option value="A">空间 A</option><option value="B">空间 B</option></select></div>
       </div>
       <button class="term-btn-sm" id="addUserBtn" data-i18n="add_user">添加用户</button>
     </div>
@@ -2408,6 +2409,9 @@ function applyI18n() {
           renderDashboard();
           renderTransactions();
           renderGroups();
+          // 更新用户创建表单的空间下拉框
+          const uSpaceSel = $('#uSpace');
+          if (uSpaceSel) uSpaceSel.value = sp;
           toast('已切换到空间 ' + sp);
         });
       });
@@ -3596,8 +3600,9 @@ function applyI18n() {
     const name = $('#uName').value.trim();
     const pass = $('#uPass').value.trim();
     const role = $('#uRole').value;
+    const space = $('#uSpace') ? $('#uSpace').value : currentSpace;
     if (!name || !pass) { toast(t('t_user_pass_required')); return; }
-    const res = await apiAddUser(name, pass, role, currentSpace);
+    const res = await apiAddUser(name, pass, role, space);
     if (!res.ok) { toast('创建失败: ' + (res.msg || '未知错误')); return; }
     await renderUsers();
     $('#uName').value = '';
