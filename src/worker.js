@@ -340,10 +340,7 @@ export default {
           await ensureHbCache(env);
           hbCache[uid] = Date.now();
           hbDirty = true;
-          // 每 60 秒批量刷新一次，所有用户共用一次 KV 写入
-          if (Date.now() - hbFlushTime > HB_FLUSH_INTERVAL) {
-            await flushHbCache(env);
-          }
+          await flushHbCache(env);
           return json({ ok: true });
         }
 
@@ -363,11 +360,12 @@ export default {
           const uids = uidsParam.split(',').map(s => s.trim()).filter(Boolean);
           await ensureHbCache(env);
           const now = Date.now();
-          const statuses = uids.map(uid => {
+          const statuses = {};
+          for (const uid of uids) {
             const lastSeen = hbCache[uid] || null;
             const online = !!lastSeen && (now - lastSeen) <= HB_ONLINE_WINDOW;
-            return { uid, online, lastSeen };
-          });
+            statuses[uid] = { online, lastSeen };
+          }
           return json({ ok: true, statuses });
         }
 

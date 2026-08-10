@@ -253,10 +253,12 @@ body {
   border-top: 1px solid var(--border) !important;
   padding: 8px 10px !important;
   justify-content: center !important;
+  gap: 0 !important;
 }
 
 .trae-sidebar:hover .trae-user {
   justify-content: flex-start !important;
+  gap: 10px !important;
 }
 
 .trae-user-info,

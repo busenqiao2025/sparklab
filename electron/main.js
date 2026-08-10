@@ -12,8 +12,7 @@ let updateCheckTimer = null;
 const APP_URL = 'https://ankomon.dpdns.org';
 const versionFilePath = path.join(app.getPath('userData'), 'last-version.json');
 
-app.commandLine.appendSwitch('no-proxy-server');
-app.disableHardwareAcceleration();
+app.setAppUserModelId('com.sparkminds.lab');
 
 function setupRequestRedirect() {
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
