@@ -223,7 +223,7 @@ export default {
           const spaceFilter = url.searchParams.get('space');
           let filtered = users;
           if (spaceFilter && spaceFilter !== '*') {
-            filtered = users.filter(u => u.space === spaceFilter || u.space === '*');
+            filtered = users.filter(u => u.space === spaceFilter || (u.space === '*' && u.uid === '00001'));
           }
           if (withPass) return json({ ok: true, users: filtered });
           return json({ ok: true, users: filtered.map(sanitize) });
@@ -236,7 +236,7 @@ export default {
           if (users.find(u => u.name === name)) return json({ ok: false, msg: '用户已存在' });
           const uid = await genUid(env, users);
           // 普通管理员只能管理自己空间，space='*' 仅超级管理员（UID 00001）持有
-          const userSpace = space || 'A';
+          const userSpace = (space === 'A' || space === 'B') ? space : 'A';
           const newUser = { name, pass, role: role || 'user', uid, nickname: name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], friends: [], space: userSpace, created: Date.now() };
           // 自动与 admin 建立双向好友关系
           const adminUser = users.find(u => u.role === 'admin');
@@ -421,7 +421,7 @@ export default {
           const users = await loadUsers(env);
           const user = users.find(u => u.uid === uid);
           if (!user) return json({ ok: false, msg: '用户不存在' });
-          const spaceUsers = users.filter(u => u.space === sp || u.space === '*');
+          const spaceUsers = users.filter(u => u.space === sp || (u.space === '*' && u.uid === '00001'));
           const friends = (user.friends || []).map(fuid => {
             const f = spaceUsers.find(u => u.uid === fuid);
             return f ? { uid: f.uid, name: f.name, nickname: f.nickname, avatar: f.avatar } : null;
@@ -608,7 +608,7 @@ export default {
           const sp = space || 'A';
           const users = await loadUsers(env);
           // 按空间过滤目标用户
-          let spaceUsers = users.filter(u => u.space === sp || u.space === '*');
+          let spaceUsers = users.filter(u => u.space === sp || (u.space === '*' && u.uid === '00001'));
           let targets;
           if (to === 'all_including_admin') {
             // 全体用户（含管理员自己，仅当前空间）
@@ -679,7 +679,7 @@ export default {
           // 按空间过滤消息
           msgs = msgs.filter(m => !m.space || m.space === sp);
           // 按空间过滤用户列表
-          let spaceUsers = users.filter(u => u.space === sp || u.space === '*');
+          let spaceUsers = users.filter(u => u.space === sp || (u.space === '*' && u.uid === '00001'));
           // 好友列表
           let contacts = [];
           if (user && user.friends) {
