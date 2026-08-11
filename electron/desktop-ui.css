@@ -148,6 +148,41 @@ body {
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
 }
 
+/* ===== Space Switcher — Desktop Rail ===== */
+.space-switcher {
+  flex-direction: column !important;
+  gap: 4px !important;
+  padding: 6px 6px !important;
+}
+
+.space-btn {
+  flex: none !important;
+  padding: 6px 8px !important;
+  font-size: 11px !important;
+  text-align: center !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Collapsed: show only letter */
+.trae-sidebar:not(:hover) .space-btn {
+  font-size: 0 !important;
+  padding: 8px 0 !important;
+  position: relative;
+}
+
+.trae-sidebar:not(:hover) .space-btn::after {
+  content: attr(data-space);
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+/* Expanded: show full label */
+.trae-sidebar:hover .space-btn {
+  font-size: 11px !important;
+}
+
 /* Category rail at sidebar top */
 .desktop-cat-rail {
   display: flex;

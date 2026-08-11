@@ -191,7 +191,7 @@
       '</div>' +
       '<div class="desktop-statusbar-divider"></div>' +
       '<div class="desktop-statusbar-item">' +
-      '<span>SparkMinds Lab v2.4</span>' +
+      '<span>SparkMinds Lab v2.5</span>' +
       '</div>' +
       '</div>';
 

@@ -351,6 +351,24 @@ export default {
           return json({ ok: true });
         }
 
+        // ========== 摄像头监控 ==========
+        // GET /api/cameras?space=A — 获取当前空间的摄像头配置
+        if (url.pathname === '/api/cameras' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
+          const raw = await env.USERS.get('cameras_' + sp);
+          let cameras = [];
+          if (raw) { try { cameras = JSON.parse(raw); } catch(e) {} }
+          return json({ ok: true, cameras });
+        }
+
+        // PUT /api/cameras — 保存摄像头配置
+        if (url.pathname === '/api/cameras' && request.method === 'PUT') {
+          const { cameras, space } = await readBody(request);
+          const sp = (space === 'A' || space === 'B') ? space : 'A';
+          await env.USERS.put('cameras_' + sp, JSON.stringify(cameras || []));
+          return json({ ok: true });
+        }
+
         // ========== 在线状态 ==========
         // POST /api/heartbeat — 用户心跳（内存缓存，60 秌批量刷入 KV）
         if (url.pathname === '/api/heartbeat' && request.method === 'POST') {
