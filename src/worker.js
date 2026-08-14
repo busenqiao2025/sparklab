@@ -326,6 +326,14 @@ export default {
             reqs = reqs.filter(r => r.from !== removedUid && r.to !== removedUid);
             cleaned.friendReqs = beforeR - reqs.length;
             if (cleaned.friendReqs > 0) needSaveFriendReqs = true;
+
+            // 4. 清理惩罚记录（防止 UID 复用导致新用户被误禁言）
+            let punishments = await loadPunishments(env);
+            const beforeP = punishments.length;
+            punishments = punishments.filter(p => p.uid !== removedUid);
+            if (punishments.length < beforeP) {
+              await savePunishments(env, punishments);
+            }
           }
 
           // 统一批量写入（最多 5 次 KV put，而非原来的 6 次+重复读）

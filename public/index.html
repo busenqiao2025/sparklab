@@ -370,27 +370,44 @@
   /* ===== Lab Map ===== */
   .lab-map{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto 32px auto;gap:12px}
   .lab-corridor{grid-column:1/-1;background:rgba(255,255,255,.68);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(226,232,240,.3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);letter-spacing:6px;box-shadow:var(--shadow-xs);font-weight:500}
-  .cam-section{margin-top:16px}
-  .cam-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-  .cam-header h3{font-size:14px;font-weight:700;color:var(--fg);margin:0}
-  .cam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
-  .cam-card{background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:all .3s cubic-bezier(.4,0,.2,1)}
+  .cam-section{margin-top:20px}
+  .cam-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .cam-header h3{font-size:15px;font-weight:700;color:var(--fg);margin:0;display:flex;align-items:center;gap:8px}
+  .cam-header h3::before{content:'';width:4px;height:16px;background:var(--accent);border-radius:2px}
+  .cam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+  .cam-card{background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:all .3s cubic-bezier(.4,0,.2,1);position:relative}
   [data-theme="dark"] .cam-card{background:rgba(20,24,33,.78);border-color:rgba(30,36,51,.4)}
-  .cam-card:hover{box-shadow:var(--shadow-lg),0 0 24px rgba(99,102,241,.12);border-color:var(--accent-light)}
-  .cam-card-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.04);border-bottom:1px solid var(--border-light)}
+  .cam-card:hover{box-shadow:var(--shadow-lg);border-color:var(--accent-light)}
+  .cam-card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.04);border-bottom:1px solid var(--border-light)}
   [data-theme="dark"] .cam-card-header{background:rgba(255,255,255,.04)}
-  .cam-card-name{font-size:12px;font-weight:600;color:var(--fg)}
-  .cam-card-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0}
-  .cam-card-dot.live{background:var(--success);box-shadow:0 0 4px rgba(16,185,129,.5)}
-  .cam-card video,.cam-card iframe{width:100%;height:200px;border:none;display:block;background:#000}
-  .cam-empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px;grid-column:1/-1}
-  .cam-config-btn{font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:transparent;color:var(--fg-dim);cursor:pointer;font-family:var(--font)}
-  .cam-config-btn:hover{background:var(--bg-hover);color:var(--fg)}
+  .cam-card-name{font-size:13px;font-weight:600;color:var(--fg);display:flex;align-items:center;gap:8px}
+  .cam-card-dot{width:8px;height:8px;border-radius:50%;background:var(--danger);flex-shrink:0;transition:all .3s}
+  .cam-card-dot.live{background:var(--success);box-shadow:0 0 6px rgba(16,185,129,.5)}
+  .cam-card-dot.loading{background:var(--warning);animation:camPulse 1s infinite}
+  @keyframes camPulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .cam-card-body{position:relative;background:#000}
+  .cam-card video,.cam-card iframe{width:100%;height:220px;border:none;display:block;background:#000}
+  .cam-card-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#888;font-size:12px;gap:8px}
+  .cam-card-loading .spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.15);border-top-color:var(--accent);border-radius:50%;animation:camSpin .8s linear infinite}
+  @keyframes camSpin{to{transform:rotate(360deg)}}
+  .cam-card-error{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a1a;color:#666;font-size:12px;gap:6px}
+  .cam-card-actions{position:absolute;top:46px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .2s}
+  .cam-card:hover .cam-card-actions{opacity:1}
+  .cam-card-action{width:28px;height:28px;border-radius:var(--radius-xs);background:rgba(0,0,0,.55);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;backdrop-filter:blur(4px);transition:background .2s}
+  .cam-card-action:hover{background:rgba(0,0,0,.75)}
+  .cam-empty{text-align:center;padding:40px 16px;color:var(--muted);font-size:13px;grid-column:1/-1}
+  .cam-empty-icon{width:48px;height:48px;margin:0 auto 12px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.4}
+  .cam-config-btn{font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);background:transparent;color:var(--fg-dim);cursor:pointer;font-family:var(--font);transition:all .2s}
+  .cam-config-btn:hover{background:var(--bg-hover);color:var(--fg);border-color:var(--accent-light)}
+  .cam-add-btn{width:100%;padding:10px;border:1px dashed var(--border);border-radius:var(--radius-xs);background:transparent;color:var(--fg-dim);cursor:pointer;font-family:var(--font);font-size:13px;transition:all .2s;margin-top:8px}
+  .cam-add-btn:hover{border-color:var(--accent);color:var(--accent)}
   .cam-modal-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
-  .cam-modal-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--fg);font-size:12px;font-family:var(--font)}
-  .cam-modal-row button{padding:6px 10px;border:none;border-radius:var(--radius-xs);background:var(--danger);color:#fff;cursor:pointer;font-size:12px;white-space:nowrap}
-  .cam-add-btn{padding:8px 14px;border:1px dashed var(--border);border-radius:var(--radius-xs);background:transparent;color:var(--accent);cursor:pointer;font-size:12px;font-family:var(--font);width:100%;margin-top:4px}
-  .cam-add-btn:hover{background:var(--accent-soft)}
+  .cam-modal-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px}
+  .cam-modal-row input:focus{outline:none;border-color:var(--accent)}
+  .cam-del-btn{flex-shrink:0;padding:8px 12px;border:1px solid var(--danger);border-radius:var(--radius-xs);background:transparent;color:var(--danger);cursor:pointer;font-size:12px;transition:all .2s}
+  .cam-del-btn:hover{background:var(--danger);color:#fff}
+  .cam-save-btn{padding:8px 20px;border:none;border-radius:var(--radius-xs);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:600;transition:all .2s}
+  .cam-save-btn:hover{opacity:.9}
 [data-theme="dark"] .lab-corridor{background:rgba(20,24,33,.68);border-color:rgba(30,36,51,.3)}
   .room-term{background:rgba(255,255,255,.78);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid rgba(226,232,240,.4);border-radius:var(--radius);position:relative;padding:18px;box-shadow:var(--shadow);transition:all .3s cubic-bezier(.4,0,.2,1)}
 [data-theme="dark"] .room-term{background:rgba(20,24,33,.78);border-color:rgba(30,36,51,.4)}
@@ -1284,24 +1301,30 @@ function applyI18n() {
         <button class="cam-config-btn" id="camConfigBtn" style="display:none">配置摄像头</button>
       </div>
       <div class="cam-grid" id="camGrid">
-        <div class="cam-empty">暂无摄像头，请由管理员配置</div>
+        <div class="cam-empty">
+          <div class="cam-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          <div>暂无摄像头，请由管理员配置</div>
+        </div>
       </div>
     </div>
   </div>
   <!-- Camera Config Modal -->
   <div class="modal-overlay" id="camModal" style="display:none">
-    <div class="modal-card" style="max-width:520px">
+    <div class="modal-card" style="max-width:560px">
       <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <h3 style="margin:0">摄像头配置</h3>
-        <button class="cam-config-btn" onclick="document.getElementById('camModal').style.display='none'">关闭</button>
+        <button class="cam-config-btn" id="camCloseBtn">关闭</button>
       </div>
       <div id="camList"></div>
       <button class="cam-add-btn" id="camAddBtn">+ 添加摄像头</button>
-      <div style="margin-top:12px;padding:10px;background:var(--bg-soft);border-radius:var(--radius-xs);font-size:11px;color:var(--muted);line-height:1.6">
+      <div style="margin-top:12px;padding:12px;background:var(--bg-soft);border-radius:var(--radius-xs);font-size:12px;color:var(--muted);line-height:1.7">
         <b>使用方法：</b><br>
-        1. 电脑运行 go2rtc（和摄像头同一网络）<br>
-        2. 流地址填 go2rtc 的 Web 播放地址，如：<code>http://192.168.1.100:1984/stream.html?src=cam1</code><br>
-        3. 也支持 HLS 地址：<code>http://192.168.1.100:1984/cam1/stream.m3u8</code>
+        1. 服务器运行 go2rtc（和摄像头同一网络）<br>
+        2. 推荐填 HLS 流地址：<code>https://cam.sparkmindslab.dpdns.org/api/stream.m3u8?src=cam1</code><br>
+        3. 也支持 go2rtc 播放页地址：<code>https://cam.sparkmindslab.dpdns.org/stream.html?src=cam1</code>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="cam-save-btn" id="camSaveBtn">保存配置</button>
       </div>
     </div>
   </div>
@@ -2687,6 +2710,12 @@ function applyI18n() {
 
   // ===================== CAMERA MONITOR =====================
   let camConfig = [];
+  let camHlsInstances = {};
+
+  function destroyAllHls() {
+    Object.values(camHlsInstances).forEach(h => { try { h.destroy(); } catch(e){} });
+    camHlsInstances = {};
+  }
 
   async function loadCameras() {
     try {
@@ -2705,44 +2734,110 @@ function applyI18n() {
     } else {
       configBtn.style.display = 'none';
     }
+    destroyAllHls();
     if (!camConfig.length) {
-      grid.innerHTML = '<div class="cam-empty">暂无摄像头，请由管理员配置</div>';
+      grid.innerHTML = '<div class="cam-empty"><div class="cam-empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div><div>暂无摄像头，请由管理员配置</div></div>';
       return;
     }
     grid.innerHTML = camConfig.map((c, i) => {
-      const isHls = c.url && c.url.endsWith('.m3u8');
+      const isHls = c.url && c.url.includes('.m3u8');
+      const fsBtn = `<div class="cam-card-actions"><button class="cam-card-action" onclick="camFullscreen(${i})" title="全屏"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button></div>`;
       if (isHls) {
-        return `<div class="cam-card">
-          <div class="cam-card-header"><span class="cam-card-name">${c.name}</span><span class="cam-card-dot live"></span></div>
-          <video id="cam-video-${i}" autoplay muted playsinline></video>
+        return `<div class="cam-card" id="cam-card-${i}">
+          <div class="cam-card-header"><span class="cam-card-name"><span class="cam-card-dot loading" id="cam-dot-${i}"></span>${c.name || '未命名'}</span></div>
+          <div class="cam-card-body">
+            <video id="cam-video-${i}" autoplay muted playsinline></video>
+            <div class="cam-card-loading" id="cam-loading-${i}"><div class="spinner"></div>连接中...</div>
+            ${fsBtn}
+          </div>
         </div>`;
       }
-      return `<div class="cam-card">
-        <div class="cam-card-header"><span class="cam-card-name">${c.name}</span><span class="cam-card-dot live"></span></div>
-        <iframe src="${c.url}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      return `<div class="cam-card" id="cam-card-${i}">
+        <div class="cam-card-header"><span class="cam-card-name"><span class="cam-card-dot loading" id="cam-dot-${i}"></span>${c.name || '未命名'}</span></div>
+        <div class="cam-card-body">
+          <iframe src="${c.url}" allow="autoplay; encrypted-media" allowfullscreen id="cam-iframe-${i}"></iframe>
+          <div class="cam-card-loading" id="cam-loading-${i}"><div class="spinner"></div>连接中...</div>
+          ${fsBtn}
+        </div>
       </div>`;
     }).join('');
     camConfig.forEach((c, i) => {
-      if (c.url && c.url.endsWith('.m3u8')) {
+      if (c.url && c.url.includes('.m3u8')) {
         const v = document.getElementById('cam-video-' + i);
-        if (v && window.Hls) {
-          const hls = new Hls();
+        const dot = document.getElementById('cam-dot-' + i);
+        const loading = document.getElementById('cam-loading-' + i);
+        if (v && window.Hls && Hls.isSupported()) {
+          const hls = new Hls({ maxBufferLength: 10, liveSyncDuration: 3 });
+          camHlsInstances[i] = hls;
           hls.loadSource(c.url);
           hls.attachMedia(v);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            if (loading) loading.style.display = 'none';
+            if (dot) { dot.classList.remove('loading'); dot.classList.add('live'); }
+            v.play().catch(()=>{});
+          });
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+              if (loading) loading.innerHTML = '连接失败';
+              if (dot) dot.classList.remove('loading', 'live');
+            }
+          });
+        } else if (v && v.canPlayType('application/vnd.apple.mpegurl')) {
+          v.src = c.url;
+          v.addEventListener('loadedmetadata', () => {
+            if (loading) loading.style.display = 'none';
+            if (dot) { dot.classList.remove('loading'); dot.classList.add('live'); }
+            v.play().catch(()=>{});
+          });
+        }
+      } else {
+        const dot = document.getElementById('cam-dot-' + i);
+        const loading = document.getElementById('cam-loading-' + i);
+        const iframe = document.getElementById('cam-iframe-' + i);
+        if (iframe) {
+          iframe.addEventListener('load', () => {
+            if (loading) loading.style.display = 'none';
+            if (dot) { dot.classList.remove('loading'); dot.classList.add('live'); }
+          });
+          setTimeout(() => {
+            if (loading) loading.style.display = 'none';
+            if (dot) { dot.classList.remove('loading'); dot.classList.add('live'); }
+          }, 5000);
         }
       }
     });
   }
 
+  function camFullscreen(i) {
+    const card = document.getElementById('cam-card-' + i);
+    if (!card) return;
+    const elem = card.querySelector('video') || card.querySelector('iframe');
+    if (elem) {
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    }
+  }
+
   function renderCamConfigList() {
     const list = $('#camList');
+    if (!camConfig.length) {
+      list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">暂无摄像头，点击下方按钮添加</div>';
+      return;
+    }
     list.innerHTML = camConfig.map((c, i) =>
       `<div class="cam-modal-row">
         <input type="text" placeholder="名称（如：实验室入口）" value="${c.name||''}" data-idx="${i}" data-field="name">
-        <input type="text" placeholder="流地址" value="${c.url||''}" data-idx="${i}" data-field="url">
-        <button onclick="camConfig.splice(${i},1); renderCamConfigList();">删除</button>
+        <input type="text" placeholder="流地址（HLS 或 播放页URL）" value="${c.url||''}" data-idx="${i}" data-field="url">
+        <button class="cam-del-btn" data-del-idx="${i}">删除</button>
       </div>`
     ).join('');
+    list.querySelectorAll('[data-del-idx]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.delIdx);
+        camConfig.splice(idx, 1);
+        renderCamConfigList();
+      });
+    });
   }
 
   async function saveCameras() {
@@ -2771,8 +2866,8 @@ function applyI18n() {
       const field = e.target.dataset.field;
       if (!isNaN(idx) && field) camConfig[idx][field] = e.target.value;
     });
-    const origClose = $('#camModal').querySelector('.cam-config-btn');
-    origClose.addEventListener('click', () => { saveCameras(); $('#camModal').style.display = 'none'; });
+    $('#camCloseBtn').addEventListener('click', () => { $('#camModal').style.display = 'none'; });
+    $('#camSaveBtn').addEventListener('click', () => { saveCameras(); $('#camModal').style.display = 'none'; });
   }
 
   function initRooms() {
