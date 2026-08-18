@@ -1571,6 +1571,19 @@ export default {
           return json({ ok: true });
         }
 
+        // ========== ESP32 皮重表（开机拉取，刷卡时本地查表） ==========
+        // GET /api/materials/tare?space=A — 返回 [{uid, tare}] 轻量映射
+        if (url.pathname === '/api/materials/tare' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
+          let raw = await env.USERS.get(`inventory_materials_${sp}`);
+          if (raw === null && sp === 'A') raw = await env.USERS.get('inventory_materials');
+          const materials = raw ? JSON.parse(raw) : [];
+          const tares = materials
+            .filter(m => m.rfid && m.tareWeight > 0)
+            .map(m => ({ uid: m.rfid.toUpperCase(), tare: m.tareWeight }));
+          return json({ ok: true, tares });
+        }
+
         // ========== 耗材称重扫描（ESP32 MQTT 联动） ==========
         // POST /api/materials/scan — 存储扫描记录（body: { uid, weight, space }）
         if (url.pathname === '/api/materials/scan' && request.method === 'POST') {

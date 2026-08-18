@@ -2198,8 +2198,10 @@ function applyI18n() {
     const notify = document.getElementById('scanNotify');
     const notifyText = document.getElementById('scanNotifyText');
 
-    if (match && !isNew) {
-      // 已知卡：ESP32 已按皮重算出净重，直接更新剩余量
+    if (match) {
+      // 网站已有此卡：无论 ESP32 报 new 还是非 new，都按已有记录更新
+      // isNew=true 说明 ESP32 未拉到皮重（可能是刚录入还没下发），上报的是总重
+      // isNew=false 说明 ESP32 已按皮重算出净重
       const fullWeight = match.weight || weight;
       let remain = 100;
       if (fullWeight > 0) {
@@ -2211,10 +2213,11 @@ function applyI18n() {
       renderMaterialCards();
       if (notify && notifyText) {
         notify.style.display = 'block';
-        notifyText.innerHTML = `RFID ${uid} 已更新 → ${match.type} ${match.color}${match.manufacturer ? ' / ' + match.manufacturer : ''}，净重 ${weight}g，剩余 ${remain}%`;
+        const wType = isNew ? '总重' : '净重';
+        notifyText.innerHTML = `RFID ${uid} 已更新 → ${match.type} ${match.color}${match.manufacturer ? ' / ' + match.manufacturer : ''}，${wType} ${weight}g，剩余 ${remain}%`;
         setTimeout(() => { notify.style.display = 'none'; }, 5000);
       }
-      toast(`已更新: ${match.type} ${match.color} 净重${weight}g 剩余${remain}%`);
+      toast(`已更新: ${match.type} ${match.color} ${isNew?'总重':'净重'}${weight}g 剩余${remain}%`);
     } else {
       // 未知卡：ESP32 上报总重，网站创建记录，用户手动填写类型/颜色/厂商/皮重/克重
       const newId = Date.now();
