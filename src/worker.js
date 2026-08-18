@@ -1571,6 +1571,37 @@ export default {
           return json({ ok: true });
         }
 
+        // ========== 耗材称重扫描（ESP32 MQTT 联动） ==========
+        // POST /api/materials/scan — 存储扫描记录（body: { uid, weight, space }）
+        if (url.pathname === '/api/materials/scan' && request.method === 'POST') {
+          const { uid, weight, space } = await readBody(request);
+          if (!uid) return json({ ok: false, msg: '缺少 uid' });
+          const sp = space || 'A';
+          const scanData = { uid, weight: weight || 0, timestamp: Date.now() };
+          await env.USERS.put(`last_scan_${sp}`, JSON.stringify(scanData));
+          let history = [];
+          const histRaw = await env.USERS.get(`scan_history_${sp}`);
+          if (histRaw) { try { history = JSON.parse(histRaw); } catch(e) {} }
+          history.unshift(scanData);
+          if (history.length > 50) history = history.slice(0, 50);
+          await env.USERS.put(`scan_history_${sp}`, JSON.stringify(history));
+          return json({ ok: true, scan: scanData });
+        }
+
+        // GET /api/materials/scan?space=A — 获取最新扫描记录
+        if (url.pathname === '/api/materials/scan' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
+          const raw = await env.USERS.get(`last_scan_${sp}`);
+          return json({ ok: true, scan: raw ? JSON.parse(raw) : null });
+        }
+
+        // GET /api/materials/scan/history?space=A — 获取扫描历史
+        if (url.pathname === '/api/materials/scan/history' && request.method === 'GET') {
+          const sp = url.searchParams.get('space') || 'A';
+          const raw = await env.USERS.get(`scan_history_${sp}`);
+          return json({ ok: true, history: raw ? JSON.parse(raw) : [] });
+        }
+
         // ========== 公告与更新日志（按空间隔离） ==========
         // GET /api/notice?space=A — 获取公告和更新日志（公开接口，登录页可用）
         if (url.pathname === '/api/notice' && request.method === 'GET') {
