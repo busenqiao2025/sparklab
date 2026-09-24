@@ -1653,6 +1653,25 @@ export default {
             const parsed = JSON.parse(raw);
             list = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
           }
+          // 兼容并迁移旧无后缀 key（如 announcement / changelog）：将其独有的条目合并进当前 space key，
+          // 避免发布公告时旧公告因 PUT 不读兜底 key 而“消失”。合并完成后删除旧 key。
+          if (sp === 'A') {
+            try {
+              const oldRaw = await env.USERS.get(type);
+              if (oldRaw !== null) {
+                const oldArr = JSON.parse(oldRaw);
+                if (Array.isArray(oldArr) && oldArr.length) {
+                  const sig = new Set(list.map(x => (x.id ?? '') + '|' + (x.title || '') + '|' + (x.content || '').slice(0, 60)));
+                  for (const o of oldArr) {
+                    const s = (o.id ?? '') + '|' + (o.title || '') + '|' + (o.content || '').slice(0, 60);
+                    if (!sig.has(s)) { list.push(o); sig.add(s); }
+                  }
+                  await env.USERS.delete(type);
+                }
+              }
+            } catch (e) { /* 迁移失败不影响主流程 */ }
+          }
+          list.sort((a, b) => (b.updated || 0) - (a.updated || 0));
           if (action === 'add') {
             const newItem = { id: Date.now(), title: (item && item.title) || '', content: (item && item.content) || '', updated: Date.now(), author: user.name, pinned: !!(item && item.pinned) };
             list.unshift(newItem);
