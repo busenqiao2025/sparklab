@@ -2447,11 +2447,19 @@ function applyI18n() {
 
   async function loadNotice() {
     try {
-      const r = await fetch(`${API}/notice?space=${currentSpace}`);
+      const r = await fetch(`${API}/notice?space=${currentSpace}`, { cache: 'no-store' });
       const j = await r.json();
       if (j.ok) {
-        noticeData.announcements = j.announcements || [];
-        noticeData.changelogs = j.changelogs || [];
+        const newAnn = j.announcements || [];
+        const newLog = j.changelogs || [];
+        const hasContent = newAnn.length > 0 || newLog.length > 0;
+        const hadData = noticeData.announcements.length > 0 || noticeData.changelogs.length > 0;
+        // 降级保护：GET 偶发返回空（KV 边缘未同步 / 网络抖动）时，保留已展示的公告，
+        // 避免刷新页面时公告“一会消失一会回来”。仅在拿到内容、或首次本就为空时才覆盖。
+        if (hasContent || !hadData) {
+          noticeData.announcements = newAnn;
+          noticeData.changelogs = newLog;
+        }
         renderLoginNotice();
         if (typeof renderNoticeAdmin === 'function') renderNoticeAdmin();
       }

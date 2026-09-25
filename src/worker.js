@@ -1619,21 +1619,47 @@ export default {
         // GET /api/notice?space=A — 获取公告和更新日志（公开接口，登录页可用）
         if (url.pathname === '/api/notice' && request.method === 'GET') {
           const sp = url.searchParams.get('space') || 'A';
-          let annRaw = await env.USERS.get(`announcement_${sp}`);
-          if (annRaw === null && sp === 'A') annRaw = await env.USERS.get('announcement');
-          let logRaw = await env.USERS.get(`changelog_${sp}`);
-          if (logRaw === null && sp === 'A') logRaw = await env.USERS.get('changelog');
+          // 读取（带 A 空间兜底）：当前 space key 不存在或为空数组时，回退读旧的全局 key，
+          // 规避 KV 迁移/同步间隙导致公告整体“消失”
+          const readWithFallback = async (baseKey) => {
+            let raw = await env.USERS.get(`${baseKey}_${sp}`);
+            if (sp === 'A') {
+              let curLen = 0;
+              try { curLen = (JSON.parse(raw || '[]')).length; } catch (e) {}
+              if (!raw || curLen === 0) {
+                try {
+                  const oldRaw = await env.USERS.get(baseKey);
+                  if (oldRaw && (JSON.parse(oldRaw) || []).length) raw = oldRaw;
+                } catch (e) {}
+              }
+            }
+            return raw;
+          };
+          const annRaw = await readWithFallback('announcement');
+          const logRaw = await readWithFallback('changelog');
           let announcements = [];
           let changelogs = [];
           if (annRaw) {
-            const parsed = JSON.parse(annRaw);
-            announcements = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+            try {
+              const parsed = JSON.parse(annRaw);
+              announcements = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+            } catch (e) {}
           }
           if (logRaw) {
-            const parsed = JSON.parse(logRaw);
-            changelogs = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+            try {
+              const parsed = JSON.parse(logRaw);
+              changelogs = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
+            } catch (e) {}
           }
-          return json({ ok: true, announcements, changelogs });
+          return new Response(JSON.stringify({ ok: true, announcements, changelogs }), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Access-Control-Allow-Origin': '*',
+              'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+              'X-Worker-Version': '20260925-notice-fix',
+            },
+          });
         }
 
         // PUT /api/notice — 增删改公告或更新日志（仅管理员，body 含 space）
@@ -1698,6 +1724,15 @@ export default {
       }
     }
 
-    return env.ASSETS.fetch(request);
+    // 静态资源由 ASSETS 提供；对 HTML 入口强制 no-store，避免 CDN 长缓存导致前端更新不生效
+    const assetResp = await env.ASSETS.fetch(request);
+    const act = assetResp.headers.get('content-type') || '';
+    if (act.includes('text/html')) {
+      const h = new Headers(assetResp.headers);
+      h.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      h.set('X-Worker-Version', '20260925-notice-fix');
+      return new Response(assetResp.body, { status: assetResp.status, headers: h });
+    }
+    return assetResp;
   },
 };
