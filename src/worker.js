@@ -1619,24 +1619,11 @@ export default {
         // GET /api/notice?space=A — 获取公告和更新日志（公开接口，登录页可用）
         if (url.pathname === '/api/notice' && request.method === 'GET') {
           const sp = url.searchParams.get('space') || 'A';
-          // 读取（带 A 空间兜底）：当前 space key 不存在或为空数组时，回退读旧的全局 key，
-          // 规避 KV 迁移/同步间隙导致公告整体“消失”
-          const readWithFallback = async (baseKey) => {
-            let raw = await env.USERS.get(`${baseKey}_${sp}`);
-            if (sp === 'A') {
-              let curLen = 0;
-              try { curLen = (JSON.parse(raw || '[]')).length; } catch (e) {}
-              if (!raw || curLen === 0) {
-                try {
-                  const oldRaw = await env.USERS.get(baseKey);
-                  if (oldRaw && (JSON.parse(oldRaw) || []).length) raw = oldRaw;
-                } catch (e) {}
-              }
-            }
-            return raw;
-          };
-          const annRaw = await readWithFallback('announcement');
-          const logRaw = await readWithFallback('changelog');
+          // 单一数据源：只读 <type>_<space>。
+          // 旧的无后缀 key（如 announcement）已由一次性迁移脚本合并删除；此处若继续“读不到就回退旧 key”，
+          // 会因 KV 边缘节点同步延迟让不同网络读到不同来源，表现为公告“一会有、一会没有”。
+          const annRaw = await env.USERS.get(`announcement_${sp}`);
+          const logRaw = await env.USERS.get(`changelog_${sp}`);
           let announcements = [];
           let changelogs = [];
           if (annRaw) {
@@ -1657,7 +1644,7 @@ export default {
               'Content-Type': 'application/json; charset=utf-8',
               'Access-Control-Allow-Origin': '*',
               'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-              'X-Worker-Version': '20260925-notice-fix',
+              'X-Worker-Version': '20260925-single-source',
             },
           });
         }
@@ -1679,24 +1666,8 @@ export default {
             const parsed = JSON.parse(raw);
             list = Array.isArray(parsed) ? parsed : [{ id: 1, title: '', content: parsed.content || '', updated: parsed.updated || 0, author: parsed.author || '' }];
           }
-          // 兼容并迁移旧无后缀 key（如 announcement / changelog）：将其独有的条目合并进当前 space key，
-          // 避免发布公告时旧公告因 PUT 不读兜底 key 而“消失”。合并完成后删除旧 key。
-          if (sp === 'A') {
-            try {
-              const oldRaw = await env.USERS.get(type);
-              if (oldRaw !== null) {
-                const oldArr = JSON.parse(oldRaw);
-                if (Array.isArray(oldArr) && oldArr.length) {
-                  const sig = new Set(list.map(x => (x.id ?? '') + '|' + (x.title || '') + '|' + (x.content || '').slice(0, 60)));
-                  for (const o of oldArr) {
-                    const s = (o.id ?? '') + '|' + (o.title || '') + '|' + (o.content || '').slice(0, 60);
-                    if (!sig.has(s)) { list.push(o); sig.add(s); }
-                  }
-                  await env.USERS.delete(type);
-                }
-              }
-            } catch (e) { /* 迁移失败不影响主流程 */ }
-          }
+          // 旧的无后缀 key 已于 2026-09-25 一次性迁移合并到带后缀 key 并删除，此处不再读取，
+          // 保证写入目标唯一，避免已删除的条目被再次捡回。
           list.sort((a, b) => (b.updated || 0) - (a.updated || 0));
           if (action === 'add') {
             const newItem = { id: Date.now(), title: (item && item.title) || '', content: (item && item.content) || '', updated: Date.now(), author: user.name, pinned: !!(item && item.pinned) };
