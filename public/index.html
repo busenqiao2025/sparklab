@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.6.1]</title>
+<title>SparkMinds Lab [v2.6.2]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -784,24 +784,7 @@
     .trae-topbar{padding:0 12px;gap:8px}
     #shortcutHelpBtn,#myReqBtn{display:none}
   }
-  @media(max-width:768px){
-    .trae-topbar{flex-wrap:wrap;height:auto;min-height:var(--topbar-h);padding:8px 12px;gap:6px}
-    .trae-brand{margin-right:0}
-    .trae-topbar-right{margin-left:0;flex-wrap:wrap;width:100%}
-    .tb-sep{display:none}
-    .tb-group{gap:0}
-    .trae-sidebar{width:56px}
-    .trae-sidebar-item span:not(.icon):not(.badge){display:none}
-    .trae-sidebar-label{display:none}
-    .trae-user-info,.trae-user-actions{display:none}
-    .trae-content{padding:12px}
-    .term-form{grid-template-columns:1fr}
-    .lab-map{grid-template-columns:1fr}
-    .card-stack,.card-grid{grid-template-columns:1fr}
-    .forum-stats{grid-template-columns:repeat(2,1fr)}
-    .forum-toolbar{flex-direction:column;align-items:stretch}
-    .forum-avatar{width:30px;height:30px;font-size:12px}
-  }
+  /* v2.6.2 起手机端样式统一移至文件末尾「手机端适配」大块 */
 
   /* ===== v2.6 论坛 ===== */
   .forum-stats{
@@ -934,7 +917,7 @@
   .forum-counter{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
   .forum-counter.over{color:var(--danger);font-weight:700}
 
-  /* ===== v2.6.1 主题样式（组合预设） ===== */
+  /* ===== v2.6.2 主题样式（组合预设） ===== */
   .ts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px}
   .ts-card{
     border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-soft);
@@ -962,13 +945,90 @@
   @media(max-width:768px){
     .ts-grid{grid-template-columns:repeat(2,1fr)}
   }
+
+  /* ===== v2.6.2 手机端适配 ===== */
+  .m-backdrop{display:none}
+  #drawerCats{display:none}
+  @media(max-width:768px){
+    :root{--topbar-h:48px}
+    /* ---- 顶栏：压缩为单行，次要入口移入抽屉 ---- */
+    .trae-topbar{flex-wrap:nowrap;height:var(--topbar-h);min-height:var(--topbar-h);padding:0 8px;gap:6px}
+    .trae-topbar-left{min-width:0;flex-shrink:1;overflow:hidden}
+    .trae-brand{margin-right:0;gap:6px}
+    .trae-brand img{height:22px!important}
+    .trae-topbar-left .trae-cat{display:none!important}
+    .trae-topbar-right{margin-left:auto;width:auto;flex-wrap:nowrap;flex-shrink:0}
+    #connStatus,#simBtn,#msgBtn,.tb-sep{display:none!important}
+    .trae-icon-btn{padding:7px 9px}
+    /* ---- 侧边栏 → 左侧抽屉 ---- */
+    .trae-body .trae-sidebar{
+      position:fixed;top:var(--topbar-h);left:0;bottom:0;width:min(78vw,300px);z-index:120;
+      transform:translateX(-104%);transition:transform .22s var(--ease, ease);overflow-y:auto;box-shadow:none;
+    }
+    [data-sidebar="collapsed"] .trae-body .trae-sidebar{width:min(78vw,300px)}
+    html.m-drawer-open .trae-body .trae-sidebar{transform:none;box-shadow:var(--shadow-lg)}
+    [data-sidebar="collapsed"] .trae-sidebar-item span:not(.icon):not(.badge),
+    .trae-sidebar-item span:not(.icon):not(.badge){display:inline}
+    [data-sidebar="collapsed"] .trae-sidebar-item{justify-content:flex-start;padding:8px 10px}
+    [data-sidebar="collapsed"] .trae-sidebar-label,
+    .trae-sidebar-label{display:block}
+    [data-sidebar="collapsed"] .trae-user-info,
+    .trae-user-info{display:block}
+    [data-sidebar="collapsed"] .trae-user-actions,
+    .trae-user-actions{display:flex}
+    [data-sidebar="collapsed"] .trae-user{justify-content:flex-start;padding:11px 12px}
+    [data-sidebar="collapsed"] .space-switcher{flex-direction:row;padding:10px 12px 2px}
+    #drawerCats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px 12px;border-bottom:1px solid var(--border)}
+    #drawerCats .trae-cat{font-size:12px;padding:7px 11px;border:1px solid var(--border);color:var(--fg-dim)}
+    #drawerCats .trae-cat.active{border-color:var(--accent);color:var(--accent)}
+    .m-backdrop{display:block;position:fixed;top:var(--topbar-h);left:0;right:0;bottom:0;background:rgba(15,23,42,.45);z-index:110;opacity:0;pointer-events:none;transition:opacity .2s ease}
+    html.m-drawer-open .m-backdrop{opacity:1;pointer-events:auto}
+    /* ---- 内容区 ---- */
+    .trae-content{padding:12px 10px;gap:12px}
+    .panel-title{font-size:16px}
+    .term-form{grid-template-columns:1fr}
+    .card-stack,.card-grid{grid-template-columns:1fr}
+    /* ---- 仪表盘 ---- */
+    .dash-kpi{grid-template-columns:repeat(2,1fr)!important;gap:10px}
+    .dash-card{padding:14px}
+    .dash-grid{grid-template-columns:1fr!important}
+    /* ---- 实验室：单列地图，修掉 span 2 撑出隐式列的问题 ---- */
+    .lab-map{grid-template-columns:1fr!important;grid-template-rows:none!important;gap:10px}
+    .lab-map .room-wide{grid-column:auto!important}
+    .cam-grid{grid-template-columns:1fr}
+    /* ---- 站内信：联系人列表 / 聊天 二选一显示 ---- */
+    #msgLayout{height:calc(100dvh - 170px)!important}
+    #msgLayout > div:first-child{width:100%!important;border-right:none!important}
+    html.m-chat-open #msgLayout > div:first-child{display:none!important}
+    html:not(.m-chat-open) #chatArea{display:none!important}
+    #chatArea{position:relative}
+    #chatBackBtn{display:none!important}
+    html.m-chat-open #chatBackBtn{display:inline-flex!important;position:absolute;top:9px;left:10px;z-index:6;width:32px;height:32px;align-items:center;justify-content:center;font-size:15px;background:var(--bg-soft)}
+    html.m-chat-open #chatHeader{padding-left:52px!important}
+    /* ---- 论坛 ---- */
+    .forum-stats{grid-template-columns:repeat(2,1fr)}
+    .forum-toolbar{flex-direction:column;align-items:stretch}
+    .forum-search{min-width:0}
+    .forum-avatar{width:30px;height:30px;font-size:12px}
+    /* ---- 表格：整块横向滚动，不压碎内容 ---- */
+    .panel table{display:block;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .panel table th,.panel table td{white-space:nowrap}
+    /* ---- 弹窗 ---- */
+    .modal-card,.ee-modal{width:94vw!important;max-width:94vw!important;max-height:84vh;overflow-y:auto;padding:20px 16px}
+    .modal-actions{flex-wrap:wrap}
+    .notify-dropdown{width:min(94vw,380px)}
+    .cl-drawer{width:min(94vw,440px)}
+    /* ---- 杂项 ---- */
+    .pref-row{flex-wrap:wrap}
+    .profile-page{grid-template-columns:1fr!important}
+  }
 </style>
 <script>
 // ===================== I18N MULTI-LANGUAGE SYSTEM =====================
 const I18N = {
   'zh-CN': {
     // Login
-    'app_name': 'SparkMinds Lab', 'app_subtitle': '实验室物联网监控平台',
+    'app_name': 'SparkMinds Lab', 'mobile_back': '返回列表', 'app_subtitle': '实验室物联网监控平台',
     'username': '用户名', 'password': '密码', 'login': '登 录',
     'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续', 'notice_announcement': '系统公告', 'notice_changelog': '更新日志', 'notice_empty': '暂无内容', 'notice_edit': '编辑', 'notice_save': '保存', 'notice_cancel': '取消', 'notice_saved': '保存成功', 'notice_save_failed': '保存失败', 'notice_edit_announcement': '编辑系统公告', 'notice_edit_changelog': '编辑更新日志', 'notice_updated': '更新于', 'notice_add': '新增', 'notice_delete': '删除', 'notice_confirm_delete': '确定删除此条目？', 'notice_title': '标题', 'notice_title_placeholder': '输入标题（可选）', 'notice_content': '内容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日志', 'notice_edit_item': '编辑条目', 'notice_no_title': '无标题',
     'login_hint': '默认账号：admin / admin123 | user / user123',
@@ -1114,7 +1174,7 @@ const I18N = {
     'forum_md_hint': '支持 **粗体** / `代码` / - 列表',
     'forum_draft_hint': '已自动保存草稿', 'forum_draft_clear': '丢弃', 'forum_draft_dropped': '草稿已丢弃',
     'forum_title_too_long': '标题最多 {n} 个字', 'forum_body_too_long': '内容最多 {n} 个字',
-    // v2.6.1 主题样式
+    // v2.6.2 主题样式
     'settings_theme_style': '主题样式', 'settings_theme_style_hint': '一键套用配色 / 圆角 / 密度 / 壁纸组合',
     'theme_style_classic': '经典蓝', 'theme_style_minimal': '极简灰', 'theme_style_vibrant': '活力橙',
     'theme_style_forest': '森林绿', 'theme_style_tech': '暗夜科技', 'theme_style_sakura': '樱花粉',
@@ -1149,7 +1209,7 @@ const I18N = {
     'notify_center': '通知中心', 'notify_all': '全部', 'notify_messages': '站内信', 'notify_system': '系统', 'notify_mark_all_read': '全部已读', 'notify_empty': '暂无通知', 'notify_friend_request': '好友申请', 'notify_broadcast': '系统广播', 'notify_unread_msg': '条未读消息',
   },
   'zh-TW': {
-    'app_name': 'SparkMinds Lab', 'app_subtitle': '實驗室物聯網監控平台',
+    'app_name': 'SparkMinds Lab', 'mobile_back': '返回列表', 'app_subtitle': '實驗室物聯網監控平台',
     'username': '用戶名', 'password': '密碼', 'login': '登 入',
     'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續', 'notice_announcement': '系統公告', 'notice_changelog': '更新日誌', 'notice_empty': '暫無內容', 'notice_edit': '編輯', 'notice_save': '儲存', 'notice_cancel': '取消', 'notice_saved': '儲存成功', 'notice_save_failed': '儲存失敗', 'notice_edit_announcement': '編輯系統公告', 'notice_edit_changelog': '編輯更新日誌', 'notice_updated': '更新於', 'notice_add': '新增', 'notice_delete': '刪除', 'notice_confirm_delete': '確定刪除此條目？', 'notice_title': '標題', 'notice_title_placeholder': '輸入標題（可選）', 'notice_content': '內容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日誌', 'notice_edit_item': '編輯條目', 'notice_no_title': '無標題',
     'login_hint': '預設帳號：admin / admin123 | user / user123',
@@ -1282,7 +1342,7 @@ const I18N = {
     'forum_md_hint': '支援 **粗體** / `程式碼` / - 清單',
     'forum_draft_hint': '已自動儲存草稿', 'forum_draft_clear': '丟棄', 'forum_draft_dropped': '草稿已丟棄',
     'forum_title_too_long': '標題最多 {n} 個字', 'forum_body_too_long': '內容最多 {n} 個字',
-    // v2.6.1 主題樣式
+    // v2.6.2 主題樣式
     'settings_theme_style': '主題樣式', 'settings_theme_style_hint': '一鍵套用配色 / 圓角 / 密度 / 壁紙組合',
     'theme_style_classic': '經典藍', 'theme_style_minimal': '極簡灰', 'theme_style_vibrant': '活力橙',
     'theme_style_forest': '森林綠', 'theme_style_tech': '暗夜科技', 'theme_style_sakura': '櫻花粉',
@@ -1312,7 +1372,7 @@ const I18N = {
     'notify_center': '通知中心', 'notify_all': '全部', 'notify_messages': '站內信', 'notify_system': '系統', 'notify_mark_all_read': '全部已讀', 'notify_empty': '暫無通知', 'notify_friend_request': '好友申請', 'notify_broadcast': '系統廣播', 'notify_unread_msg': '條未讀訊息',
   },
   'en': {
-    'app_name': 'SparkMinds Lab', 'app_subtitle': 'Lab IoT Monitoring Platform',
+    'app_name': 'SparkMinds Lab', 'mobile_back': 'Back to list', 'app_subtitle': 'Lab IoT Monitoring Platform',
     'username': 'Username', 'password': 'Password', 'login': 'Log In',
     'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue', 'notice_announcement': 'Announcements', 'notice_changelog': 'Changelog', 'notice_empty': 'No content', 'notice_edit': 'Edit', 'notice_save': 'Save', 'notice_cancel': 'Cancel', 'notice_saved': 'Saved', 'notice_save_failed': 'Save failed', 'notice_edit_announcement': 'Edit Announcement', 'notice_edit_changelog': 'Edit Changelog', 'notice_updated': 'Updated', 'notice_add': 'Add', 'notice_delete': 'Delete', 'notice_confirm_delete': 'Delete this item?', 'notice_title': 'Title', 'notice_title_placeholder': 'Enter title (optional)', 'notice_content': 'Content', 'notice_new_announcement': 'New Announcement', 'notice_new_changelog': 'New Changelog', 'notice_edit_item': 'Edit Item', 'notice_no_title': 'Untitled',
     'login_hint': 'Default: admin / admin123 | user / user123',
@@ -1445,7 +1505,7 @@ const I18N = {
     'forum_md_hint': 'Supports **bold** / `code` / - list',
     'forum_draft_hint': 'Draft saved automatically', 'forum_draft_clear': 'Discard', 'forum_draft_dropped': 'Draft discarded',
     'forum_title_too_long': 'Title must be {n} characters or fewer', 'forum_body_too_long': 'Body must be {n} characters or fewer',
-    // v2.6.1 theme styles
+    // v2.6.2 theme styles
     'settings_theme_style': 'Theme Style', 'settings_theme_style_hint': 'Apply a bundled accent / radius / density / wallpaper preset',
     'theme_style_classic': 'Classic Blue', 'theme_style_minimal': 'Minimal Grey', 'theme_style_vibrant': 'Vibrant Orange',
     'theme_style_forest': 'Forest Green', 'theme_style_tech': 'Midnight Tech', 'theme_style_sakura': 'Sakura Pink',
@@ -1517,7 +1577,7 @@ function setLang(lang) {
     if (active.id === 'panel-forum' && typeof window.__renderForumList === 'function') {
       window.__renderForumList();
     }
-    // v2.6.1 主题样式卡片由 JS 渲染，切换语言后需重绘（名称与标签）
+    // v2.6.2 主题样式卡片由 JS 渲染，切换语言后需重绘（名称与标签）
     if (active.id === 'panel-settings' && typeof window.__renderThemeStyles === 'function') {
       window.__renderThemeStyles();
     }
@@ -1545,7 +1605,7 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.6.1]';
+    document.title = t('app_name') + ' [v2.6.2]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1626,7 +1686,7 @@ function applyI18n() {
     <div class="trae-topbar-left">
       <!-- v2.5.1 侧边栏折叠 -->
       <button class="trae-icon-btn" id="sidebarToggleBtn" data-i18n-title="sidebar_collapse" title="收起 / 展开侧边栏" style="padding:4px 8px;flex-shrink:0">☰</button>
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.1<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.2<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1685,8 +1745,12 @@ function applyI18n() {
 
   <!-- Body: Sidebar + Content -->
   <div class="trae-body">
+    <!-- v2.6.2 手机端抽屉遮罩 -->
+    <div class="m-backdrop" id="mBackdrop"></div>
     <!-- Sidebar -->
     <div class="trae-sidebar">
+      <!-- v2.6.2 手机端分类（由 JS 从顶栏克隆，仅移动端显示） -->
+      <div id="drawerCats"></div>
       <!-- Space Switcher (admin only) -->
       <div class="space-switcher" id="spaceSwitcher" style="display:none">
         <button class="space-btn active" data-space="A">空间 A</button>
@@ -1955,6 +2019,8 @@ function applyI18n() {
         </div>
       </div>
       <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
+        <!-- v2.6.2 手机端返回联系人列表 -->
+        <button class="trae-icon-btn" id="chatBackBtn" title="返回" data-i18n-title="mobile_back">←</button>
         <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:600;font-size:13.5px;color:var(--fg)" data-i18n="msg_select_contact">选择一个联系人开始聊天</div>
         <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
         <div id="chatInputBar" style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;background:var(--bg2)">
@@ -2126,7 +2192,7 @@ function applyI18n() {
       </div>
     </div>
 
-    <!-- v2.6.1 主题样式（配色 + 圆角 + 密度 + 壁纸 组合预设） -->
+    <!-- v2.6.2 主题样式（配色 + 圆角 + 密度 + 壁纸 组合预设） -->
     <div class="term-box" data-i18n-title="settings_theme_style">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
         <span style="font-size:13px;font-weight:600" data-i18n="settings_theme_style">主题样式</span>
@@ -2271,7 +2337,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.1</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.2</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -3350,9 +3416,7 @@ function applyI18n() {
 
   function switchCategory(cat) {
     currentCat = cat;
-    $$('.trae-cat').forEach(b => b.classList.remove('active'));
-    const catBtn = document.querySelector(`.trae-cat[data-cat="${cat}"]`);
-    if (catBtn) catBtn.classList.add('active');
+    $$('.trae-cat').forEach(b => b.classList.toggle('active', b.dataset.cat === cat)); // v2.6.2 同步顶栏与抽屉分类高亮
     renderSidebar();
     // Auto-select first item in category（进入管理后台时优先落在「审批」，未决事项先处理）
     const items = SIDEBAR_CONFIG[cat] || [];
@@ -3591,8 +3655,8 @@ function applyI18n() {
     const bottomRooms = ROOMS.slice(4);
     bottomRooms.forEach((r, idx) => {
       const div = createRoomElement(r);
-      // 3D打印区 spans 2 columns
-      if (idx === 2) div.style.gridColumn = 'span 2';
+      // 3D打印区 spans 2 columns（v2.6.2 加 room-wide class，手机端单列布局时取消跨列）
+      if (idx === 2) { div.style.gridColumn = 'span 2'; div.classList.add('room-wide'); }
       grid.appendChild(div);
     });
 
@@ -5473,6 +5537,7 @@ function applyI18n() {
     currentChatPeer = peerUid;
     currentChatMode = 'friend';
     currentChatGroupId = null;
+    document.documentElement.classList.add('m-chat-open'); // v2.6.2 手机端进入聊天视图
     // 退出搜索模式，恢复聊天视图
     isSearchMode = false;
     const searchInput = $('#msgSearchInput');
@@ -5604,6 +5669,7 @@ function applyI18n() {
     currentChatMode = 'group';
     currentChatGroupId = gid;
     currentChatPeer = null;
+    document.documentElement.classList.add('m-chat-open'); // v2.6.2 手机端进入聊天视图
     // 清除好友轮询
     if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
     // v2.3 获取群组成员在线状态
@@ -6296,7 +6362,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.1 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.2 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -7097,7 +7163,7 @@ tr:hover{background:#f5f5ff}
         settings.custom = null;
         saveWpSettings(settings);
         applyWallpaper();
-        // v2.6.1：手动换壁纸 → 主题样式标记为「自定义」
+        // v2.6.2：手动换壁纸 → 主题样式标记为「自定义」
         if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
         renderWpGrid();
         toast(wpId === 'none' ? t('wp_cleared') : t('wp_switched', {name: t(WP_PRESETS.find(p=>p.id===wpId).nameKey)}));
@@ -7207,7 +7273,7 @@ tr:hover{background:#f5f5ff}
 
   // ===================== 设置 =====================
   function initSettings() {
-    // v2.6.1：设置页初始化期间先关闭「手动改设置」钩子，避免恢复存档时被误判为自定义
+    // v2.6.2：设置页初始化期间先关闭「手动改设置」钩子，避免恢复存档时被误判为自定义
     tsReady = false;
     // 主题切换已由全局 toggleTheme 处理，这里同步状态
     applyThemeState();
@@ -7250,7 +7316,7 @@ tr:hover{background:#f5f5ff}
 
     // 自定义主题色
     initAccentColor();
-    // v2.6.1 主题样式（放在最后：渲染完卡片后再开启钩子）
+    // v2.6.2 主题样式（放在最后：渲染完卡片后再开启钩子）
     if (typeof initThemeStyles === 'function') initThemeStyles();
   }
 
@@ -7287,7 +7353,7 @@ tr:hover{background:#f5f5ff}
     root.style.setProperty('--accent-dark', hslString(h, s, Math.max(l - 12, 25)));
     root.style.setProperty('--accent-soft', hslString(h, s, l, 0.12));
     localStorage.setItem('lab_accent', hex);
-    // v2.6.1：手动改主题色 → 主题样式标记为「自定义」
+    // v2.6.2：手动改主题色 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     var dashPanel = document.querySelector('#panel-dashboard');
     if (dashPanel && dashPanel.classList.contains('active') && typeof renderDashboard === 'function') {
@@ -7373,7 +7439,7 @@ tr:hover{background:#f5f5ff}
     // 圆角很小时输入框会显得像老式控件，轻微收紧内边距改善观感
     root.style.setProperty('--radius-tight', n <= 4 ? '4px' : n + 'px');
     localStorage.setItem('lab_radius', String(n));
-    // v2.6.1：手动改圆角 → 主题样式标记为「自定义」
+    // v2.6.2：手动改圆角 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     syncRadiusUI(n);
   }
@@ -7421,7 +7487,7 @@ tr:hover{background:#f5f5ff}
     if (m === 'compact') document.documentElement.setAttribute('data-density', 'compact');
     else document.documentElement.removeAttribute('data-density');
     localStorage.setItem('lab_density', m);
-    // v2.6.1：手动改密度 → 主题样式标记为「自定义」
+    // v2.6.2：手动改密度 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     const seg = $('#densitySeg');
     if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.densityVal === m));
@@ -7450,7 +7516,7 @@ tr:hover{background:#f5f5ff}
   function setThemeMode(mode) {
     localStorage.setItem('lab_theme_mode', mode);
     localStorage.setItem('lab_theme', resolveThemeMode(mode)); // 同步旧 key，保持向后兼容
-    // v2.6.1：手动改外观模式 → 主题样式标记为「自定义」
+    // v2.6.2：手动改外观模式 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     applyThemeState();
     const dash = $('#panel-dashboard');
@@ -7485,7 +7551,7 @@ tr:hover{background:#f5f5ff}
     applyThemeState();
   }
 
-  /* ---- v2.6.1 主题样式：配色 + 圆角 + 密度 + 壁纸 的组合预设 ---- */
+  /* ---- v2.6.2 主题样式：配色 + 圆角 + 密度 + 壁纸 的组合预设 ---- */
   const THEME_STYLES = [
     { id: 'classic', nameKey: 'theme_style_classic', accent: '#6366f1', radius: 14, density: 'comfortable', mode: 'light', wp: 'none' },
     { id: 'minimal', nameKey: 'theme_style_minimal', accent: '#64748b', radius: 4, density: 'compact', mode: 'light', wp: 'none' },
@@ -7629,7 +7695,7 @@ tr:hover{background:#f5f5ff}
         <div class="cl-head">
           <div>
             <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
-            <div class="cl-sub">SparkMinds Lab v2.6.1 · ${list.length}</div>
+            <div class="cl-sub">SparkMinds Lab v2.6.2 · ${list.length}</div>
           </div>
           <button class="cl-close" title="Close">✕</button>
         </div>
@@ -7820,7 +7886,57 @@ tr:hover{background:#f5f5ff}
     const btn = $('#sidebarToggleBtn');
     if (btn) btn.textContent = collapsed ? '»' : '☰';
   }
-  function toggleSidebar() { applySidebarCollapse(document.documentElement.getAttribute('data-sidebar') !== 'collapsed'); }
+  function toggleSidebar() {
+    // v2.6.2 手机端：汉堡按钮改为开关侧边栏抽屉
+    if (window.matchMedia('(max-width:768px)').matches) { toggleMobileDrawer(); return; }
+    applySidebarCollapse(document.documentElement.getAttribute('data-sidebar') !== 'collapsed');
+  }
+  /* ---- v2.6.2 手机端适配：抽屉 / 返回按钮 / 克隆分类 ---- */
+  function toggleMobileDrawer(force) {
+    const open = typeof force === 'boolean' ? force : !document.documentElement.classList.contains('m-drawer-open');
+    document.documentElement.classList.toggle('m-drawer-open', open);
+    const btn = $('#sidebarToggleBtn');
+    if (btn && window.matchMedia('(max-width:768px)').matches) btn.textContent = open ? '✕' : '☰';
+  }
+  function closeMobileDrawer() {
+    if (document.documentElement.classList.contains('m-drawer-open')) toggleMobileDrawer(false);
+  }
+  function initMobileUI() {
+    const backdrop = $('#mBackdrop');
+    if (backdrop && !backdrop.dataset.mBound) {
+      backdrop.dataset.mBound = '1';
+      backdrop.addEventListener('click', () => toggleMobileDrawer(false));
+    }
+    const back = $('#chatBackBtn');
+    if (back && !back.dataset.mBound) {
+      back.dataset.mBound = '1';
+      back.addEventListener('click', () => document.documentElement.classList.remove('m-chat-open'));
+    }
+    // 克隆顶栏分类按钮到抽屉（仅移动端可见）
+    const box = $('#drawerCats');
+    if (box && !box.dataset.built) {
+      box.dataset.built = '1';
+      $$('.trae-topbar-left .trae-cat').forEach(b => {
+        const c = b.cloneNode(true);
+        c.removeAttribute('style');
+        c.addEventListener('click', () => switchCategory(b.dataset.cat)); // 抽屉内切分类不收起，点具体面板才收
+        box.appendChild(c);
+      });
+    }
+    // 点抽屉里的导航项后自动收起
+    document.addEventListener('click', e => {
+      if (!document.documentElement.classList.contains('m-drawer-open')) return;
+      if (e.target.closest('.trae-sidebar-item')) closeMobileDrawer();
+    }, true);
+    // 从手机尺寸切回桌面时清理状态
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        document.documentElement.classList.remove('m-drawer-open');
+        const btn2 = $('#sidebarToggleBtn');
+        if (btn2) btn2.textContent = document.documentElement.getAttribute('data-sidebar') === 'collapsed' ? '»' : '☰';
+      }
+    });
+  }
   function initSidebarCollapse() {
     const btn = $('#sidebarToggleBtn');
     if (btn) btn.addEventListener('click', toggleSidebar);
@@ -7880,8 +7996,9 @@ tr:hover{background:#f5f5ff}
   initDensity();
   initThemeMode();
   initSidebarCollapse();
+  initMobileUI(); // v2.6.2 手机端
   initMotion();
-  // v2.6.1 主题样式
+  // v2.6.2 主题样式
   initThemeStyles();
   updateChangelogDot();
 
@@ -8916,7 +9033,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.6.1\n' +
+      '\n  🔬 SparkMinds Lab v2.6.2\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -8967,7 +9084,7 @@ tr:hover{background:#f5f5ff}
           ['v2.4', 'Notifications + Shortcuts + Reports', '08-05', 'spark'],
           ['v2.5', 'Command Palette + Density + Changelog', '09-25', 'command'],
           ['v2.6', 'Forum Revamp: Search / Sort / Rich Text', '09-25', 'chat'],
-          ['v2.6.1', 'Theme Styles: 6 bundled presets', '09-25', 'design']
+          ['v2.6.2', 'Theme Styles: 6 bundled presets', '09-25', 'design']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -8985,7 +9102,7 @@ tr:hover{background:#f5f5ff}
           ['v2.4', '通知中心 + 快捷鍵 + 報告導出', '08-05', '火花'],
           ['v2.5', '命令面板 + 介面密度 + 更新日誌', '09-25', 'command'],
           ['v2.6', '論壇改版：搜尋 / 排序 / 富文本', '09-25', 'chat'],
-          ['v2.6.1', '主題樣式：六套組合預設', '09-25', 'design']
+          ['v2.6.2', '主題樣式：六套組合預設', '09-25', 'design']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -9003,10 +9120,10 @@ tr:hover{background:#f5f5ff}
           ['v2.4', '通知中心 + 快捷键 + 报告导出', '08-05', '火花'],
           ['v2.5', '命令面板 + 界面密度 + 更新日志', '09-25', 'command'],
           ['v2.6', '论坛改版：搜索 / 排序 / 富文本', '09-25', 'chat'],
-          ['v2.6.1', '主题样式：六套组合预设', '09-25', 'design']
+          ['v2.6.2', '主题样式：六套组合预设', '09-25', 'design']
         ]
       };
-      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘' };
+      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘', 'mobile': '📱' };
       modal.innerHTML =
         '<h2><span class="ee-badge">🔬</span>' + content.title + '</h2>' +
         '<div class="ee-ver">' + content.ver + '</div>' +
