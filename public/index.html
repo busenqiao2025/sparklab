@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.6.4]</title>
+<title>SparkMinds Lab [v2.6.5]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -459,18 +459,30 @@
   .room-term .rt-dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--success);box-shadow:0 0 0 3px var(--success-soft)}
   .room-term.is-stale .rt-dot{background:var(--warning);box-shadow:0 0 0 3px var(--warning-soft)}
   .room-term.is-offline .rt-dot{background:var(--muted);box-shadow:0 0 0 3px var(--bg-soft)}
-  .room-term .rt-name{font-size:14px;font-weight:700;color:var(--fg);letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .room-term .rt-name{font-size:14.5px;font-weight:700;color:var(--fg);letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .room-term .rt-chip{font-size:10px;color:var(--accent);background:var(--accent-soft);border:none;padding:3px 9px;border-radius:var(--radius-xs);font-weight:700;letter-spacing:.3px;flex:none;white-space:nowrap}
   .room-term .rt-status{font-size:10.5px;color:var(--muted);margin-top:3px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .room-term.is-stale .rt-status{color:var(--warning)}
   .room-term .rt-headcol{display:flex;flex-direction:column;min-width:0;flex:1}
-  /* 电脑 / 平板：传感器沿用原本的「标签左 · 数值右」行式排版 */
+  /* v2.6.5 主指标：温度 / 湿度 大字突出，一眼可读 */
+  .sensor-primary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px 12px;margin-bottom:10px;background:var(--bg-soft);border:1px solid var(--border-light);border-radius:var(--radius-sm)}
+  .sp-item{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .sp-label{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);letter-spacing:.2px;white-space:nowrap}
+  .sp-icon,.sc-icon{font-style:normal;font-size:11px;line-height:1;flex:none;opacity:.9}
+  .sp-val{display:flex;align-items:baseline;gap:2px;font-family:var(--mono);color:var(--fg);min-width:0}
+  .sp-val .sv-num{font-size:19px;font-weight:800;letter-spacing:-.6px;line-height:1.1;white-space:nowrap}
+  .sp-val .sv-unit{font-size:10.5px;font-weight:600;color:var(--fg-light);white-space:nowrap}
+  .sp-val.warn .sv-num{color:var(--warning)}
+  .sp-val.danger .sv-num{color:var(--danger)}
+  /* 电脑 / 平板：次要指标沿用原本的「标签左 · 数值右」行式排版 */
   .sensor-grid{display:block}
-  .sensor-cell{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;min-width:0}
-  .sensor-cell .sc-label{font-size:12px;color:var(--fg-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sensor-cell .sc-val{font-size:11.5px;font-weight:600;color:var(--fg);font-family:var(--mono);white-space:nowrap}
-  .sensor-cell .sc-val.warn{color:var(--warning)}
-  .sensor-cell .sc-val.danger{color:var(--danger)}
+  .sensor-cell{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:5px 0;min-width:0}
+  .sensor-cell .sc-label{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--fg-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sensor-cell .sc-val{display:flex;align-items:baseline;gap:2px;font-size:11.5px;font-weight:600;color:var(--fg);font-family:var(--mono);white-space:nowrap}
+  .sensor-cell .sc-val .sv-num{font-size:12.5px;font-weight:700}
+  .sensor-cell .sc-val .sv-unit{font-size:10px;color:var(--fg-light)}
+  .sensor-cell .sc-val.warn .sv-num{color:var(--warning)}
+  .sensor-cell .sc-val.danger .sv-num{color:var(--danger)}
   .light-bar{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .light-tag{font-size:11px;padding:4px 10px;border:1px solid var(--border);color:var(--fg-light);border-radius:20px;background:var(--bg-soft);transition:var(--transition);font-weight:500}
   .light-tag.on{border-color:var(--success);color:var(--success);background:var(--success-soft);font-weight:600}
@@ -795,7 +807,7 @@
     .trae-topbar{padding:0 12px;gap:8px}
     #shortcutHelpBtn,#myReqBtn{display:none}
   }
-  /* v2.6.4 起手机端样式统一移至文件末尾「手机端适配」大块 */
+  /* v2.6.5 起手机端样式统一移至文件末尾「手机端适配」大块 */
 
   /* ===== v2.6 论坛 ===== */
   .forum-stats{
@@ -928,7 +940,7 @@
   .forum-counter{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
   .forum-counter.over{color:var(--danger);font-weight:700}
 
-  /* ===== v2.6.4 主题样式（组合预设） ===== */
+  /* ===== v2.6.5 主题样式（组合预设） ===== */
   .ts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px}
   .ts-card{
     border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-soft);
@@ -957,7 +969,7 @@
     .ts-grid{grid-template-columns:repeat(2,1fr)}
   }
 
-  /* ===== v2.6.4 手机端适配 ===== */
+  /* ===== v2.6.5 手机端适配 ===== */
   .m-backdrop{display:none}
   #drawerCats{display:none}
   @media(max-width:768px){
@@ -1012,6 +1024,11 @@
     .sensor-cell{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;background:var(--bg-soft);border:1px solid var(--border-light);border-radius:var(--radius-xs);padding:8px 10px}
     .sensor-cell .sc-label{font-size:10px;color:var(--muted);letter-spacing:.2px}
     .sensor-cell .sc-val{font-size:13px;font-weight:700}
+    /* 手机上主指标数值再放大一档 */
+    .sensor-primary{gap:8px;padding:9px 10px}
+    .sp-val .sv-num{font-size:22px}
+    .sensor-cell .sc-val .sv-num{font-size:14px}
+    .sensor-cell .sc-val .sv-unit{font-size:10.5px}
     .cam-grid{grid-template-columns:1fr}
     /* ---- 站内信：联系人列表 / 聊天 二选一显示 ---- */
     #msgLayout{height:calc(100dvh - 170px)!important}
@@ -1190,7 +1207,7 @@ const I18N = {
     'forum_md_hint': '支持 **粗体** / `代码` / - 列表',
     'forum_draft_hint': '已自动保存草稿', 'forum_draft_clear': '丢弃', 'forum_draft_dropped': '草稿已丢弃',
     'forum_title_too_long': '标题最多 {n} 个字', 'forum_body_too_long': '内容最多 {n} 个字',
-    // v2.6.4 主题样式
+    // v2.6.5 主题样式
     'settings_theme_style': '主题样式', 'settings_theme_style_hint': '一键套用配色 / 圆角 / 密度 / 壁纸组合',
     'theme_style_classic': '经典蓝', 'theme_style_minimal': '极简灰', 'theme_style_vibrant': '活力橙',
     'theme_style_forest': '森林绿', 'theme_style_tech': '暗夜科技', 'theme_style_sakura': '樱花粉',
@@ -1357,7 +1374,7 @@ const I18N = {
     'forum_md_hint': '支援 **粗體** / `程式碼` / - 清單',
     'forum_draft_hint': '已自動儲存草稿', 'forum_draft_clear': '丟棄', 'forum_draft_dropped': '草稿已丟棄',
     'forum_title_too_long': '標題最多 {n} 個字', 'forum_body_too_long': '內容最多 {n} 個字',
-    // v2.6.4 主題樣式
+    // v2.6.5 主題樣式
     'settings_theme_style': '主題樣式', 'settings_theme_style_hint': '一鍵套用配色 / 圓角 / 密度 / 壁紙組合',
     'theme_style_classic': '經典藍', 'theme_style_minimal': '極簡灰', 'theme_style_vibrant': '活力橙',
     'theme_style_forest': '森林綠', 'theme_style_tech': '暗夜科技', 'theme_style_sakura': '櫻花粉',
@@ -1519,7 +1536,7 @@ const I18N = {
     'forum_md_hint': 'Supports **bold** / `code` / - list',
     'forum_draft_hint': 'Draft saved automatically', 'forum_draft_clear': 'Discard', 'forum_draft_dropped': 'Draft discarded',
     'forum_title_too_long': 'Title must be {n} characters or fewer', 'forum_body_too_long': 'Body must be {n} characters or fewer',
-    // v2.6.4 theme styles
+    // v2.6.5 theme styles
     'settings_theme_style': 'Theme Style', 'settings_theme_style_hint': 'Apply a bundled accent / radius / density / wallpaper preset',
     'theme_style_classic': 'Classic Blue', 'theme_style_minimal': 'Minimal Grey', 'theme_style_vibrant': 'Vibrant Orange',
     'theme_style_forest': 'Forest Green', 'theme_style_tech': 'Midnight Tech', 'theme_style_sakura': 'Sakura Pink',
@@ -1591,11 +1608,11 @@ function setLang(lang) {
     if (active.id === 'panel-forum' && typeof window.__renderForumList === 'function') {
       window.__renderForumList();
     }
-    // v2.6.4 主题样式卡片由 JS 渲染，切换语言后需重绘（名称与标签）
+    // v2.6.5 主题样式卡片由 JS 渲染，切换语言后需重绘（名称与标签）
     if (active.id === 'panel-settings' && typeof window.__renderThemeStyles === 'function') {
       window.__renderThemeStyles();
     }
-    // v2.6.4 实验室卡片由 JS 渲染（传感器标签 / 在线状态文案）
+    // v2.6.5 实验室卡片由 JS 渲染（传感器标签 / 在线状态文案）
     if (active.id === 'panel-lab' && typeof window.__initRooms === 'function') {
       window.__initRooms();
     }
@@ -1623,7 +1640,7 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.6.4]';
+    document.title = t('app_name') + ' [v2.6.5]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1704,7 +1721,7 @@ function applyI18n() {
     <div class="trae-topbar-left">
       <!-- v2.5.1 侧边栏折叠 -->
       <button class="trae-icon-btn" id="sidebarToggleBtn" data-i18n-title="sidebar_collapse" title="收起 / 展开侧边栏" style="padding:4px 8px;flex-shrink:0">☰</button>
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.4<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.5<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1763,11 +1780,11 @@ function applyI18n() {
 
   <!-- Body: Sidebar + Content -->
   <div class="trae-body">
-    <!-- v2.6.4 手机端抽屉遮罩 -->
+    <!-- v2.6.5 手机端抽屉遮罩 -->
     <div class="m-backdrop" id="mBackdrop"></div>
     <!-- Sidebar -->
     <div class="trae-sidebar">
-      <!-- v2.6.4 手机端分类（由 JS 从顶栏克隆，仅移动端显示） -->
+      <!-- v2.6.5 手机端分类（由 JS 从顶栏克隆，仅移动端显示） -->
       <div id="drawerCats"></div>
       <!-- Space Switcher (admin only) -->
       <div class="space-switcher" id="spaceSwitcher" style="display:none">
@@ -2037,7 +2054,7 @@ function applyI18n() {
         </div>
       </div>
       <div id="chatArea" style="flex:1;display:flex;flex-direction:column">
-        <!-- v2.6.4 手机端返回联系人列表 -->
+        <!-- v2.6.5 手机端返回联系人列表 -->
         <button class="trae-icon-btn" id="chatBackBtn" title="返回" data-i18n-title="mobile_back">←</button>
         <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);font-weight:600;font-size:13.5px;color:var(--fg)" data-i18n="msg_select_contact">选择一个联系人开始聊天</div>
         <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px"></div>
@@ -2210,7 +2227,7 @@ function applyI18n() {
       </div>
     </div>
 
-    <!-- v2.6.4 主题样式（配色 + 圆角 + 密度 + 壁纸 组合预设） -->
+    <!-- v2.6.5 主题样式（配色 + 圆角 + 密度 + 壁纸 组合预设） -->
     <div class="term-box" data-i18n-title="settings_theme_style">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
         <span style="font-size:13px;font-weight:600" data-i18n="settings_theme_style">主题样式</span>
@@ -2355,7 +2372,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.4</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.5</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -3434,7 +3451,7 @@ function applyI18n() {
 
   function switchCategory(cat) {
     currentCat = cat;
-    $$('.trae-cat').forEach(b => b.classList.toggle('active', b.dataset.cat === cat)); // v2.6.4 同步顶栏与抽屉分类高亮
+    $$('.trae-cat').forEach(b => b.classList.toggle('active', b.dataset.cat === cat)); // v2.6.5 同步顶栏与抽屉分类高亮
     renderSidebar();
     // Auto-select first item in category（进入管理后台时优先落在「审批」，未决事项先处理）
     const items = SIDEBAR_CONFIG[cat] || [];
@@ -3486,13 +3503,21 @@ function applyI18n() {
         </div>
         <span class="rt-chip">${r.chip}</span>
       </div>
+      <div class="sensor-primary">
+        <div class="sp-item">
+          <span class="sp-label"><i class="sp-icon">🌡</i>${t('sensor_temp')}</span>
+          <span class="sp-val" data-k="temp"><span class="sv-num">--</span><span class="sv-unit">°C</span></span>
+        </div>
+        <div class="sp-item">
+          <span class="sp-label"><i class="sp-icon">💧</i>${t('sensor_humi')}</span>
+          <span class="sp-val" data-k="humi"><span class="sv-num">--</span><span class="sv-unit">%</span></span>
+        </div>
+      </div>
       <div class="sensor-grid">
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_temp')}</span><span class="sc-val" data-k="temp">-- °C</span></div>
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_humi')}</span><span class="sc-val" data-k="humi">-- %</span></div>
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_light')}</span><span class="sc-val" data-k="light" title="raw: --">-- %</span></div>
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_aqi')}</span><span class="sc-val" data-k="aqi">--</span></div>
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_tvoc')}</span><span class="sc-val" data-k="tvoc">-- ppb</span></div>
-        <div class="sensor-cell"><span class="sc-label">${t('sensor_eco2')}</span><span class="sc-val" data-k="eco2">-- ppm</span></div>
+        <div class="sensor-cell"><span class="sc-label"><i class="sc-icon">💡</i>${t('sensor_light')}</span><span class="sc-val" data-k="light" title="raw: --"><span class="sv-num">--</span><span class="sv-unit">%</span></span></div>
+        <div class="sensor-cell"><span class="sc-label"><i class="sc-icon">🍃</i>${t('sensor_aqi')}</span><span class="sc-val" data-k="aqi"><span class="sv-num">--</span></span></div>
+        <div class="sensor-cell"><span class="sc-label"><i class="sc-icon">☁️</i>${t('sensor_tvoc')}</span><span class="sc-val" data-k="tvoc"><span class="sv-num">--</span><span class="sv-unit">ppb</span></span></div>
+        <div class="sensor-cell"><span class="sc-label"><i class="sc-icon">🏭</i>${t('sensor_eco2')}</span><span class="sc-val" data-k="eco2"><span class="sv-num">--</span><span class="sv-unit">ppm</span></span></div>
       </div>
       <div class="light-bar" id="lb-${r.id}"></div>
     `;
@@ -3661,7 +3686,7 @@ function applyI18n() {
     $('#camSaveBtn').addEventListener('click', () => { saveCameras(); $('#camModal').style.display = 'none'; });
   }
 
-  /* ---- v2.6.4 卡片状态：最后更新时间 / 在线离线 ---- */
+  /* ---- v2.6.5 卡片状态：最后更新时间 / 在线离线 ---- */
   const roomLastSeen = {};      // roomId -> 最后一次收到数据的时间
   const roomSensorData = {};    // roomId -> { key: value }（重绘卡片时回放，避免数值被清空）
   let roomStatusTimer = null;
@@ -3803,12 +3828,18 @@ function applyI18n() {
     lightState[key] = isOn;
   }
 
+  // v2.6.5：数值写进 .sv-num，单位（°C / % / ppm…）留在 .sv-unit 单独排版
+  function setSensorText(el, text) {
+    const box = el.querySelector('.sv-num');
+    if (box) box.textContent = text; else el.textContent = text;
+  }
+
   function updateSensor(roomId, key, value) {
     const roomEl = document.getElementById('room-' + roomId);
     if (!roomEl) return;
     const el = roomEl.querySelector(`[data-k="${key}"]`);
     if (!el) return;
-    roomLastSeen[roomId] = Date.now();   // v2.6.4 卡片状态
+    roomLastSeen[roomId] = Date.now();   // v2.6.5 卡片状态
     (roomSensorData[roomId] = roomSensorData[roomId] || {})[key] = value;
     updateRoomStatusEl(roomId);
     if (typeof recordSensorData === 'function') recordSensorData(roomId, key, value);
@@ -3817,7 +3848,7 @@ function applyI18n() {
       const raw = parseInt(value);
       lightRawCache[roomId] = raw;
       const pct = Math.max(0, Math.min(100, Math.round((1 - raw / 4095) * 100)));
-      el.textContent = pct + ' %';
+      setSensorText(el, pct + ' %');
       el.title = `raw ADC: ${raw}`;
       const isOn = raw <= LIGHT_OFF_THRESHOLD;
       const r = ROOMS.find(x => x.id === roomId);
@@ -3831,13 +3862,13 @@ function applyI18n() {
       const v = parseInt(value);
       const label = AQI_LABELS[v] || '未知';
       const color = AQI_COLORS[v] || '#888';
-      el.textContent = `${v} [${label}]`;
+      setSensorText(el, `${v} [${label}]`);
       el.style.color = color;
       return;
     }
 
     if (key === 'tvoc') {
-      el.textContent = value + ' ppb';
+      setSensorText(el, value + ' ppb');
       const v = parseInt(value);
       el.classList.toggle('warn', v >= 500 && v < 1500);
       el.classList.toggle('danger', v >= 1500);
@@ -3845,7 +3876,7 @@ function applyI18n() {
     }
 
     if (key === 'eco2') {
-      el.textContent = value + ' ppm';
+      setSensorText(el, value + ' ppm');
       const v = parseInt(value);
       el.classList.toggle('warn', v >= 1000 && v < 2000);
       el.classList.toggle('danger', v >= 2000);
@@ -3853,7 +3884,7 @@ function applyI18n() {
     }
 
     if (key === 'temp') {
-      el.textContent = value + ' °C';
+      setSensorText(el, value + ' °C');
       const v = parseFloat(value);
       el.classList.toggle('warn', v >= 35 && v < 40);
       el.classList.toggle('danger', v >= 40);
@@ -3861,14 +3892,14 @@ function applyI18n() {
     }
 
     if (key === 'humi') {
-      el.textContent = value + ' %';
+      setSensorText(el, value + ' %');
       const v = parseFloat(value);
       el.classList.toggle('warn', (v >= 80 && v < 90) || (v <= 20 && v > 10));
       el.classList.toggle('danger', v >= 90 || v <= 10);
       return;
     }
 
-    el.textContent = value;
+    setSensorText(el, value);
   }
 
   // ===================== MQTT =====================
@@ -5616,7 +5647,7 @@ function applyI18n() {
     currentChatPeer = peerUid;
     currentChatMode = 'friend';
     currentChatGroupId = null;
-    document.documentElement.classList.add('m-chat-open'); // v2.6.4 手机端进入聊天视图
+    document.documentElement.classList.add('m-chat-open'); // v2.6.5 手机端进入聊天视图
     // 退出搜索模式，恢复聊天视图
     isSearchMode = false;
     const searchInput = $('#msgSearchInput');
@@ -5748,7 +5779,7 @@ function applyI18n() {
     currentChatMode = 'group';
     currentChatGroupId = gid;
     currentChatPeer = null;
-    document.documentElement.classList.add('m-chat-open'); // v2.6.4 手机端进入聊天视图
+    document.documentElement.classList.add('m-chat-open'); // v2.6.5 手机端进入聊天视图
     // 清除好友轮询
     if (msgPollTimer) { clearInterval(msgPollTimer); msgPollTimer = null; }
     // v2.3 获取群组成员在线状态
@@ -6441,7 +6472,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.4 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.5 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -7242,7 +7273,7 @@ tr:hover{background:#f5f5ff}
         settings.custom = null;
         saveWpSettings(settings);
         applyWallpaper();
-        // v2.6.4：手动换壁纸 → 主题样式标记为「自定义」
+        // v2.6.5：手动换壁纸 → 主题样式标记为「自定义」
         if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
         renderWpGrid();
         toast(wpId === 'none' ? t('wp_cleared') : t('wp_switched', {name: t(WP_PRESETS.find(p=>p.id===wpId).nameKey)}));
@@ -7352,7 +7383,7 @@ tr:hover{background:#f5f5ff}
 
   // ===================== 设置 =====================
   function initSettings() {
-    // v2.6.4：设置页初始化期间先关闭「手动改设置」钩子，避免恢复存档时被误判为自定义
+    // v2.6.5：设置页初始化期间先关闭「手动改设置」钩子，避免恢复存档时被误判为自定义
     tsReady = false;
     // 主题切换已由全局 toggleTheme 处理，这里同步状态
     applyThemeState();
@@ -7395,7 +7426,7 @@ tr:hover{background:#f5f5ff}
 
     // 自定义主题色
     initAccentColor();
-    // v2.6.4 主题样式（放在最后：渲染完卡片后再开启钩子）
+    // v2.6.5 主题样式（放在最后：渲染完卡片后再开启钩子）
     if (typeof initThemeStyles === 'function') initThemeStyles();
   }
 
@@ -7432,7 +7463,7 @@ tr:hover{background:#f5f5ff}
     root.style.setProperty('--accent-dark', hslString(h, s, Math.max(l - 12, 25)));
     root.style.setProperty('--accent-soft', hslString(h, s, l, 0.12));
     localStorage.setItem('lab_accent', hex);
-    // v2.6.4：手动改主题色 → 主题样式标记为「自定义」
+    // v2.6.5：手动改主题色 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     var dashPanel = document.querySelector('#panel-dashboard');
     if (dashPanel && dashPanel.classList.contains('active') && typeof renderDashboard === 'function') {
@@ -7518,7 +7549,7 @@ tr:hover{background:#f5f5ff}
     // 圆角很小时输入框会显得像老式控件，轻微收紧内边距改善观感
     root.style.setProperty('--radius-tight', n <= 4 ? '4px' : n + 'px');
     localStorage.setItem('lab_radius', String(n));
-    // v2.6.4：手动改圆角 → 主题样式标记为「自定义」
+    // v2.6.5：手动改圆角 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     syncRadiusUI(n);
   }
@@ -7566,7 +7597,7 @@ tr:hover{background:#f5f5ff}
     if (m === 'compact') document.documentElement.setAttribute('data-density', 'compact');
     else document.documentElement.removeAttribute('data-density');
     localStorage.setItem('lab_density', m);
-    // v2.6.4：手动改密度 → 主题样式标记为「自定义」
+    // v2.6.5：手动改密度 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     const seg = $('#densitySeg');
     if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.densityVal === m));
@@ -7595,7 +7626,7 @@ tr:hover{background:#f5f5ff}
   function setThemeMode(mode) {
     localStorage.setItem('lab_theme_mode', mode);
     localStorage.setItem('lab_theme', resolveThemeMode(mode)); // 同步旧 key，保持向后兼容
-    // v2.6.4：手动改外观模式 → 主题样式标记为「自定义」
+    // v2.6.5：手动改外观模式 → 主题样式标记为「自定义」
     if (typeof markThemeStyleCustom === 'function') markThemeStyleCustom();
     applyThemeState();
     const dash = $('#panel-dashboard');
@@ -7630,7 +7661,7 @@ tr:hover{background:#f5f5ff}
     applyThemeState();
   }
 
-  /* ---- v2.6.4 主题样式：配色 + 圆角 + 密度 + 壁纸 的组合预设 ---- */
+  /* ---- v2.6.5 主题样式：配色 + 圆角 + 密度 + 壁纸 的组合预设 ---- */
   const THEME_STYLES = [
     { id: 'classic', nameKey: 'theme_style_classic', accent: '#6366f1', radius: 14, density: 'comfortable', mode: 'light', wp: 'none' },
     { id: 'minimal', nameKey: 'theme_style_minimal', accent: '#64748b', radius: 4, density: 'compact', mode: 'light', wp: 'none' },
@@ -7774,7 +7805,7 @@ tr:hover{background:#f5f5ff}
         <div class="cl-head">
           <div>
             <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
-            <div class="cl-sub">SparkMinds Lab v2.6.4 · ${list.length}</div>
+            <div class="cl-sub">SparkMinds Lab v2.6.5 · ${list.length}</div>
           </div>
           <button class="cl-close" title="Close">✕</button>
         </div>
@@ -7966,11 +7997,11 @@ tr:hover{background:#f5f5ff}
     if (btn) btn.textContent = collapsed ? '»' : '☰';
   }
   function toggleSidebar() {
-    // v2.6.4 手机端：汉堡按钮改为开关侧边栏抽屉
+    // v2.6.5 手机端：汉堡按钮改为开关侧边栏抽屉
     if (window.matchMedia('(max-width:768px)').matches) { toggleMobileDrawer(); return; }
     applySidebarCollapse(document.documentElement.getAttribute('data-sidebar') !== 'collapsed');
   }
-  /* ---- v2.6.4 手机端适配：抽屉 / 返回按钮 / 克隆分类 ---- */
+  /* ---- v2.6.5 手机端适配：抽屉 / 返回按钮 / 克隆分类 ---- */
   function toggleMobileDrawer(force) {
     const open = typeof force === 'boolean' ? force : !document.documentElement.classList.contains('m-drawer-open');
     document.documentElement.classList.toggle('m-drawer-open', open);
@@ -8075,9 +8106,9 @@ tr:hover{background:#f5f5ff}
   initDensity();
   initThemeMode();
   initSidebarCollapse();
-  initMobileUI(); // v2.6.4 手机端
+  initMobileUI(); // v2.6.5 手机端
   initMotion();
-  // v2.6.4 主题样式
+  // v2.6.5 主题样式
   initThemeStyles();
   updateChangelogDot();
 
@@ -9112,7 +9143,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.6.4\n' +
+      '\n  🔬 SparkMinds Lab v2.6.5\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -9166,7 +9197,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.1', 'Theme Styles: 6 bundled presets', '09-25', 'design'],
           ['v2.6.2', 'Mobile Layout: Drawer Nav + Chat View', '09-25', 'mobile'],
           ['v2.6.3', 'Lab Monitor: Card Grid', '09-25', 'design'],
-          ['v2.6.4', 'Lab: Floor Plan on Desktop, Cards on Mobile', '09-25', 'mobile']
+          ['v2.6.4', 'Lab: Floor Plan on Desktop, Cards on Mobile', '09-25', 'mobile'],
+          ['v2.6.5', 'Lab Monitor: Clearer Metric Hierarchy', '09-25', 'design']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -9187,7 +9219,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.1', '主題樣式：六套組合預設', '09-25', 'design'],
           ['v2.6.2', '手機版面：抽屜導航 + 聊天視圖', '09-25', 'mobile'],
           ['v2.6.3', '實驗室監控：全螢幕卡片流', '09-25', 'design'],
-          ['v2.6.4', '實驗室：電腦平板保留平面圖，手機用卡片', '09-25', 'mobile']
+          ['v2.6.4', '實驗室：電腦平板保留平面圖，手機用卡片', '09-25', 'mobile'],
+          ['v2.6.5', '實驗室監控：主次指標分層更易讀', '09-25', 'design']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -9208,7 +9241,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.1', '主题样式：六套组合预设', '09-25', 'design'],
           ['v2.6.2', '手机版面：抽屉导航 + 聊天视图', '09-25', 'mobile'],
           ['v2.6.3', '实验室监控：全屏卡片流', '09-25', 'design'],
-          ['v2.6.4', '实验室：电脑平板保留平面图，手机用卡片', '09-25', 'mobile']
+          ['v2.6.4', '实验室：电脑平板保留平面图，手机用卡片', '09-25', 'mobile'],
+          ['v2.6.5', '实验室监控：主次指标分层更易读', '09-25', 'design']
         ]
       };
       const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘', 'mobile': '📱' };
