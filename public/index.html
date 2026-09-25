@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.5]</title>
+<title>SparkMinds Lab [v2.5.1]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -239,7 +239,27 @@
   .cl-entry-content{font-size:12.5px;line-height:1.7;color:var(--fg-dim);white-space:pre-wrap;word-break:break-word}
   .cl-empty{padding:34px 8px;text-align:center;color:var(--fg-light);font-size:13px}
 
-  /* ===== v2.5 紧凑密度 ===== */
+  /* ===== v2.5.1 侧边栏折叠 ===== */
+  .trae-sidebar{transition:width .18s var(--ease, ease)}
+  [data-sidebar="collapsed"] .trae-sidebar{width:var(--sidebar-w-collapsed,60px)}
+  [data-sidebar="collapsed"] .trae-sidebar-item{justify-content:center;padding:9px 0}
+  [data-sidebar="collapsed"] .trae-sidebar-item span:not(.icon):not(.badge){display:none}
+  [data-sidebar="collapsed"] .trae-sidebar-item.active::before{left:-8px}
+  [data-sidebar="collapsed"] .trae-user{justify-content:center;padding:12px 4px}
+  [data-sidebar="collapsed"] .trae-user-info,[data-sidebar="collapsed"] .trae-user-actions{display:none}
+  [data-sidebar="collapsed"] .space-switcher{flex-direction:column;padding:6px}
+  #sidebarToggleBtn{transition:var(--transition)}
+  [data-sidebar="collapsed"] #sidebarToggleBtn{color:var(--accent);border-color:var(--accent)}
+
+  /* ===== v2.5.1 关闭动效（无障碍：减少 animation / transition） ===== */
+  [data-motion="off"] *,[data-motion="off"] *::before,[data-motion="off"] *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+
+  /* ===== v2.5.1 紧凑密度 ===== */
   [data-density="compact"] .panel{gap:10px}
   [data-density="compact"] .panel-title{font-size:13.5px;min-height:20px}
   [data-density="compact"] .term-box{padding:13px;padding-top:16px}
@@ -911,6 +931,9 @@ const I18N = {
     'settings_density': '界面密度', 'settings_density_hint': '紧凑模式可在一屏内显示更多内容', 'density_comfortable': '舒适', 'density_compact': '紧凑',
     'settings_theme_mode': '外观模式', 'theme_auto': '跟随系统',
     'changelog_view': '查看更新日志', 'changelog_title': '更新日志', 'changelog_empty': '暂无更新记录', 'changelog_new': '有新的更新日志', 'cmdk_feature': '命令面板（全局搜索）',
+    // v2.5.1 侧边栏折叠 / 动效 / 最近使用
+    'sidebar_collapse': '收起 / 展开侧边栏', 'cmdk_recent': '最近使用',
+    'settings_motion': '动画效果', 'settings_motion_hint': '关闭可减少晃動带来的不适（默认跟随系统设置）', 'motion_on': '开启', 'motion_off': '关闭',
     'radius_sharp': '直角', 'radius_round': '圆润', 'radius_preview': '圆角效果预览',
     'profile_info_title': '账号信息', 'profile_info_hint': '账号由管理员创建与维护',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -1053,6 +1076,9 @@ const I18N = {
     'settings_density': '介面密度', 'settings_density_hint': '緊湊模式可在一屏內顯示更多內容', 'density_comfortable': '舒適', 'density_compact': '緊湊',
     'settings_theme_mode': '外觀模式', 'theme_auto': '跟隨系統',
     'changelog_view': '檢視更新日誌', 'changelog_title': '更新日誌', 'changelog_empty': '暫無更新記錄', 'changelog_new': '有新的更新日誌', 'cmdk_feature': '命令面板（全域搜尋）',
+    // v2.5.1 側邊欄折疊 / 動效 / 最近使用
+    'sidebar_collapse': '收起 / 展開側邊欄', 'cmdk_recent': '最近使用',
+    'settings_motion': '動畫效果', 'settings_motion_hint': '關閉可減少晃動帶來的不適（預設跟隨系統設定）', 'motion_on': '開啟', 'motion_off': '關閉',
     'radius_sharp': '直角', 'radius_round': '圓潤', 'radius_preview': '圓角效果預覽',
     'profile_info_title': '帳號資訊', 'profile_info_hint': '帳號由管理員建立與維護',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -1190,6 +1216,9 @@ const I18N = {
     'settings_density': 'Interface Density', 'settings_density_hint': 'Compact shows more content on one screen', 'density_comfortable': 'Comfortable', 'density_compact': 'Compact',
     'settings_theme_mode': 'Appearance', 'theme_auto': 'System',
     'changelog_view': 'View changelog', 'changelog_title': 'Changelog', 'changelog_empty': 'No changelog yet', 'changelog_new': 'New changelog available', 'cmdk_feature': 'Command Palette',
+    // v2.5.1 sidebar collapse / motion / recently used
+    'sidebar_collapse': 'Collapse / expand sidebar', 'cmdk_recent': 'Recently Used',
+    'settings_motion': 'Animations', 'settings_motion_hint': 'Turn off to reduce motion sickness (follows system by default)', 'motion_on': 'On', 'motion_off': 'Off',
     'radius_sharp': 'Sharp', 'radius_round': 'Round', 'radius_preview': 'Corner radius preview',
     'profile_info_title': 'Account Info', 'profile_info_hint': 'Account is created by an administrator',
     'req_type_material_add': '3D Material - Add', 'req_type_material_edit': '3D Material - Edit',
@@ -1276,7 +1305,7 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.5]';
+    document.title = t('app_name') + ' [v2.5.1]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1355,7 +1384,9 @@ function applyI18n() {
   <!-- Top Bar -->
   <div class="trae-topbar">
     <div class="trae-topbar-left">
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.5<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
+      <!-- v2.5.1 侧边栏折叠 -->
+      <button class="trae-icon-btn" id="sidebarToggleBtn" data-i18n-title="sidebar_collapse" title="收起 / 展开侧边栏" style="padding:4px 8px;flex-shrink:0">☰</button>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.5.1<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1888,6 +1919,14 @@ function applyI18n() {
           <button class="pref-seg-btn" data-density-val="compact" style="flex:1" data-i18n="density_compact">紧凑</button>
         </div>
       </div>
+      <!-- v2.5.1 动画效果开关 -->
+      <div class="pref-row">
+        <span class="pref-row-label"><span>✨</span><span data-i18n="settings_motion">动画效果</span></span>
+        <div class="pref-seg" id="motionSeg">
+          <button class="pref-seg-btn" data-motion-val="on" data-i18n="motion_on">开启</button>
+          <button class="pref-seg-btn" data-motion-val="off" data-i18n="motion_off">关闭</button>
+        </div>
+      </div>
     </div>
 
     <!-- 壁纸设置 -->
@@ -1949,7 +1988,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.5</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.5.1</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -5974,7 +6013,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.5 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.5.1 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -6075,6 +6114,7 @@ tr:hover{background:#f5f5ff}
       { key: 'Esc', desc: t('cancel') || 'Close' },
       { key: '?', desc: t('shortcut_help') || 'Shortcut Help' },
       { key: 'Ctrl/⌘+K', desc: t('cmdk_feature') || 'Command Palette' },
+      { key: 'Ctrl/⌘+B', desc: t('sidebar_collapse') || 'Sidebar' },
     ];
     modal.innerHTML = `
       <div style="font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">⌨️ ${t('shortcut_help')||'快捷键'}</div>
@@ -6824,7 +6864,7 @@ tr:hover{background:#f5f5ff}
         <div class="cl-head">
           <div>
             <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
-            <div class="cl-sub">SparkMinds Lab v2.5 · ${list.length}</div>
+            <div class="cl-sub">SparkMinds Lab v2.5.1 · ${list.length}</div>
           </div>
           <button class="cl-close" title="Close">✕</button>
         </div>
@@ -6914,8 +6954,22 @@ tr:hover{background:#f5f5ff}
       if (!s) return all.slice();
       return all.filter(it => (it.label || '').toLowerCase().includes(s) || (it.alias || '').toLowerCase().includes(s) || (it.panel || '').toLowerCase().includes(s));
     }
+    function orderedRecents(list) {
+      const recent = getRecentPanels().slice(0, 5);
+      if (!recent.length) return list.slice();
+      const rec = [];
+      const ids = [];
+      recent.forEach(id => {
+        const found = list.find(x => x.kind === 'panel' && x.panel === id);
+        if (found) { rec.push({ ...found, cat: t('cmdk_recent') }); ids.push(id); }
+      });
+      if (!rec.length) return list.slice();
+      const rest = list.filter(x => !(x.kind === 'panel' && ids.includes(x.panel)));
+      return rec.concat(rest);
+    }
     function paint() {
-      flat = filter(input.value);
+      const q = (input.value || '').trim();
+      flat = q ? filter(q) : orderedRecents(all);
       if (sel >= flat.length) sel = 0;
       if (!flat.length) { listEl.innerHTML = `<div class="cmdk-empty">${v25Esc(t('cmdk_empty'))}</div>`; return; }
       let html = '', lastCat = null;
@@ -6990,8 +7044,78 @@ tr:hover{background:#f5f5ff}
     });
   }
 
+  /* ---- v2.5.1 侧边栏折叠 ---- */
+  (function applyStoredSidebar() {
+    if (localStorage.getItem('lab_sidebar') === 'collapsed') document.documentElement.setAttribute('data-sidebar', 'collapsed');
+  })();
+  function applySidebarCollapse(collapsed) {
+    if (collapsed) document.documentElement.setAttribute('data-sidebar', 'collapsed');
+    else document.documentElement.removeAttribute('data-sidebar');
+    localStorage.setItem('lab_sidebar', collapsed ? 'collapsed' : 'expanded');
+    const btn = $('#sidebarToggleBtn');
+    if (btn) btn.textContent = collapsed ? '»' : '☰';
+  }
+  function toggleSidebar() { applySidebarCollapse(document.documentElement.getAttribute('data-sidebar') !== 'collapsed'); }
+  function initSidebarCollapse() {
+    const btn = $('#sidebarToggleBtn');
+    if (btn) btn.addEventListener('click', toggleSidebar);
+    applySidebarCollapse(localStorage.getItem('lab_sidebar') === 'collapsed');
+  }
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'b' || e.key === 'B')) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleSidebar();
+    }
+  }, true);
+
+  /* ---- v2.5.1 动画效果开关（无障碍） ---- */
+  function v25PrefersReducedMotion() {
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
+  function applyMotion(mode) {
+    const off = mode === 'off' || (mode === null && v25PrefersReducedMotion());
+    if (off) document.documentElement.setAttribute('data-motion', 'off');
+    else document.documentElement.removeAttribute('data-motion');
+    localStorage.setItem('lab_motion', mode === null ? 'auto' : mode);
+    const seg = $('#motionSeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.motionVal === (off ? 'off' : 'on')));
+  }
+  function initMotion() {
+    const saved = localStorage.getItem('lab_motion');
+    applyMotion(saved === 'on' || saved === 'off' ? saved : null);
+    const seg = $('#motionSeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyMotion(btn.dataset.motionVal));
+    });
+    try {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const onChange = () => { if (localStorage.getItem('lab_motion') === 'auto') applyMotion(null); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+    } catch (e) {}
+  }
+
+  /* ---- v2.5.1 命令面板：最近使用 ---- */
+  const RECENT_KEY = 'lab_cmdk_recent';
+  function getRecentPanels() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function pushRecentPanel(id) {
+    if (!id) return;
+    let arr = getRecentPanels().filter(x => x !== id);
+    arr.unshift(id);
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(arr.slice(0, 5))); } catch (e) {}
+  }
+  const __switchPanelOrigV25 = switchPanel;
+  switchPanel = function(p) { pushRecentPanel(p); return __switchPanelOrigV25(p); };
+
   initDensity();
   initThemeMode();
+  initSidebarCollapse();
+  initMotion();
   updateChangelogDot();
 
   function initBackupAndTxn() {
@@ -8025,7 +8149,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.5\n' +
+      '\n  🔬 SparkMinds Lab v2.5.1\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
