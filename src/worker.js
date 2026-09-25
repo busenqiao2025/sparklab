@@ -1524,12 +1524,22 @@ export default {
           return json({ ok: true, comment });
         }
 
-        // DELETE /api/forum/post?id=xxx — 删除帖子
+        // DELETE /api/forum/post?id=xxx&uid=yyy — 删除帖子（v2.6 增加权限校验）
         if (url.pathname === '/api/forum/post' && request.method === 'DELETE') {
           const postId = url.searchParams.get('id');
+          const uid = url.searchParams.get('uid') || '';
           const raw = await env.USERS.get('forum_posts');
           let posts = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(posts)) posts = [];
+          const post = posts.find(p => p.id === postId);
+          if (!post) return json({ ok: false, msg: '帖子不存在' }, 404);
+          // v2.6：仅作者本人或管理员可删除（此前任何人都可删任意帖）
+          if (uid) {
+            const users = await loadUsers(env);
+            const me = (users || []).find(x => x.uid === uid);
+            const isAdmin = me && me.role === 'admin';
+            if (post.authorUid !== uid && !isAdmin) return json({ ok: false, msg: '没有权限删除此帖' }, 403);
+          }
           posts = posts.filter(p => p.id !== postId);
           await env.USERS.put('forum_posts', JSON.stringify(posts));
           return json({ ok: true });

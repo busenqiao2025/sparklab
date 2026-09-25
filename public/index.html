@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.5.1]</title>
+<title>SparkMinds Lab [v2.6]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -798,7 +798,141 @@
     .term-form{grid-template-columns:1fr}
     .lab-map{grid-template-columns:1fr}
     .card-stack,.card-grid{grid-template-columns:1fr}
+    .forum-stats{grid-template-columns:repeat(2,1fr)}
+    .forum-toolbar{flex-direction:column;align-items:stretch}
+    .forum-avatar{width:30px;height:30px;font-size:12px}
   }
+
+  /* ===== v2.6 论坛 ===== */
+  .forum-stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;
+  }
+  .forum-stat{
+    background:var(--bg-soft);border:1px solid var(--border-light);border-radius:var(--radius-md);
+    padding:10px 12px;display:flex;flex-direction:column;gap:2px;transition:var(--transition);
+  }
+  .forum-stat:hover{border-color:var(--border-strong);background:var(--bg-hover)}
+  .forum-stat-val{font-size:19px;font-weight:700;line-height:1.15;font-family:var(--mono);color:var(--fg)}
+  .forum-stat-label{font-size:11px;color:var(--muted);letter-spacing:.2px}
+
+  .forum-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .forum-search{
+    flex:1;min-width:200px;display:flex;align-items:center;gap:6px;
+    padding:0 10px;height:34px;border:1px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--bg2);transition:var(--transition);
+  }
+  .forum-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .forum-search input{
+    flex:1;border:none;outline:none;background:transparent;color:var(--fg);
+    font-family:var(--font);font-size:13px;
+  }
+  .forum-search-clear{
+    border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;
+    padding:0 2px;line-height:1;display:none;
+  }
+  .forum-search-clear:hover{color:var(--danger)}
+  .forum-sort{display:flex;gap:4px;flex-wrap:wrap}
+  .forum-sort .nav-btn{padding:5px 11px;font-size:12px}
+
+  .forum-cats{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .forum-cats .nav-btn{padding:5px 11px;font-size:12px}
+  .cat-count{
+    display:inline-block;margin-left:5px;font-size:10px;font-family:var(--mono);
+    color:var(--muted);background:var(--bg-hover);border-radius:8px;padding:1px 5px;
+  }
+  .forum-cats .nav-btn.active .cat-count{background:rgba(255,255,255,.22);color:inherit}
+
+  .forum-card{
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:var(--transition);
+    position:relative;overflow:hidden;
+  }
+  .forum-card:hover{border-color:var(--accent-light);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .forum-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:0;transition:var(--transition);
+  }
+  .forum-card:hover::before{opacity:1}
+  .forum-card-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .forum-avatar{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;user-select:none;
+  }
+  .forum-card-author{font-size:12px;font-weight:600;color:var(--fg-dim);line-height:1.3}
+  .forum-card-meta{font-size:11px;color:var(--muted);line-height:1.3}
+  .forum-chip{
+    margin-left:auto;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0;
+  }
+  .forum-chip.general{background:var(--accent-soft);color:var(--accent)}
+  .forum-chip.tech{background:var(--success-soft);color:var(--success)}
+  .forum-chip.project{background:var(--warning-soft);color:var(--warning)}
+  .forum-chip.qa{background:var(--danger-soft);color:var(--danger)}
+  .forum-hot{
+    font-size:10px;padding:3px 7px;border-radius:20px;font-weight:700;flex-shrink:0;
+    background:linear-gradient(135deg,#ff8a65,#ef4444);color:#fff;letter-spacing:.3px;
+  }
+  .forum-card-title{
+    font-size:15px;font-weight:600;color:var(--fg);margin-bottom:6px;line-height:1.45;
+    word-break:break-word;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  }
+  .forum-card-excerpt{
+    font-size:12.5px;color:var(--fg-light);line-height:1.65;margin-bottom:10px;word-break:break-word;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .forum-card-foot{display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+  .forum-metric{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono)}
+  .forum-like{
+    margin-left:auto;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);
+    background:var(--bg-soft);color:var(--fg-light);border-radius:20px;padding:3px 10px;font-size:11.5px;
+    cursor:pointer;transition:var(--transition);font-family:var(--font);
+  }
+  .forum-like:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft)}
+  .forum-like.on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger);font-weight:600}
+  .forum-like.pop{animation:forumPop .28s ease}
+  @keyframes forumPop{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+
+  .forum-empty{
+    text-align:center;padding:48px 16px;color:var(--muted);
+    border:1px dashed var(--border-strong);border-radius:var(--radius);background:var(--bg-soft);
+  }
+  .forum-empty-icon{font-size:34px;margin-bottom:10px;opacity:.55}
+  .forum-empty-title{font-size:14px;font-weight:600;color:var(--fg-dim);margin-bottom:5px}
+  .forum-empty-hint{font-size:12px;margin-bottom:14px}
+
+  .forum-body{font-size:14px;line-height:1.75;color:var(--fg);white-space:pre-wrap;word-break:break-word}
+  .forum-body a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+  .forum-list{margin:6px 0 6px 2px;padding-left:20px;list-style:disc}
+  .forum-list li{margin:2px 0;line-height:1.6}
+  .forum-code{
+    font-family:var(--mono);font-size:12.5px;background:var(--bg-soft);color:var(--accent-dark);
+    padding:1.5px 5px;border-radius:var(--radius-xs);border:1px solid var(--border-light);
+  }
+  .forum-author-row{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:12px;
+    background:var(--bg-soft);border:1px solid var(--border-light);border-radius:var(--radius-md);
+  }
+  .forum-op-badge{
+    font-size:9.5px;padding:1.5px 6px;border-radius:20px;background:var(--accent-soft);color:var(--accent);
+    font-weight:700;flex-shrink:0;
+  }
+  .forum-comment{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light)}
+  .forum-comment:last-child{border-bottom:none}
+  .forum-comment-body{flex:1;min-width:0}
+  .forum-comment-head{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap}
+  .forum-comment-author{font-size:12.5px;font-weight:600;color:var(--fg-dim)}
+  .forum-comment-time{font-size:10.5px;color:var(--muted)}
+  .forum-comment-text{font-size:13px;color:var(--fg);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+  .forum-detail-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .forum-section-title{font-size:13px;font-weight:700;color:var(--fg-dim);display:flex;align-items:center;gap:6px}
+  .forum-count-pill{font-size:10.5px;font-weight:600;color:var(--muted);background:var(--bg-hover);border-radius:20px;padding:1px 7px;font-family:var(--mono)}
+  .forum-draft-hint{font-size:11px;color:var(--warning);display:none;align-items:center;gap:5px}
+  .forum-fmt-bar{display:flex;gap:5px;margin-bottom:6px;flex-wrap:wrap}
+  .forum-fmt-btn{
+    border:1px solid var(--border);background:var(--bg-soft);color:var(--fg-light);border-radius:var(--radius-xs);
+    padding:2px 8px;font-size:11px;cursor:pointer;transition:var(--transition);font-family:var(--font);
+  }
+  .forum-fmt-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .forum-counter{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+  .forum-counter.over{color:var(--danger);font-weight:700}
 </style>
 <script>
 // ===================== I18N MULTI-LANGUAGE SYSTEM =====================
@@ -934,6 +1068,23 @@ const I18N = {
     // v2.5.1 侧边栏折叠 / 动效 / 最近使用
     'sidebar_collapse': '收起 / 展开侧边栏', 'cmdk_recent': '最近使用',
     'settings_motion': '动画效果', 'settings_motion_hint': '关闭可减少晃動带来的不适（默认跟随系统设置）', 'motion_on': '开启', 'motion_off': '关闭',
+    // v2.6 论坛改版
+    'forum_refresh': '刷新', 'forum_refreshed': '论坛已刷新',
+    'forum_search_ph': '搜索标题、内容或作者…', 'forum_search_clear': '清除搜索',
+    'forum_sort_new': '最新', 'forum_sort_hot': '最热', 'forum_sort_views': '浏览最多',
+    'forum_stat_posts': '帖子', 'forum_stat_views': '浏览', 'forum_stat_likes': '点赞', 'forum_stat_comments': '评论',
+    'forum_hot': '热门', 'forum_op': '楼主', 'forum_anon': '匿名',
+    'forum_loading': '正在加载帖子…',
+    'forum_no_posts_hint': '分享你的实验、代码或想法，让大家都看到',
+    'forum_no_result_title': '没有找到匹配的帖子', 'forum_no_result_hint': '换个关键词，或清除筛选条件再看看',
+    'forum_clear_search': '清除筛选',
+    'forum_time_now': '刚刚', 'forum_time_min': '{n} 分钟前', 'forum_time_hour': '{n} 小时前', 'forum_time_day': '{n} 天前',
+    'forum_like_failed': '点赞失败，请重试', 'forum_comment_failed': '评论失败，请重试', 'forum_delete_failed': '删除失败，请重试',
+    'forum_fmt_bold': '粗体', 'forum_fmt_code': '代码', 'forum_fmt_list': '列表', 'forum_fmt_link': '链接',
+    'forum_fmt_bold_text': '粗体文字', 'forum_fmt_list_text': '列表项', 'forum_fmt_link_text': '链接文字',
+    'forum_md_hint': '支持 **粗体** / `代码` / - 列表',
+    'forum_draft_hint': '已自动保存草稿', 'forum_draft_clear': '丢弃', 'forum_draft_dropped': '草稿已丢弃',
+    'forum_title_too_long': '标题最多 {n} 个字', 'forum_body_too_long': '内容最多 {n} 个字',
     'radius_sharp': '直角', 'radius_round': '圆润', 'radius_preview': '圆角效果预览',
     'profile_info_title': '账号信息', 'profile_info_hint': '账号由管理员创建与维护',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -1079,6 +1230,23 @@ const I18N = {
     // v2.5.1 側邊欄折疊 / 動效 / 最近使用
     'sidebar_collapse': '收起 / 展開側邊欄', 'cmdk_recent': '最近使用',
     'settings_motion': '動畫效果', 'settings_motion_hint': '關閉可減少晃動帶來的不適（預設跟隨系統設定）', 'motion_on': '開啟', 'motion_off': '關閉',
+    // v2.6 論壇改版
+    'forum_refresh': '重新整理', 'forum_refreshed': '論壇已重新整理',
+    'forum_search_ph': '搜尋標題、內容或作者…', 'forum_search_clear': '清除搜尋',
+    'forum_sort_new': '最新', 'forum_sort_hot': '最熱', 'forum_sort_views': '瀏覽最多',
+    'forum_stat_posts': '貼文', 'forum_stat_views': '瀏覽', 'forum_stat_likes': '按讚', 'forum_stat_comments': '留言',
+    'forum_hot': '熱門', 'forum_op': '樓主', 'forum_anon': '匿名',
+    'forum_loading': '正在載入貼文…',
+    'forum_no_posts_hint': '分享你的實驗、程式碼或想法，讓大家都看到',
+    'forum_no_result_title': '找不到符合的貼文', 'forum_no_result_hint': '換個關鍵字，或清除篩選條件再看看',
+    'forum_clear_search': '清除篩選',
+    'forum_time_now': '剛剛', 'forum_time_min': '{n} 分鐘前', 'forum_time_hour': '{n} 小時前', 'forum_time_day': '{n} 天前',
+    'forum_like_failed': '按讚失敗，請重試', 'forum_comment_failed': '留言失敗，請重試', 'forum_delete_failed': '刪除失敗，請重試',
+    'forum_fmt_bold': '粗體', 'forum_fmt_code': '程式碼', 'forum_fmt_list': '清單', 'forum_fmt_link': '連結',
+    'forum_fmt_bold_text': '粗體文字', 'forum_fmt_list_text': '清單項目', 'forum_fmt_link_text': '連結文字',
+    'forum_md_hint': '支援 **粗體** / `程式碼` / - 清單',
+    'forum_draft_hint': '已自動儲存草稿', 'forum_draft_clear': '丟棄', 'forum_draft_dropped': '草稿已丟棄',
+    'forum_title_too_long': '標題最多 {n} 個字', 'forum_body_too_long': '內容最多 {n} 個字',
     'radius_sharp': '直角', 'radius_round': '圓潤', 'radius_preview': '圓角效果預覽',
     'profile_info_title': '帳號資訊', 'profile_info_hint': '帳號由管理員建立與維護',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -1219,6 +1387,23 @@ const I18N = {
     // v2.5.1 sidebar collapse / motion / recently used
     'sidebar_collapse': 'Collapse / expand sidebar', 'cmdk_recent': 'Recently Used',
     'settings_motion': 'Animations', 'settings_motion_hint': 'Turn off to reduce motion sickness (follows system by default)', 'motion_on': 'On', 'motion_off': 'Off',
+    // v2.6 forum revamp
+    'forum_refresh': 'Refresh', 'forum_refreshed': 'Forum refreshed',
+    'forum_search_ph': 'Search title, content or author…', 'forum_search_clear': 'Clear search',
+    'forum_sort_new': 'Newest', 'forum_sort_hot': 'Hottest', 'forum_sort_views': 'Most viewed',
+    'forum_stat_posts': 'Posts', 'forum_stat_views': 'Views', 'forum_stat_likes': 'Likes', 'forum_stat_comments': 'Comments',
+    'forum_hot': 'Hot', 'forum_op': 'Author', 'forum_anon': 'Anonymous',
+    'forum_loading': 'Loading posts…',
+    'forum_no_posts_hint': 'Share your experiments, code or ideas with everyone',
+    'forum_no_result_title': 'No matching posts', 'forum_no_result_hint': 'Try another keyword or clear the filters',
+    'forum_clear_search': 'Clear filters',
+    'forum_time_now': 'just now', 'forum_time_min': '{n}m ago', 'forum_time_hour': '{n}h ago', 'forum_time_day': '{n}d ago',
+    'forum_like_failed': 'Like failed, please retry', 'forum_comment_failed': 'Comment failed, please retry', 'forum_delete_failed': 'Delete failed, please retry',
+    'forum_fmt_bold': 'Bold', 'forum_fmt_code': 'Code', 'forum_fmt_list': 'List', 'forum_fmt_link': 'Link',
+    'forum_fmt_bold_text': 'bold text', 'forum_fmt_list_text': 'list item', 'forum_fmt_link_text': 'link text',
+    'forum_md_hint': 'Supports **bold** / `code` / - list',
+    'forum_draft_hint': 'Draft saved automatically', 'forum_draft_clear': 'Discard', 'forum_draft_dropped': 'Draft discarded',
+    'forum_title_too_long': 'Title must be {n} characters or fewer', 'forum_body_too_long': 'Body must be {n} characters or fewer',
     'radius_sharp': 'Sharp', 'radius_round': 'Round', 'radius_preview': 'Corner radius preview',
     'profile_info_title': 'Account Info', 'profile_info_hint': 'Account is created by an administrator',
     'req_type_material_add': '3D Material - Add', 'req_type_material_edit': '3D Material - Edit',
@@ -1281,6 +1466,10 @@ function setLang(lang) {
     if (active.id === 'panel-approval' && typeof window.__renderReqList === 'function') {
       window.__renderReqList();
     }
+    // v2.6 论坛由 JS 渲染，切换语言后需重绘（含相对时间、排序标签等）
+    if (active.id === 'panel-forum' && typeof window.__renderForumList === 'function') {
+      window.__renderForumList();
+    }
     // 由渲染函数写入的文案不走 data-i18n，需在其后补一次通用替换
     applyI18n();
   };
@@ -1305,7 +1494,7 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.5.1]';
+    document.title = t('app_name') + ' [v2.6]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1386,7 +1575,7 @@ function applyI18n() {
     <div class="trae-topbar-left">
       <!-- v2.5.1 侧边栏折叠 -->
       <button class="trae-icon-btn" id="sidebarToggleBtn" data-i18n-title="sidebar_collapse" title="收起 / 展开侧边栏" style="padding:4px 8px;flex-shrink:0">☰</button>
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.5.1<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1729,16 +1918,32 @@ function applyI18n() {
 
   <!-- 论坛面板 -->
   <div id="panel-forum" class="panel">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div class="panel-title" data-i18n="panel_forum">论坛</div>
-      <button class="nav-btn active" id="createPostBtn" data-i18n="forum_create">发帖</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <div class="panel-title" data-i18n="panel_forum" style="margin-bottom:0">论坛</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="nav-btn" id="forumRefreshBtn">↻ <span data-i18n="forum_refresh">刷新</span></button>
+        <button class="nav-btn active" id="createPostBtn">✏️ <span data-i18n="forum_create">发帖</span></button>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap" id="forumCategories">
-      <button class="nav-btn active" data-cat="all" data-i18n="forum_cat_all">全部</button>
-      <button class="nav-btn" data-cat="general" data-i18n="forum_cat_general">综合讨论</button>
-      <button class="nav-btn" data-cat="tech" data-i18n="forum_cat_tech">技术交流</button>
-      <button class="nav-btn" data-cat="project" data-i18n="forum_cat_project">项目展示</button>
-      <button class="nav-btn" data-cat="qa" data-i18n="forum_cat_qa">问答求助</button>
+    <div class="forum-stats" id="forumStats"></div>
+    <div class="forum-toolbar">
+      <div class="forum-search">
+        <span style="font-size:12px;opacity:.6">🔍</span>
+        <input type="text" id="forumSearch" data-i18n-ph="forum_search_ph" placeholder="搜索标题、内容或作者...">
+        <button class="forum-search-clear" id="forumSearchClear" data-i18n-title="forum_search_clear" title="清除">×</button>
+      </div>
+      <div class="forum-sort" id="forumSort">
+        <button class="nav-btn active" data-sort="new" data-i18n="forum_sort_new">最新</button>
+        <button class="nav-btn" data-sort="hot" data-i18n="forum_sort_hot">最热</button>
+        <button class="nav-btn" data-sort="views" data-i18n="forum_sort_views">浏览最多</button>
+      </div>
+    </div>
+    <div class="forum-cats" id="forumCategories">
+      <button class="nav-btn active" data-cat="all"><span data-i18n="forum_cat_all">全部</span><span class="cat-count" data-cat-count="all">0</span></button>
+      <button class="nav-btn" data-cat="general"><span data-i18n="forum_cat_general">综合讨论</span><span class="cat-count" data-cat-count="general">0</span></button>
+      <button class="nav-btn" data-cat="tech"><span data-i18n="forum_cat_tech">技术交流</span><span class="cat-count" data-cat-count="tech">0</span></button>
+      <button class="nav-btn" data-cat="project"><span data-i18n="forum_cat_project">项目展示</span><span class="cat-count" data-cat-count="project">0</span></button>
+      <button class="nav-btn" data-cat="qa"><span data-i18n="forum_cat_qa">问答求助</span><span class="cat-count" data-cat-count="qa">0</span></button>
     </div>
     <div id="forumList"></div>
   </div>
@@ -1748,8 +1953,11 @@ function applyI18n() {
     <div class="modal-card" style="max-width:560px">
       <div class="modal-title" data-i18n="forum_create_title">发布新帖</div>
       <div style="margin-bottom:12px">
-        <label style="font-size:12px;color:var(--fg-light);margin-bottom:6px;display:block" data-i18n="forum_title">标题</label>
-        <input type="text" id="postTitle" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(255,255,255,.6);color:var(--fg);font-family:var(--font);font-size:13px" data-i18n-ph="forum_title_ph">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label style="font-size:12px;color:var(--fg-light)" data-i18n="forum_title">标题</label>
+          <span class="forum-counter" id="postTitleCount">0/60</span>
+        </div>
+        <input type="text" id="postTitle" maxlength="80" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(255,255,255,.6);color:var(--fg);font-family:var(--font);font-size:13px" data-i18n-ph="forum_title_ph">
       </div>
       <div style="margin-bottom:12px">
         <label style="font-size:12px;color:var(--fg-light);margin-bottom:6px;display:block" data-i18n="forum_category">分类</label>
@@ -1761,8 +1969,22 @@ function applyI18n() {
         </select>
       </div>
       <div style="margin-bottom:16px">
-        <label style="font-size:12px;color:var(--fg-light);margin-bottom:6px;display:block" data-i18n="forum_content">内容</label>
-        <textarea id="postContent" rows="6" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(255,255,255,.6);color:var(--fg);font-family:var(--font);font-size:13px;resize:vertical" data-i18n-ph="forum_content_ph"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label style="font-size:12px;color:var(--fg-light)" data-i18n="forum_content">内容</label>
+          <span class="forum-counter" id="postContentCount">0/2000</span>
+        </div>
+        <div class="forum-fmt-bar">
+          <button type="button" class="forum-fmt-btn" data-fmt="bold" data-i18n-title="forum_fmt_bold" title="粗体"><b>B</b></button>
+          <button type="button" class="forum-fmt-btn" data-fmt="code" data-i18n-title="forum_fmt_code" title="代码">&lt;/&gt;</button>
+          <button type="button" class="forum-fmt-btn" data-fmt="list" data-i18n-title="forum_fmt_list" title="列表">• 列表</button>
+          <button type="button" class="forum-fmt-btn" data-fmt="link" data-i18n-title="forum_fmt_link" title="链接">🔗</button>
+          <span style="flex:1"></span>
+          <span style="font-size:10.5px;color:var(--muted)" data-i18n="forum_md_hint">支持 **粗体** / `代码`</span>
+        </div>
+        <textarea id="postContent" rows="7" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:rgba(255,255,255,.6);color:var(--fg);font-family:var(--font);font-size:13px;resize:vertical" data-i18n-ph="forum_content_ph"></textarea>
+      </div>
+      <div class="forum-draft-hint" id="postDraftHint" style="margin-bottom:10px">📝 <span data-i18n="forum_draft_hint">已自动保存草稿</span>
+        <button type="button" class="nav-btn" id="postDraftClear" style="padding:1px 8px;font-size:11px" data-i18n="forum_draft_clear">丢弃</button>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="nav-btn" id="postCancel" data-i18n="cancel">取消</button>
@@ -1988,7 +2210,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.5.1</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -4630,7 +4852,7 @@ function applyI18n() {
     try { const r = await fetch('/api/forum/comment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ postId, author:currentUser.nickname||currentUser.name, authorUid:currentUser.uid, content }) }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiDeletePost(id) {
-    try { const r = await fetch(`/api/forum/post?id=${id}`, { method:'DELETE' }); return await r.json(); } catch(e) { return { ok:false }; }
+    try { const uid = currentUser ? encodeURIComponent(currentUser.uid) : ''; const r = await fetch(`/api/forum/post?id=${id}&uid=${uid}`, { method:'DELETE' }); return await r.json(); } catch(e) { return { ok:false }; }
   }
   async function apiUploadFile(name, size, type, data) {
     try {
@@ -6013,7 +6235,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.5.1 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -6215,127 +6437,426 @@ tr:hover{background:#f5f5ff}
     }).join('');
   }
 
-  // ===================== 论坛 =====================
+  // ===================== 论坛（v2.6 富化版） =====================
   let currentForumCat = 'all';
+  let currentForumSort = 'new';
+  let forumQuery = '';
   let allPosts = [];
+  let currentDetailId = null;
+  const FORUM_DRAFT_KEY = 'lab_forum_draft';
+  const FORUM_TITLE_MAX = 60;
+  const FORUM_BODY_MAX = 2000;
+
+  // ---- 通用小工具：转义 / 相对时间 / 头像 / 轻量富文本 ----
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
+  function relTime(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - ts;
+    if (diff < 0) return fmtDate(ts);
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return t('forum_time_now');
+    if (min < 60) return t('forum_time_min', { n: min });
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return t('forum_time_hour', { n: hr });
+    const day = Math.floor(hr / 24);
+    if (day < 30) return t('forum_time_day', { n: day });
+    return fmtDate(ts);
+  }
+
+  function avatarColor(name) {
+    let h = 0;
+    const s = String(name || '?');
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return `hsl(${h % 360} 62% 48%)`;
+  }
+
+  function avatarHtml(name, size) {
+    const n = String(name || '?').trim();
+    const ch = n ? n[0].toUpperCase() : '?';
+    const sz = size || 32;
+    const sizeCss = sz === 32 ? '' : `width:${sz}px;height:${sz}px;font-size:${Math.round(sz * 0.42)}px;`;
+    return `<span class="forum-avatar" style="${sizeCss}background:${avatarColor(n)}">${esc(ch)}</span>`;
+  }
+
+  // 先把用户输入整体转义（杜绝 XSS），再做「安全」的富文本替换
+  function renderRich(raw) {
+    let s = esc(raw || '');
+    // 1) [文字](链接) 先占位取出，避免被后面的裸链接规则二次处理
+    const tokens = [];
+    s = s.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (m) => {
+      tokens.push(m);
+      return `\u0000TOK${tokens.length - 1}\u0000`;
+    });
+    // 2) 列表项 - / * / 1.
+    s = s.replace(/(^|\n)((?:(?:-|\*|\d+\.)\s+[^\n]*\n?)+)/g, (m, pre, block) => {
+      const items = block.replace(/\n$/, '').split('\n')
+        .map(l => `<li>${l.replace(/^(?:-|\*|\d+\.)\s+/, '')}</li>`).join('');
+      return pre + `<ul class="forum-list">${items}</ul>`;
+    });
+    // 3) 行内代码 / 粗体 / 裸链接
+    s = s.replace(/`([^`\n]+)`/g, '<code class="forum-code">$1</code>');
+    s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    // 4) 还原占位链接
+    s = s.replace(/\u0000TOK(\d+)\u0000/g, (m, i) => {
+      const mm = (tokens[+i] || '').match(/^\[([^\]]+)\]\((.+)\)$/);
+      return mm ? `<a href="${mm[2]}" target="_blank" rel="noopener noreferrer">${mm[1]}</a>` : m;
+    });
+    return s;
+  }
+
+  function forumCatLabel(cat) {
+    const map = { general: t('forum_cat_general'), tech: t('forum_cat_tech'), project: t('forum_cat_project'), qa: t('forum_cat_qa') };
+    return map[cat] || cat || t('forum_cat_general');
+  }
+
+  function postScore(p) {
+    return ((p.likes || []).length) * 2 + ((p.comments || []).length) * 3 + (p.views || 0) * 0.5;
+  }
+
+  // ---- 统计数据（全部来自真实帖子数据） ----
+  function renderForumStats() {
+    const el = $('#forumStats');
+    if (!el) return;
+    let views = 0, likes = 0, comments = 0;
+    allPosts.forEach(p => {
+      views += p.views || 0;
+      likes += (p.likes || []).length;
+      comments += (p.comments || []).length;
+    });
+    const items = [
+      { v: allPosts.length, l: t('forum_stat_posts'), icon: '📝' },
+      { v: views, l: t('forum_stat_views'), icon: '👁' },
+      { v: likes, l: t('forum_stat_likes'), icon: '❤' },
+      { v: comments, l: t('forum_stat_comments'), icon: '💬' }
+    ];
+    el.innerHTML = items.map(i => `<div class="forum-stat">
+      <div class="forum-stat-val">${i.icon} ${i.v}</div>
+      <div class="forum-stat-label">${esc(i.l)}</div>
+    </div>`).join('');
+  }
+
+  function updateCatCounts() {
+    document.querySelectorAll('#forumCategories [data-cat-count]').forEach(span => {
+      const c = span.dataset.catCount;
+      const n = c === 'all' ? allPosts.length : allPosts.filter(p => (p.category || 'general') === c).length;
+      span.textContent = n;
+    });
+  }
 
   async function renderForum() {
+    const list = $('#forumList');
+    if (list) list.innerHTML = `<div class="forum-empty"><div class="forum-empty-icon">⏳</div><div class="forum-empty-title">${esc(t('forum_loading'))}</div></div>`;
     const r = await apiGetPosts();
-    allPosts = r.ok ? (r.posts || []) : [];
+    allPosts = (r && r.ok) ? (r.posts || []) : [];
     renderForumList();
   }
 
   function renderForumList() {
     const list = $('#forumList');
-    let posts = allPosts;
-    if (currentForumCat !== 'all') posts = posts.filter(p => p.category === currentForumCat);
+    if (!list) return;
+    renderForumStats();
+    updateCatCounts();
+
+    let posts = allPosts.slice();
+    if (currentForumCat !== 'all') posts = posts.filter(p => (p.category || 'general') === currentForumCat);
+
+    const q = forumQuery.trim().toLowerCase();
+    if (q) {
+      posts = posts.filter(p => (((p.title || '') + ' ' + (p.content || '') + ' ' + (p.author || '')).toLowerCase().indexOf(q) >= 0));
+    }
+
+    if (currentForumSort === 'views') posts.sort((a, b) => (b.views || 0) - (a.views || 0) || (b.created - a.created));
+    else if (currentForumSort === 'hot') posts.sort((a, b) => postScore(b) - postScore(a) || (b.created - a.created));
+    else posts.sort((a, b) => (b.created || 0) - (a.created || 0));
+
     if (posts.length === 0) {
-      list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:12px">'+t('forum_no_posts')+'</div>';
+      const filtered = !!q || currentForumCat !== 'all';
+      list.innerHTML = filtered
+        ? `<div class="forum-empty">
+             <div class="forum-empty-icon">🔍</div>
+             <div class="forum-empty-title">${esc(t('forum_no_result_title'))}</div>
+             <div class="forum-empty-hint">${esc(t('forum_no_result_hint'))}</div>
+             <button class="nav-btn active" id="forumResetFilter">${esc(t('forum_clear_search'))}</button>
+           </div>`
+        : `<div class="forum-empty">
+             <div class="forum-empty-icon">💬</div>
+             <div class="forum-empty-title">${esc(t('forum_no_posts'))}</div>
+             <div class="forum-empty-hint">${esc(t('forum_no_posts_hint'))}</div>
+             <button class="nav-btn active" id="forumFirstPostBtn">✏️ ${esc(t('forum_create'))}</button>
+           </div>`;
+      const rb = $('#forumResetFilter'); if (rb) rb.addEventListener('click', clearForumFilter);
+      const fb = $('#forumFirstPostBtn'); if (fb) fb.addEventListener('click', () => { const b = $('#createPostBtn'); if (b) b.click(); });
       return;
     }
-    const catLabel = { general: t('forum_cat_general'), tech: t('forum_cat_tech'), project: t('forum_cat_project'), qa: t('forum_cat_qa') };
-    const catColor = { general: 'var(--accent)', tech: 'var(--success)', project: 'var(--warning)', qa: 'var(--danger)' };
+
+    const maxScore = Math.max.apply(null, posts.map(postScore).concat([0]));
+    const myUid = currentUser ? currentUser.uid : '';
+
     list.innerHTML = posts.map(p => {
-      const cc = catColor[p.category] || 'var(--accent)';
-      return `<div class="req-item" style="cursor:pointer" onclick="openPostDetail('${p.id}')">
-        <div style="display:flex;justify-content:space-between;align-items:start">
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-              <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${cc==='var(--accent)'?'var(--accent-soft)':cc==='var(--success)'?'rgba(34,197,94,0.1)':cc==='var(--warning)'?'var(--warning-soft)':'rgba(239,68,68,0.1)'};color:${cc};font-weight:600">${catLabel[p.category]||p.category}</span>
-              <span style="font-size:14px;font-weight:600">${p.title}</span>
-            </div>
-            <div style="font-size:12px;color:var(--fg-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:400px">${(p.content||'').substring(0,80)}...</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:6px">${p.author} · ${fmtDate(p.created)} · 👁 ${p.views||0} · ❤ ${(p.likes||[]).length} · 💬 ${(p.comments||[]).length}</div>
+      const cat = p.category || 'general';
+      const likes = (p.likes || []).length;
+      const comments = (p.comments || []).length;
+      const views = p.views || 0;
+      const liked = myUid && (p.likes || []).indexOf(myUid) >= 0;
+      const hot = maxScore > 0 && postScore(p) >= maxScore * 0.6;
+      const excerpt = String(p.content || '').replace(/\s+/g, ' ').trim();
+      return `<div class="forum-card" data-id="${esc(p.id)}" role="button" tabindex="0">
+        <div class="forum-card-head">
+          ${avatarHtml(p.author)}
+          <div style="min-width:0">
+            <div class="forum-card-author">${esc(p.author || t('forum_anon'))}</div>
+            <div class="forum-card-meta">${relTime(p.created)}</div>
           </div>
+          <span class="forum-chip ${esc(cat)}">${esc(forumCatLabel(cat))}</span>
+          ${hot ? `<span class="forum-hot">🔥 ${esc(t('forum_hot'))}</span>` : ''}
+        </div>
+        <div class="forum-card-title">${esc(p.title)}</div>
+        ${excerpt ? `<div class="forum-card-excerpt">${esc(excerpt)}</div>` : ''}
+        <div class="forum-card-foot">
+          <span class="forum-metric">👁 ${views}</span>
+          <span class="forum-metric">💬 ${comments}</span>
+          <button class="forum-like ${liked ? 'on' : ''}" data-like="${esc(p.id)}" title="${liked ? esc(t('forum_liked')) : esc(t('forum_like'))}">${liked ? '❤️' : '🤍'} ${likes}</button>
         </div>
       </div>`;
     }).join('');
   }
 
-  window.openPostDetail = async function(postId) {
+  function clearForumFilter() {
+    forumQuery = '';
+    currentForumCat = 'all';
+    const si = $('#forumSearch'); if (si) si.value = '';
+    const sc = $('#forumSearchClear'); if (sc) sc.style.display = 'none';
+    document.querySelectorAll('#forumCategories [data-cat]').forEach(b => b.classList.toggle('active', b.dataset.cat === 'all'));
+    renderForumList();
+  }
+
+  async function toggleForumLike(postId, btn) {
+    if (!currentUser || !currentUser.uid) return;
+    if (btn) btn.classList.add('pop');
+    const r = await apiLikePost(postId, currentUser.uid);
+    if (r && r.ok) {
+      const p = allPosts.find(x => x.id === postId);
+      if (p) p.likes = r.likes || [];
+      renderForumList();
+      if (currentDetailId === postId && $('#postDetailModal').style.display !== 'none') openPostDetail(postId, true);
+    } else {
+      toast(t('forum_like_failed'));
+      if (btn) btn.classList.remove('pop');
+    }
+  }
+
+  window.openPostDetail = async function (postId, silent) {
     const r = await apiGetPost(postId);
     if (!r.ok || !r.post) { toast(t('forum_not_found')); return; }
     const p = r.post;
-    const catLabel = { general: t('forum_cat_general'), tech: t('forum_cat_tech'), project: t('forum_cat_project'), qa: t('forum_cat_qa') };
-    const isLiked = (p.likes||[]).includes(currentUser.uid);
+    currentDetailId = postId;
+    const idx = allPosts.findIndex(x => x.id === postId);
+    if (idx >= 0) allPosts[idx] = p;
+    const cat = p.category || 'general';
+    const likes = (p.likes || []).length;
+    const comments = p.comments || [];
+    const liked = (p.likes || []).indexOf(currentUser.uid) >= 0;
     const isAuthor = p.authorUid === currentUser.uid;
     const isAdmin = currentUser.role === 'admin';
-    $('#postDetailTitle').textContent = p.title;
-    let commentsHtml = (p.comments||[]).map(c => `
-      <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:12px;font-weight:600">${c.author}</span>
-          <span style="font-size:10px;color:var(--muted)">${fmtDate(c.created)}</span>
+
+    $('#postDetailTitle').textContent = p.title || t('forum_post_default');
+
+    const commentsHtml = comments.map(c => {
+      const op = c.authorUid && c.authorUid === p.authorUid;
+      return `<div class="forum-comment">
+        ${avatarHtml(c.author, 28)}
+        <div class="forum-comment-body">
+          <div class="forum-comment-head">
+            <span class="forum-comment-author">${esc(c.author || t('forum_anon'))}</span>
+            ${op ? `<span class="forum-op-badge">${esc(t('forum_op'))}</span>` : ''}
+            <span class="forum-comment-time">${relTime(c.created)}</span>
+          </div>
+          <div class="forum-comment-text">${renderRich(c.content)}</div>
         </div>
-        <div style="font-size:13px;color:var(--fg-light);margin-top:4px">${c.content}</div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
+
     $('#postDetailBody').innerHTML = `
-      <div style="margin-bottom:16px">
-        <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-weight:600">${catLabel[p.category]||p.category}</span>
-        <div style="font-size:12px;color:var(--muted);margin-top:8px">${p.author} · ${fmtDate(p.created)} · 👁 ${p.views||0}</div>
+      <div class="forum-author-row">
+        ${avatarHtml(p.author, 38)}
+        <div style="min-width:0;flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--fg);display:flex;align-items:center;gap:6px">
+            ${esc(p.author || t('forum_anon'))}${isAuthor ? `<span class="forum-op-badge">${esc(t('forum_op'))}</span>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">${relTime(p.created)} · ${fmtDate(p.created)}</div>
+        </div>
+        <span class="forum-chip ${esc(cat)}" style="margin-left:0">${esc(forumCatLabel(cat))}</span>
       </div>
-      <div style="font-size:14px;line-height:1.7;color:var(--fg);margin-bottom:16px;white-space:pre-wrap">${p.content}</div>
-      <div style="display:flex;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
-        <button class="nav-btn ${isLiked?'active':''}" id="likeBtn" style="${isLiked?'':'border-color:var(--danger);color:var(--danger)'}">❤ ${isLiked?t('forum_liked'):t('forum_like')} (${(p.likes||[]).length})</button>
-        ${isAuthor?'':`<button class="nav-btn" style="border-color:var(--danger);color:var(--danger)" onclick="openReportModal('${(p.author||'').replace(/'/g,"\\'")}','${p.authorUid||''}')">🚨 ${t('report_title')||'举报'}</button>`}
-        ${(isAuthor||isAdmin)?`<button class="nav-btn danger" id="deletePostBtn" data-i18n="forum_delete">删除</button>`:''}
+      <div class="forum-body" style="margin-bottom:14px">${renderRich(p.content)}</div>
+      <div class="forum-detail-actions" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+        <button class="nav-btn ${liked ? 'active' : ''}" id="likeBtn" style="${liked ? '' : 'border-color:var(--danger);color:var(--danger)'}">${liked ? '❤️' : '🤍'} ${liked ? t('forum_liked') : t('forum_like')} ${likes}</button>
+        <span class="forum-metric">👁 ${p.views || 0}</span>
+        <span class="forum-metric">💬 ${comments.length}</span>
+        ${isAuthor ? '' : `<button class="nav-btn" id="reportPostBtn" style="border-color:var(--danger);color:var(--danger)">🚨 ${esc(t('report_title'))}</button>`}
+        ${(isAuthor || isAdmin) ? `<button class="nav-btn danger" id="deletePostBtn">🗑 ${esc(t('forum_delete'))}</button>` : ''}
       </div>
-      <div style="margin-bottom:8px;font-size:13px;font-weight:600" data-i18n="forum_comments">评论 (${(p.comments||[]).length})</div>
-      <div style="margin-bottom:12px">${commentsHtml || '<div style="text-align:center;color:var(--muted);padding:16px;font-size:12px">'+t('forum_no_comments')+'</div>'}</div>
+      <div class="forum-section-title" style="margin-bottom:6px">${esc(t('forum_comments'))} <span class="forum-count-pill">${comments.length}</span></div>
+      <div style="margin-bottom:14px">${commentsHtml || '<div style="text-align:center;color:var(--muted);padding:18px;font-size:12px">' + esc(t('forum_no_comments')) + '</div>'}</div>
       <div style="display:flex;gap:8px">
-        <input type="text" id="commentInput" placeholder="${t('forum_comment_ph')}" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px">
-        <button class="nav-btn active" id="commentSubmit" data-i18n="forum_comment_send">评论</button>
+        <input type="text" id="commentInput" placeholder="${esc(t('forum_comment_ph'))}" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px">
+        <button class="nav-btn active" id="commentSubmit">${esc(t('forum_comment_send'))}</button>
       </div>
     `;
     $('#postDetailModal').style.display = 'flex';
-    // Bind events
+
     const likeBtn = $('#likeBtn');
-    if (likeBtn) likeBtn.addEventListener('click', async () => {
-      await apiLikePost(postId, currentUser.uid);
-      openPostDetail(postId);
-      renderForum();
+    if (likeBtn) likeBtn.addEventListener('click', () => toggleForumLike(postId, likeBtn));
+    const reportBtn = $('#reportPostBtn');
+    if (reportBtn) reportBtn.addEventListener('click', () => {
+      if (typeof openReportModal === 'function') openReportModal(p.author || '', p.authorUid || '');
     });
     const delBtn = $('#deletePostBtn');
     if (delBtn) delBtn.addEventListener('click', async () => {
       if (!confirm(t('forum_delete_confirm'))) return;
-      await apiDeletePost(postId);
-      toast(t('forum_deleted'));
-      $('#postDetailModal').style.display = 'none';
-      renderForum();
+      const rr = await apiDeletePost(postId);
+      if (rr && rr.ok) {
+        toast(t('forum_deleted'));
+        $('#postDetailModal').style.display = 'none';
+        currentDetailId = null;
+        renderForum();
+      } else {
+        toast(rr && rr.msg ? rr.msg : t('forum_delete_failed'));
+      }
     });
     const cmtSubmit = $('#commentSubmit');
-    if (cmtSubmit) cmtSubmit.addEventListener('click', async () => {
-      const content = $('#commentInput').value.trim();
+    const sendComment = async () => {
+      const input = $('#commentInput');
+      if (!input) return;
+      const content = input.value.trim();
       if (!content) return;
-      await apiCommentPost(postId, content);
-      openPostDetail(postId);
-      renderForum();
-    });
-    $('#commentInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#commentSubmit').click(); });
+      input.disabled = true;
+      const rr = await apiCommentPost(postId, content);
+      if (rr && rr.ok) { await openPostDetail(postId, true); await renderForum(); }
+      else toast(t('forum_comment_failed'));
+      const fresh = $('#commentInput');
+      if (fresh) fresh.disabled = false;
+    };
+    if (cmtSubmit) cmtSubmit.addEventListener('click', sendComment);
+    const cmtInput = $('#commentInput');
+    if (cmtInput) {
+      cmtInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendComment(); } });
+      setTimeout(() => cmtInput.focus(), 50);
+    }
   };
 
+  // ---- 发帖草稿 ----
+  function forumSaveDraft() {
+    try {
+      const title = $('#postTitle') ? $('#postTitle').value : '';
+      const content = $('#postContent') ? $('#postContent').value : '';
+      if (!title.trim() && !content.trim()) { localStorage.removeItem(FORUM_DRAFT_KEY); return false; }
+      localStorage.setItem(FORUM_DRAFT_KEY, JSON.stringify({ title, content, category: $('#postCategory').value, ts: Date.now() }));
+      return true;
+    } catch (e) { return false; }
+  }
+  function forumLoadDraft() {
+    try { const raw = localStorage.getItem(FORUM_DRAFT_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+  }
+  function forumShowDraftHint(has) {
+    const el = $('#postDraftHint');
+    if (el) el.style.display = has ? 'flex' : 'none';
+  }
+  function forumUpdateCounters() {
+    const tl = $('#postTitle') ? $('#postTitle').value.length : 0;
+    const cl = $('#postContent') ? $('#postContent').value.length : 0;
+    const tc = $('#postTitleCount'), cc = $('#postContentCount');
+    if (tc) { tc.textContent = `${tl}/${FORUM_TITLE_MAX}`; tc.classList.toggle('over', tl > FORUM_TITLE_MAX); }
+    if (cc) { cc.textContent = `${cl}/${FORUM_BODY_MAX}`; cc.classList.toggle('over', cl > FORUM_BODY_MAX); }
+  }
+  function forumApplyFmt(kind) {
+    const ta = $('#postContent');
+    if (!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const sel = ta.value.slice(s, e);
+    let ins = '', selStart = 2, selLen = 0;
+    if (kind === 'bold') { ins = `**${sel || t('forum_fmt_bold_text')}**`; selStart = 2; selLen = ins.length - 4; }
+    else if (kind === 'code') { ins = `\`${sel || 'code'}\``; selStart = 1; selLen = ins.length - 2; }
+    else if (kind === 'list') {
+      const text = sel ? sel.split('\n').map(l => '- ' + l).join('\n') : `- ${t('forum_fmt_list_text')}`;
+      const needNl = s > 0 && ta.value[s - 1] !== '\n';
+      ins = (needNl ? '\n' : '') + text;
+      selStart = needNl ? 3 : 2;
+      selLen = text.length - 2;
+    }
+    else if (kind === 'link') { ins = `[${sel || t('forum_fmt_link_text')}](https://)`; selStart = 1; selLen = (sel || t('forum_fmt_link_text')).length; }
+    else return;
+    ta.value = ta.value.slice(0, s) + ins + ta.value.slice(e);
+    ta.focus();
+    ta.selectionStart = s + selStart;
+    ta.selectionEnd = s + selStart + selLen;
+    forumUpdateCounters();
+    forumSaveDraft();
+    forumShowDraftHint(true);
+  }
+
   function initForum() {
-    $('#createPostBtn').addEventListener('click', () => {
-      $('#postTitle').value = '';
-      $('#postContent').value = '';
-      $('#postCategory').value = 'general';
-      $('#createPostModal').style.display = 'flex';
+    // 帖子列表：事件委托（卡片点击 + 卡片内点赞）
+    const list = $('#forumList');
+    if (list) {
+      list.addEventListener('click', (e) => {
+        const likeBtn = e.target.closest('[data-like]');
+        if (likeBtn) { e.stopPropagation(); toggleForumLike(likeBtn.dataset.like, likeBtn); return; }
+        const card = e.target.closest('.forum-card');
+        if (card && card.dataset.id) openPostDetail(card.dataset.id);
+      });
+      list.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const card = e.target.closest('.forum-card');
+        if (card && card.dataset.id) { e.preventDefault(); openPostDetail(card.dataset.id); }
+      });
+    }
+
+    // 搜索
+    const searchInput = $('#forumSearch');
+    if (searchInput) {
+      let timer = null;
+      searchInput.addEventListener('input', () => {
+        const clearBtn = $('#forumSearchClear');
+        if (clearBtn) clearBtn.style.display = searchInput.value ? 'block' : 'none';
+        clearTimeout(timer);
+        timer = setTimeout(() => { forumQuery = searchInput.value; renderForumList(); }, 180);
+      });
+    }
+    const searchClear = $('#forumSearchClear');
+    if (searchClear) searchClear.addEventListener('click', () => {
+      forumQuery = '';
+      if (searchInput) searchInput.value = '';
+      searchClear.style.display = 'none';
+      renderForumList();
     });
-    $('#postCancel').addEventListener('click', () => { $('#createPostModal').style.display = 'none'; });
-    $('#postSubmit').addEventListener('click', async () => {
-      const title = $('#postTitle').value.trim();
-      const content = $('#postContent').value.trim();
-      const category = $('#postCategory').value;
-      if (!title || !content) { toast(t('forum_empty')); return; }
-      const r = await apiCreatePost(title, content, category);
-      if (r.ok) {
-        toast(t('forum_published'));
-        $('#createPostModal').style.display = 'none';
-        renderForum();
-      } else toast(t('forum_publish_failed'));
+
+    // 排序
+    const sortBox = $('#forumSort');
+    if (sortBox) {
+      sortBox.querySelectorAll('[data-sort]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sortBox.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentForumSort = btn.dataset.sort;
+          renderForumList();
+        });
+      });
+    }
+
+    // 刷新
+    const refreshBtn = $('#forumRefreshBtn');
+    if (refreshBtn) refreshBtn.addEventListener('click', async () => {
+      refreshBtn.classList.add('active');
+      await renderForum();
+      refreshBtn.classList.remove('active');
+      toast(t('forum_refreshed'));
     });
-    $('#postDetailClose').addEventListener('click', () => { $('#postDetailModal').style.display = 'none'; });
-    // Category filter
+
+    // 分类筛选
     $('#forumCategories').querySelectorAll('[data-cat]').forEach(btn => {
       btn.addEventListener('click', () => {
         $('#forumCategories').querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
@@ -6344,7 +6865,68 @@ tr:hover{background:#f5f5ff}
         renderForumList();
       });
     });
+
+    // 发帖弹窗
+    $('#createPostBtn').addEventListener('click', () => {
+      const d = forumLoadDraft();
+      $('#postTitle').value = d ? (d.title || '') : '';
+      $('#postContent').value = d ? (d.content || '') : '';
+      $('#postCategory').value = d && d.category ? d.category : 'general';
+      forumUpdateCounters();
+      forumShowDraftHint(!!d);
+      $('#createPostModal').style.display = 'flex';
+      setTimeout(() => $('#postTitle').focus(), 60);
+    });
+    $('#postCancel').addEventListener('click', () => {
+      forumSaveDraft();
+      $('#createPostModal').style.display = 'none';
+    });
+    const draftClearBtn = $('#postDraftClear');
+    if (draftClearBtn) draftClearBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(FORUM_DRAFT_KEY); } catch (e) {}
+      $('#postTitle').value = '';
+      $('#postContent').value = '';
+      forumUpdateCounters();
+      forumShowDraftHint(false);
+      toast(t('forum_draft_dropped'));
+    });
+    document.querySelectorAll('.forum-fmt-btn').forEach(b => {
+      b.addEventListener('click', () => forumApplyFmt(b.dataset.fmt));
+    });
+    ['#postTitle', '#postContent'].forEach(sel => {
+      const el = $(sel);
+      if (el) el.addEventListener('input', () => { forumUpdateCounters(); forumSaveDraft(); });
+    });
+    $('#postSubmit').addEventListener('click', async () => {
+      const title = $('#postTitle').value.trim();
+      const content = $('#postContent').value.trim();
+      const category = $('#postCategory').value;
+      if (!title || !content) { toast(t('forum_empty')); return; }
+      if (title.length > FORUM_TITLE_MAX) { toast(t('forum_title_too_long', { n: FORUM_TITLE_MAX })); return; }
+      if (content.length > FORUM_BODY_MAX) { toast(t('forum_body_too_long', { n: FORUM_BODY_MAX })); return; }
+      const btn = $('#postSubmit');
+      btn.disabled = true;
+      const r = await apiCreatePost(title, content, category);
+      btn.disabled = false;
+      if (r.ok) {
+        toast(t('forum_published'));
+        try { localStorage.removeItem(FORUM_DRAFT_KEY); } catch (e) {}
+        forumShowDraftHint(false);
+        $('#createPostModal').style.display = 'none';
+        $('#postTitle').value = '';
+        $('#postContent').value = '';
+        forumUpdateCounters();
+        await renderForum();
+      } else toast(t('forum_publish_failed'));
+    });
+    $('#postDetailClose').addEventListener('click', () => {
+      $('#postDetailModal').style.display = 'none';
+      currentDetailId = null;
+    });
   }
+  // 语言切换后重绘论坛
+  window.__renderForumList = renderForumList;
+
   // 主题切换由下方 applyThemeState() 统一处理
 
   // ===================== 主题切换（B站风格） =====================
@@ -6864,7 +7446,7 @@ tr:hover{background:#f5f5ff}
         <div class="cl-head">
           <div>
             <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
-            <div class="cl-sub">SparkMinds Lab v2.5.1 · ${list.length}</div>
+            <div class="cl-sub">SparkMinds Lab v2.6 · ${list.length}</div>
           </div>
           <button class="cl-close" title="Close">✕</button>
         </div>
@@ -8149,7 +8731,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.5.1\n' +
+      '\n  🔬 SparkMinds Lab v2.6\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -8198,7 +8780,8 @@ tr:hover{background:#f5f5ff}
           ['v2.2', 'File Transfer + Report System', '07-26', 'shield'],
           ['v2.3', 'Read Receipts + Online + Search', '08-01', 'chat'],
           ['v2.4', 'Notifications + Shortcuts + Reports', '08-05', 'spark'],
-          ['v2.5', 'Command Palette + Density + Changelog', '09-25', 'command']
+          ['v2.5', 'Command Palette + Density + Changelog', '09-25', 'command'],
+          ['v2.6', 'Forum Revamp: Search / Sort / Rich Text', '09-25', 'chat']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -8214,7 +8797,8 @@ tr:hover{background:#f5f5ff}
           ['v2.2', '文件傳輸 + 舉報系統', '07-26', '盾牌'],
           ['v2.3', '已讀回執 + 在線 + 搜尋', '08-01', '聊天'],
           ['v2.4', '通知中心 + 快捷鍵 + 報告導出', '08-05', '火花'],
-          ['v2.5', '命令面板 + 介面密度 + 更新日誌', '09-25', 'command']
+          ['v2.5', '命令面板 + 介面密度 + 更新日誌', '09-25', 'command'],
+          ['v2.6', '論壇改版：搜尋 / 排序 / 富文本', '09-25', 'chat']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -8230,7 +8814,8 @@ tr:hover{background:#f5f5ff}
           ['v2.2', '文件传输 + 举报系统', '07-26', '盾牌'],
           ['v2.3', '已读回执 + 在线 + 搜索', '08-01', '聊天'],
           ['v2.4', '通知中心 + 快捷键 + 报告导出', '08-05', '火花'],
-          ['v2.5', '命令面板 + 界面密度 + 更新日志', '09-25', 'command']
+          ['v2.5', '命令面板 + 界面密度 + 更新日志', '09-25', 'command'],
+          ['v2.6', '论坛改版：搜索 / 排序 / 富文本', '09-25', 'chat']
         ]
       };
       const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘' };
