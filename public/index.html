@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.4]</title>
+<title>SparkMinds Lab [v2.5]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -186,6 +186,69 @@
   .trae-brand img{width:auto;height:24px;flex-shrink:0}
   /* 版本号小徽章：品牌名已在 logo 里，不再重复文字 */
   .trae-brand-ver{font-size:10px;font-weight:700;color:var(--fg-light);background:var(--bg-soft);border:1px solid var(--border);border-radius:20px;padding:2px 7px;letter-spacing:.2px;font-family:var(--mono);align-self:center}
+  .trae-brand-ver{cursor:pointer;position:relative;transition:var(--transition);user-select:none}
+  .trae-brand-ver:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+  .cl-new-dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid var(--bg);box-shadow:0 0 0 2px rgba(239,68,68,.18);animation:clPulse 1.8s ease-in-out infinite}
+  @keyframes clPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.84)}}
+
+  /* ===== v2.5 偏好设置：分段选择（密度 / 外观模式） ===== */
+  .pref-seg{display:flex;align-items:center;gap:6px}
+  .pref-seg-btn{padding:6px 14px;font-size:12px;font-weight:600;color:var(--fg-light);background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;transition:var(--transition);font-family:inherit;white-space:nowrap}
+  .pref-seg-btn:hover{color:var(--fg);background:var(--bg-dim,var(--bg-soft))}
+  .pref-seg-btn.active{color:#fff;background:var(--accent);border-color:var(--accent)}
+  .pref-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
+  .pref-row-label{font-size:12px;color:var(--fg-dim);display:flex;align-items:center;gap:6px}
+
+  /* ===== v2.5 命令面板 ===== */
+  .cmdk-overlay{position:fixed;inset:0;background:rgba(15,17,23,.42);z-index:400;display:flex;align-items:flex-start;justify-content:center;padding-top:11vh;animation:cmdkFade .14s ease}
+  @keyframes cmdkFade{from{opacity:0}to{opacity:1}}
+  .cmdk-panel{width:min(560px,92vw);background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden;animation:cmdkIn .16s ease}
+  @keyframes cmdkIn{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+  .cmdk-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .cmdk-input-row .cmdk-icon{font-size:15px;opacity:.75;flex-shrink:0}
+  .cmdk-input{flex:1;border:none;background:none;outline:none;color:var(--fg);font-size:14px;font-family:inherit}
+  .cmdk-input::placeholder{color:var(--fg-light)}
+  .cmdk-kbd{font-family:var(--mono);font-size:10px;color:var(--fg-light);background:var(--bg-soft);border:1px solid var(--border);border-radius:var(--radius-xs);padding:2px 6px;flex-shrink:0}
+  .cmdk-list{max-height:min(52vh,420px);overflow-y:auto;padding:6px}
+  .cmdk-group-label{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--fg-light);padding:9px 10px 5px}
+  .cmdk-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s ease;color:var(--fg-dim);font-size:13px}
+  .cmdk-item .ci-icon{width:22px;text-align:center;font-size:14px;flex-shrink:0}
+  .cmdk-item .ci-label{flex:1;color:var(--fg);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cmdk-item .ci-cat{font-size:10.5px;color:var(--fg-light);background:var(--bg-soft);border:1px solid var(--border);border-radius:20px;padding:1px 7px;flex-shrink:0}
+  .cmdk-item.sel{background:var(--accent-soft);color:var(--accent-dark,var(--accent))}
+  .cmdk-item.sel .ci-label{color:var(--accent-dark,var(--accent))}
+  .cmdk-empty{padding:26px 12px;text-align:center;color:var(--fg-light);font-size:13px}
+  .cmdk-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--fg-light);background:var(--bg-soft)}
+  [data-theme="dark"] .cmdk-overlay{background:rgba(0,0,0,.58)}
+  [data-theme="dark"] .cmdk-foot{background:rgba(255,255,255,.03)}
+
+  /* ===== v2.5 更新日志抽屉 ===== */
+  .cl-overlay{position:fixed;inset:0;background:rgba(15,17,23,.4);z-index:400;display:flex;justify-content:flex-end;animation:cmdkFade .14s ease}
+  .cl-drawer{width:min(440px,94vw);height:100%;background:var(--bg2);border-left:1px solid var(--border);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:clSlide .2s cubic-bezier(.22,1,.36,1)}
+  @keyframes clSlide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+  .cl-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
+  .cl-head h3{margin:0;font-size:14.5px;font-weight:700;color:var(--fg);display:flex;align-items:center;gap:8px}
+  .cl-head .cl-sub{font-size:11px;color:var(--fg-light);margin-top:3px}
+  .cl-close{border:1px solid var(--border);background:var(--bg-soft);color:var(--fg-light);border-radius:var(--radius-xs);width:28px;height:28px;cursor:pointer;font-size:14px;line-height:1;transition:var(--transition)}
+  .cl-close:hover{color:var(--fg);border-color:var(--fg-light)}
+  .cl-body{flex:1;overflow-y:auto;padding:14px 18px 22px}
+  .cl-entry{border-left:2px solid var(--accent);padding:0 0 0 14px;margin-bottom:18px;position:relative}
+  .cl-entry::before{content:'';position:absolute;left:-5px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .cl-entry-title{font-size:13px;font-weight:700;color:var(--fg);margin-bottom:4px}
+  .cl-entry-meta{font-size:11px;color:var(--fg-light);margin-bottom:7px;font-family:var(--mono)}
+  .cl-entry-content{font-size:12.5px;line-height:1.7;color:var(--fg-dim);white-space:pre-wrap;word-break:break-word}
+  .cl-empty{padding:34px 8px;text-align:center;color:var(--fg-light);font-size:13px}
+
+  /* ===== v2.5 紧凑密度 ===== */
+  [data-density="compact"] .panel{gap:10px}
+  [data-density="compact"] .panel-title{font-size:13.5px;min-height:20px}
+  [data-density="compact"] .term-box{padding:13px;padding-top:16px}
+  [data-density="compact"] .trae-sidebar-item{padding:5px 9px;font-size:12px;margin-bottom:1px}
+  [data-density="compact"] .card-grid,[data-density="compact"] .profile-page{gap:10px}
+  [data-density="compact"] .profile-field-grid{gap:8px}
+  [data-density="compact"] .stat-grid{gap:8px}
+  [data-density="compact"] .dash-card,[data-density="compact"] .inv-card,[data-density="compact"] .cam-card{padding:11px}
+  [data-density="compact"] .cmdk-item{padding:7px 10px}
   .trae-brand:hover .trae-logo{transform:scale(1.08)}
   .trae-cat{background:transparent;border:none;color:var(--fg-dim);font-family:var(--font);font-size:12.5px;padding:7px 13px;cursor:pointer;transition:var(--transition);border-radius:var(--radius-sm);font-weight:500;white-space:nowrap;letter-spacing:-.1px}
   .trae-cat:hover{background:var(--bg-hover);color:var(--fg)}
@@ -841,6 +904,13 @@ const I18N = {
     'req_submitter': '申请人', 'req_submit_time': '提交时间', 'req_reviewer': '审批人',
     'req_review_time': '审批时间', 'req_admin_note': '备注',
     'req_all': '全部', 'refresh': '刷新', 'settings_radius': '界面圆角', 'settings_radius_hint': '拖动滑块调整全局圆角',
+    // v2.5 命令面板 / 界面密度 / 更新日志
+    'cmdk_placeholder': '搜索面板或执行命令…', 'cmdk_hint': '↑↓ 选择 · Enter 执行 · Esc 关闭', 'cmdk_empty': '没有匹配的结果', 'cmdk_actions': '快捷操作',
+    'act_toggle_theme': '切换深浅主题', 'act_switch_lang': '切换语言（简中 / 繁中 / English）', 'act_export': '导出数据',
+    'act_shortcuts': '快捷键说明', 'act_changelog': '查看更新日志', 'act_refresh': '刷新当前页面',
+    'settings_density': '界面密度', 'settings_density_hint': '紧凑模式可在一屏内显示更多内容', 'density_comfortable': '舒适', 'density_compact': '紧凑',
+    'settings_theme_mode': '外观模式', 'theme_auto': '跟随系统',
+    'changelog_view': '查看更新日志', 'changelog_title': '更新日志', 'changelog_empty': '暂无更新记录', 'changelog_new': '有新的更新日志', 'cmdk_feature': '命令面板（全局搜索）',
     'radius_sharp': '直角', 'radius_round': '圆润', 'radius_preview': '圆角效果预览',
     'profile_info_title': '账号信息', 'profile_info_hint': '账号由管理员创建与维护',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -976,6 +1046,13 @@ const I18N = {
     'req_submitter': '申請人', 'req_submit_time': '提交時間', 'req_reviewer': '審批人',
     'req_review_time': '審批時間', 'req_admin_note': '備註',
     'req_all': '全部', 'refresh': '重新整理', 'settings_radius': '介面圓角', 'settings_radius_hint': '拖動滑桿調整全域圓角',
+    // v2.5 命令面板 / 介面密度 / 更新日誌
+    'cmdk_placeholder': '搜尋面板或執行指令…', 'cmdk_hint': '↑↓ 選擇 · Enter 執行 · Esc 關閉', 'cmdk_empty': '沒有符合的結果', 'cmdk_actions': '快捷操作',
+    'act_toggle_theme': '切換深淺主題', 'act_switch_lang': '切換語言（簡中 / 繁中 / English）', 'act_export': '匯出數據',
+    'act_shortcuts': '快捷鍵說明', 'act_changelog': '檢視更新日誌', 'act_refresh': '重新整理目前頁面',
+    'settings_density': '介面密度', 'settings_density_hint': '緊湊模式可在一屏內顯示更多內容', 'density_comfortable': '舒適', 'density_compact': '緊湊',
+    'settings_theme_mode': '外觀模式', 'theme_auto': '跟隨系統',
+    'changelog_view': '檢視更新日誌', 'changelog_title': '更新日誌', 'changelog_empty': '暫無更新記錄', 'changelog_new': '有新的更新日誌', 'cmdk_feature': '命令面板（全域搜尋）',
     'radius_sharp': '直角', 'radius_round': '圓潤', 'radius_preview': '圓角效果預覽',
     'profile_info_title': '帳號資訊', 'profile_info_hint': '帳號由管理員建立與維護',
     'req_type_material_add': '3D材料 - 新增', 'req_type_material_edit': '3D材料 - 修改',
@@ -1106,6 +1183,13 @@ const I18N = {
     'req_submitter': 'Requester', 'req_submit_time': 'Submitted', 'req_reviewer': 'Reviewer',
     'req_review_time': 'Reviewed', 'req_admin_note': 'Note',
     'req_all': 'All', 'refresh': 'Refresh', 'settings_radius': 'Corner Radius', 'settings_radius_hint': 'Drag to adjust global corner radius',
+    // v2.5 command palette / density / changelog
+    'cmdk_placeholder': 'Search panels or run a command…', 'cmdk_hint': '↑↓ navigate · Enter run · Esc close', 'cmdk_empty': 'No matching results', 'cmdk_actions': 'Quick Actions',
+    'act_toggle_theme': 'Toggle light / dark theme', 'act_switch_lang': 'Switch language (简体 / 繁體 / English)', 'act_export': 'Export data',
+    'act_shortcuts': 'Keyboard shortcuts', 'act_changelog': 'View changelog', 'act_refresh': 'Refresh current view',
+    'settings_density': 'Interface Density', 'settings_density_hint': 'Compact shows more content on one screen', 'density_comfortable': 'Comfortable', 'density_compact': 'Compact',
+    'settings_theme_mode': 'Appearance', 'theme_auto': 'System',
+    'changelog_view': 'View changelog', 'changelog_title': 'Changelog', 'changelog_empty': 'No changelog yet', 'changelog_new': 'New changelog available', 'cmdk_feature': 'Command Palette',
     'radius_sharp': 'Sharp', 'radius_round': 'Round', 'radius_preview': 'Corner radius preview',
     'profile_info_title': 'Account Info', 'profile_info_hint': 'Account is created by an administrator',
     'req_type_material_add': '3D Material - Add', 'req_type_material_edit': '3D Material - Edit',
@@ -1192,7 +1276,7 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.4]';
+    document.title = t('app_name') + ' [v2.5]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
   }
@@ -1271,7 +1355,7 @@ function applyI18n() {
   <!-- Top Bar -->
   <div class="trae-topbar">
     <div class="trae-topbar-left">
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver">v2.4</span></span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.5<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -1727,6 +1811,15 @@ function applyI18n() {
           </div>
         </button>
       </div>
+      <!-- v2.5 外观模式：浅色 / 深色 / 跟随系统 -->
+      <div class="pref-row">
+        <span class="pref-row-label"><span>🎨</span><span data-i18n="settings_theme_mode">外观模式</span></span>
+        <div class="pref-seg" id="themeModeSeg">
+          <button class="pref-seg-btn" data-mode="light" data-i18n="settings_light">浅色</button>
+          <button class="pref-seg-btn" data-mode="dark" data-i18n="settings_dark">深色</button>
+          <button class="pref-seg-btn" data-mode="auto" data-i18n="theme_auto">跟随系统</button>
+        </div>
+      </div>
     </div>
 
     <!-- 自定义主题色 -->
@@ -1780,6 +1873,20 @@ function applyI18n() {
           <div class="radius-preview-line short"></div>
         </div>
         <span class="radius-preview-tip" data-i18n="radius_preview">预览</span>
+      </div>
+    </div>
+
+    <!-- v2.5 界面密度 -->
+    <div class="term-box" data-i18n-title="settings_density">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:600" data-i18n="settings_density">界面密度</span>
+        <span style="font-size:11px;color:var(--fg-light)" data-i18n="settings_density_hint">紧凑模式可在一屏内显示更多内容</span>
+      </div>
+      <div class="pref-row" style="margin-top:0">
+        <div class="pref-seg" id="densitySeg" style="width:100%">
+          <button class="pref-seg-btn" data-density-val="comfortable" style="flex:1" data-i18n="density_comfortable">舒适</button>
+          <button class="pref-seg-btn" data-density-val="compact" style="flex:1" data-i18n="density_compact">紧凑</button>
+        </div>
       </div>
     </div>
 
@@ -1842,7 +1949,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.4</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.5</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -5867,7 +5974,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.4 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.5 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -5967,6 +6074,7 @@ tr:hover{background:#f5f5ff}
       { key: '/', desc: t('search') || 'Search' },
       { key: 'Esc', desc: t('cancel') || 'Close' },
       { key: '?', desc: t('shortcut_help') || 'Shortcut Help' },
+      { key: 'Ctrl/⌘+K', desc: t('cmdk_feature') || 'Command Palette' },
     ];
     modal.innerHTML = `
       <div style="font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">⌨️ ${t('shortcut_help')||'快捷键'}</div>
@@ -6604,6 +6712,287 @@ tr:hover{background:#f5f5ff}
     const reset = $('#radiusReset');
     if (reset) reset.addEventListener('click', () => applyRadius(RADIUS_DEFAULT));
   }
+
+  // ===================== v2.5 界面密度 / 外观模式 / 更新日志 / 命令面板 =====================
+  function v25Esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  /* ---- 界面密度：舒适 / 紧凑 ---- */
+  const DENSITY_DEFAULT = 'comfortable';
+  (function applyStoredDensity() {
+    if (localStorage.getItem('lab_density') === 'compact') document.documentElement.setAttribute('data-density', 'compact');
+  })();
+  function applyDensity(mode) {
+    const m = mode === 'compact' ? 'compact' : DENSITY_DEFAULT;
+    if (m === 'compact') document.documentElement.setAttribute('data-density', 'compact');
+    else document.documentElement.removeAttribute('data-density');
+    localStorage.setItem('lab_density', m);
+    const seg = $('#densitySeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.densityVal === m));
+  }
+  function initDensity() {
+    const seg = $('#densitySeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyDensity(btn.dataset.densityVal));
+    });
+    applyDensity(localStorage.getItem('lab_density') || DENSITY_DEFAULT);
+  }
+
+  /* ---- 外观模式：浅色 / 深色 / 跟随系统 ---- */
+  function resolveThemeMode(mode) {
+    if (mode === 'auto') {
+      try { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'light'; }
+    }
+    return mode === 'dark' ? 'dark' : 'light';
+  }
+  function getThemeMode() { return localStorage.getItem('lab_theme_mode') || localStorage.getItem('lab_theme') || 'light'; }
+  function syncThemeSeg() {
+    const cur = getThemeMode();
+    const seg = $('#themeModeSeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === cur));
+  }
+  function setThemeMode(mode) {
+    localStorage.setItem('lab_theme_mode', mode);
+    localStorage.setItem('lab_theme', resolveThemeMode(mode)); // 同步旧 key，保持向后兼容
+    applyThemeState();
+    const dash = $('#panel-dashboard');
+    if (dash && dash.classList.contains('active') && typeof renderDashboard === 'function') setTimeout(() => renderDashboard(), 100);
+  }
+  // 用「模式」模型接管原主题应用逻辑，保留原 theme-toggle 动画按钮行为
+  applyThemeState = function() {
+    const isDark = resolveThemeMode(getThemeMode()) === 'dark';
+    if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    document.querySelectorAll('.theme-toggle').forEach(el => {
+      el.classList.toggle('dark', isDark);
+      el.classList.toggle('light', !isDark);
+    });
+    applyWallpaperMask();
+    syncThemeSeg();
+  };
+  toggleTheme = function() {
+    setThemeMode(resolveThemeMode(getThemeMode()) === 'dark' ? 'light' : 'dark');
+  };
+  function initThemeMode() {
+    if (!localStorage.getItem('lab_theme_mode')) localStorage.setItem('lab_theme_mode', localStorage.getItem('lab_theme') || 'light');
+    const seg = $('#themeModeSeg');
+    if (seg) seg.querySelectorAll('.pref-seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => setThemeMode(btn.dataset.mode));
+    });
+    try {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const onChange = () => { if (getThemeMode() === 'auto') applyThemeState(); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+    } catch (e) {}
+    applyThemeState();
+  }
+
+  /* ---- 更新日志抽屉 + 新更新红点 ---- */
+  function changelogMaxStamp() {
+    const list = (noticeData && Array.isArray(noticeData.changelogs)) ? noticeData.changelogs : [];
+    return list.reduce((mx, x) => Math.max(mx, Number(x.updated || x.id || 0) || 0), 0);
+  }
+  function updateChangelogDot() {
+    const dot = $('#changelogNewDot');
+    if (!dot) return;
+    const seen = Number(localStorage.getItem('lab_changelog_seen') || 0);
+    dot.style.display = changelogMaxStamp() > seen ? 'inline-block' : 'none';
+  }
+  async function openChangelog() {
+    if (!(noticeData && noticeData.changelogs && noticeData.changelogs.length) && typeof loadNotice === 'function') {
+      try { await loadNotice(); } catch (e) {}
+    }
+    localStorage.setItem('lab_changelog_seen', String(changelogMaxStamp()));
+    updateChangelogDot();
+    const prev = document.querySelector('.cl-overlay');
+    if (prev) prev.remove();
+    const list = (noticeData && noticeData.changelogs) ? noticeData.changelogs : [];
+    const fmt = (n) => { try { return new Date(Number(n)).toLocaleString(); } catch (e) { return ''; } };
+    const body = list.length
+      ? list.map(item => `
+        <div class="cl-entry">
+          <div class="cl-entry-title">${v25Esc(item.title || '')}</div>
+          <div class="cl-entry-meta">${v25Esc(fmt(item.updated))}${item.author ? ' · ' + v25Esc(item.author) : ''}</div>
+          <div class="cl-entry-content">${v25Esc(item.content || '')}</div>
+        </div>`).join('')
+      : `<div class="cl-empty">${v25Esc(t('changelog_empty'))}</div>`;
+    const overlay = document.createElement('div');
+    overlay.className = 'cl-overlay';
+    overlay.innerHTML = `
+      <div class="cl-drawer">
+        <div class="cl-head">
+          <div>
+            <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
+            <div class="cl-sub">SparkMinds Lab v2.5 · ${list.length}</div>
+          </div>
+          <button class="cl-close" title="Close">✕</button>
+        </div>
+        <div class="cl-body">${body}</div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('.cl-close').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  }
+  // 公告/日志拉取后同步红点
+  const __loadNoticeOrig = loadNotice;
+  loadNotice = async function() {
+    try { await __loadNoticeOrig(); } catch (e) {}
+    updateChangelogDot();
+  };
+
+  /* ---- 命令面板 Ctrl/⌘ + K ---- */
+  const CMDK_ALIAS = {
+    dashboard: 'dashboard 仪表盘 儀表盤 首页 首頁 home yibiaopan main',
+    lab: 'lab 实验室 實驗室 平面图 平面圖 monitor shiyanshi',
+    print3d: '3d printer print 打印 dayin d打印 dayinji',
+    warehouse: 'warehouse inventory 仓库 庫存 物料 cangku wuliao kucun',
+    profile: 'profile me 个人主页 個人主頁 资料 資料 nickname avatar',
+    messages: 'message chat 消息 站内信 站內信 xiaoxi liaotian',
+    mypunish: 'punish punishment 处罚 懲罰 chufa jilu',
+    forum: 'forum post 论坛 論壇 帖子 luntan tiezi',
+    settings: 'settings config 设置 設定 shezhi theme language radius wallpaper',
+    users: 'user admin 用户 用戶 账号 帳號 yonghu',
+    approval: 'approval request 审批 審批 审核 shenpi shenhe',
+    reports: 'report 举报 報告 反馈 jubao fankui',
+    notice: 'notice announcement 公告 gonggao bulletin',
+    backup: 'backup rollback 备份 備份 回滚 beifen huigun',
+    transactions: 'transaction log 流水 liushui record',
+  };
+  const V25_LANGS = ['zh-CN', 'zh-TW', 'en'];
+  function v25CycleLanguage() {
+    const cur = document.documentElement.lang || 'zh-CN';
+    const i = V25_LANGS.indexOf(cur);
+    if (typeof setLang === 'function') setLang(V25_LANGS[((i < 0 ? 0 : i) + 1) % V25_LANGS.length]);
+  }
+  function cmdkItems() {
+    const cats = [['lab', 'nav_lab'], ['inventory', 'nav_inventory'], ['user', 'nav_user_center'], ['admin', 'nav_admin']];
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const out = [];
+    cats.forEach(([cat, key]) => {
+      (SIDEBAR_CONFIG[cat] || []).forEach(it => {
+        if (cat === 'admin' && !isAdmin) return;
+        out.push({ kind: 'panel', icon: it.icon, label: t(it.label), cat: t(key), catKey: cat, panel: it.id, alias: CMDK_ALIAS[it.id] || it.id });
+      });
+    });
+    [
+      { icon: '🌓', label: t('act_toggle_theme'), run: () => toggleTheme(), alias: 'theme dark light 主题 主題 深色 浅色 shense qianse' },
+      { icon: '🌐', label: t('act_switch_lang'), run: v25CycleLanguage, alias: 'lang language 语言 語言 yuyan english jianti fanti' },
+      { icon: '📦', label: t('act_export'), run: () => showExportMenu(), alias: 'export data 导出 導出 daochu report' },
+      { icon: '⌨️', label: t('act_shortcuts'), run: () => showShortcutHelp(), alias: 'shortcut key help 快捷键 快捷鍵 help' },
+      { icon: '📜', label: t('act_changelog'), run: () => openChangelog(), alias: 'changelog update news version 更新日志 更新日誌 gengxin banben' },
+      { icon: '🔄', label: t('act_refresh'), run: () => switchPanel(currentPanel), alias: 'refresh reload 刷新 重新整理 shuaxin' },
+    ].forEach(a => out.push({ kind: 'action', catKey: 'action', cat: t('cmdk_actions'), icon: a.icon, label: a.label, run: a.run, alias: a.alias }));
+    return out;
+  }
+  let cmdkOpenEl = null;
+  let cmdkCloseFn = null;
+  function openCmdk() {
+    if (cmdkOpenEl) return;
+    const all = cmdkItems();
+    const overlay = document.createElement('div');
+    overlay.className = 'cmdk-overlay';
+    overlay.innerHTML = `
+      <div class="cmdk-panel">
+        <div class="cmdk-input-row">
+          <span class="cmdk-icon">🔍</span>
+          <input class="cmdk-input" id="cmdkInput" placeholder="${v25Esc(t('cmdk_placeholder'))}" autocomplete="off" spellcheck="false">
+          <span class="cmdk-kbd">Esc</span>
+        </div>
+        <div class="cmdk-list" id="cmdkList"></div>
+        <div class="cmdk-foot"><span>${v25Esc(t('cmdk_hint'))}</span><span>Ctrl/⌘ + K</span></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    cmdkOpenEl = overlay;
+    const input = overlay.querySelector('#cmdkInput');
+    const listEl = overlay.querySelector('#cmdkList');
+    let flat = [];
+    let sel = 0;
+    function filter(q) {
+      const s = (q || '').trim().toLowerCase();
+      if (!s) return all.slice();
+      return all.filter(it => (it.label || '').toLowerCase().includes(s) || (it.alias || '').toLowerCase().includes(s) || (it.panel || '').toLowerCase().includes(s));
+    }
+    function paint() {
+      flat = filter(input.value);
+      if (sel >= flat.length) sel = 0;
+      if (!flat.length) { listEl.innerHTML = `<div class="cmdk-empty">${v25Esc(t('cmdk_empty'))}</div>`; return; }
+      let html = '', lastCat = null;
+      flat.forEach((it, i) => {
+        if (it.cat !== lastCat) { html += `<div class="cmdk-group-label">${v25Esc(it.cat)}</div>`; lastCat = it.cat; }
+        html += `<div class="cmdk-item ${i === sel ? 'sel' : ''}" data-idx="${i}">
+          <span class="ci-icon">${it.icon || '•'}</span>
+          <span class="ci-label">${v25Esc(it.label)}</span>
+          <span class="ci-cat">${it.kind === 'panel' ? v25Esc(it.cat) : '⚡'}</span>
+        </div>`;
+      });
+      listEl.innerHTML = html;
+      listEl.querySelectorAll('.cmdk-item').forEach(el => {
+        el.addEventListener('click', () => { sel = Number(el.dataset.idx); run(); });
+        el.addEventListener('mouseenter', () => { sel = Number(el.dataset.idx); paint(); });
+      });
+    }
+    function move(d) {
+      if (!flat.length) return;
+      sel = (sel + d + flat.length) % flat.length;
+      paint();
+      const el = listEl.querySelector('.cmdk-item.sel');
+      if (el) el.scrollIntoView({ block: 'nearest' });
+    }
+    function close() {
+      overlay.remove();
+      cmdkOpenEl = null;
+      cmdkCloseFn = null;
+      document.removeEventListener('keydown', onKey, true);
+    }
+    cmdkCloseFn = close;
+    function run() {
+      const it = flat[sel];
+      close();
+      if (!it) return;
+      if (it.kind === 'panel') { switchCategory(it.catKey); switchPanel(it.panel); }
+      else if (typeof it.run === 'function') it.run();
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); e.stopPropagation(); move(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); run(); }
+    }
+    input.addEventListener('input', () => { sel = 0; paint(); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey, true);
+    paint();
+    setTimeout(() => input.focus(), 10);
+  }
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (cmdkOpenEl && cmdkCloseFn) cmdkCloseFn();
+      else openCmdk();
+    }
+  }, true);
+  // 版本号：单击看更新日志（双击仍是彩蛋）
+  const brandVer = $('#brandVersion');
+  if (brandVer) {
+    let verTimer = null, verDbl = false;
+    brandVer.addEventListener('click', () => {
+      if (verDbl) return;
+      clearTimeout(verTimer);
+      verTimer = setTimeout(() => { if (!verDbl) openChangelog(); }, 210);
+    });
+    brandVer.addEventListener('dblclick', () => {
+      verDbl = true;
+      clearTimeout(verTimer);
+      setTimeout(() => { verDbl = false; }, 500);
+    });
+  }
+
+  initDensity();
+  initThemeMode();
+  updateChangelogDot();
 
   function initBackupAndTxn() {
     // 备份按钮
@@ -7636,7 +8025,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.4\n' +
+      '\n  🔬 SparkMinds Lab v2.5\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -7684,7 +8073,8 @@ tr:hover{background:#f5f5ff}
           ['v2.1', 'Glassmorphism + Animations', '07-25', 'glass'],
           ['v2.2', 'File Transfer + Report System', '07-26', 'shield'],
           ['v2.3', 'Read Receipts + Online + Search', '08-01', 'chat'],
-          ['v2.4', 'Notifications + Shortcuts + Reports', '08-05', 'spark']
+          ['v2.4', 'Notifications + Shortcuts + Reports', '08-05', 'spark'],
+          ['v2.5', 'Command Palette + Density + Changelog', '09-25', 'command']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -7699,7 +8089,8 @@ tr:hover{background:#f5f5ff}
           ['v2.1', '毛玻璃 + 動畫', '07-25', '玻璃'],
           ['v2.2', '文件傳輸 + 舉報系統', '07-26', '盾牌'],
           ['v2.3', '已讀回執 + 在線 + 搜尋', '08-01', '聊天'],
-          ['v2.4', '通知中心 + 快捷鍵 + 報告導出', '08-05', '火花']
+          ['v2.4', '通知中心 + 快捷鍵 + 報告導出', '08-05', '火花'],
+          ['v2.5', '命令面板 + 介面密度 + 更新日誌', '09-25', 'command']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -7714,10 +8105,11 @@ tr:hover{background:#f5f5ff}
           ['v2.1', '毛玻璃 + 动画', '07-25', '玻璃'],
           ['v2.2', '文件传输 + 举报系统', '07-26', '盾牌'],
           ['v2.3', '已读回执 + 在线 + 搜索', '08-01', '聊天'],
-          ['v2.4', '通知中心 + 快捷键 + 报告导出', '08-05', '火花']
+          ['v2.4', '通知中心 + 快捷键 + 报告导出', '08-05', '火花'],
+          ['v2.5', '命令面板 + 界面密度 + 更新日志', '09-25', 'command']
         ]
       };
-      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨' };
+      const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘' };
       modal.innerHTML =
         '<h2><span class="ee-badge">🔬</span>' + content.title + '</h2>' +
         '<div class="ee-ver">' + content.ver + '</div>' +
