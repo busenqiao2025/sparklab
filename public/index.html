@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SparkMinds Lab [v2.6.5]</title>
+<title>SparkMinds Lab [v2.6.6]</title>
 <style>
   /* ============================================================
      SparkMinds Lab — Design System
@@ -972,6 +972,29 @@
   /* ===== v2.6.5 手机端适配 ===== */
   .m-backdrop{display:none}
   #drawerCats{display:none}
+  /* ===== v2.6.6 手机端底部导航栏（仅 ≤768px 显示） ===== */
+  .m-tabbar{display:none}
+  @media(max-width:768px){
+    .m-tabbar{
+      display:flex;position:fixed;left:0;right:0;bottom:0;z-index:130;
+      background:var(--bg2);border-top:1px solid var(--border);
+      padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 10px rgba(15,23,42,.06);
+    }
+    .m-tabbar .mtab{
+      flex:1 1 0;min-width:0;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+      padding:8px 2px 7px;background:none;border:none;cursor:pointer;color:var(--fg-dim);
+      font-size:11px;line-height:1.2;font-family:inherit;position:relative;-webkit-tap-highlight-color:transparent;
+    }
+    .m-tabbar .mtab .mtab-icon{font-size:20px;line-height:1;display:block}
+    .m-tabbar .mtab .mtab-label{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .m-tabbar .mtab.active{color:var(--accent);font-weight:600}
+    .m-tabbar .mtab.active .mtab-icon{transform:translateY(-1px)}
+    .m-tabbar .mtab .mtab-badge{
+      position:absolute;top:4px;left:50%;margin-left:6px;background:var(--danger);color:#fff;
+      border-radius:9px;font-size:9.5px;font-weight:700;line-height:15px;min-width:15px;padding:0 4px;
+      text-align:center;display:none;
+    }
+  }
   @media(max-width:768px){
     :root{--topbar-h:48px}
     /* ---- 顶栏：压缩为单行，次要入口移入抽屉 ---- */
@@ -1055,6 +1078,8 @@
     /* ---- 杂项 ---- */
     .pref-row{flex-wrap:wrap}
     .profile-page{grid-template-columns:1fr!important}
+    /* ---- v2.6.6 底部导航：内容区留出高度，避免最后一条被遮住 ---- */
+    .trae-content{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
   }
 </style>
 <script>
@@ -1063,6 +1088,7 @@ const I18N = {
   'zh-CN': {
     // Login
     'app_name': 'SparkMinds Lab', 'mobile_back': '返回列表', 'app_subtitle': '实验室物联网监控平台',
+    'mtab_lab': '实验室', 'mtab_inventory': '库存', 'mtab_messages': '消息', 'mtab_me': '我的', 'mtab_admin': '管理', 'mtab_more': '再点一次展开侧边菜单',
     'username': '用户名', 'password': '密码', 'login': '登 录',
     'login_tagline': '实验室<span>智能</span>监控平台', 'login_desc': '实时监控实验室环境数据，管理耗材库存，跨设备数据同步，让实验室管理更高效。', 'login_feature1': '实时环境数据监控', 'login_feature2': '耗材库存跨设备同步', 'login_feature3': '多用户协作与站内信', 'login_welcome': '欢迎回来', 'login_subtitle': '登录以继续', 'notice_announcement': '系统公告', 'notice_changelog': '更新日志', 'notice_empty': '暂无内容', 'notice_edit': '编辑', 'notice_save': '保存', 'notice_cancel': '取消', 'notice_saved': '保存成功', 'notice_save_failed': '保存失败', 'notice_edit_announcement': '编辑系统公告', 'notice_edit_changelog': '编辑更新日志', 'notice_updated': '更新于', 'notice_add': '新增', 'notice_delete': '删除', 'notice_confirm_delete': '确定删除此条目？', 'notice_title': '标题', 'notice_title_placeholder': '输入标题（可选）', 'notice_content': '内容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日志', 'notice_edit_item': '编辑条目', 'notice_no_title': '无标题',
     'login_hint': '默认账号：admin / admin123 | user / user123',
@@ -1243,6 +1269,7 @@ const I18N = {
   },
   'zh-TW': {
     'app_name': 'SparkMinds Lab', 'mobile_back': '返回列表', 'app_subtitle': '實驗室物聯網監控平台',
+    'mtab_lab': '實驗室', 'mtab_inventory': '庫存', 'mtab_messages': '訊息', 'mtab_me': '我的', 'mtab_admin': '管理', 'mtab_more': '再點一次展開側邊選單',
     'username': '用戶名', 'password': '密碼', 'login': '登 入',
     'login_tagline': '實驗室<span>智能</span>監控平台', 'login_desc': '即時監控實驗室環境數據，管理耗材庫存，跨設備數據同步，讓實驗室管理更高效。', 'login_feature1': '即時環境數據監控', 'login_feature2': '耗材庫存跨設備同步', 'login_feature3': '多使用者協作與站內信', 'login_welcome': '歡迎回來', 'login_subtitle': '登入以繼續', 'notice_announcement': '系統公告', 'notice_changelog': '更新日誌', 'notice_empty': '暫無內容', 'notice_edit': '編輯', 'notice_save': '儲存', 'notice_cancel': '取消', 'notice_saved': '儲存成功', 'notice_save_failed': '儲存失敗', 'notice_edit_announcement': '編輯系統公告', 'notice_edit_changelog': '編輯更新日誌', 'notice_updated': '更新於', 'notice_add': '新增', 'notice_delete': '刪除', 'notice_confirm_delete': '確定刪除此條目？', 'notice_title': '標題', 'notice_title_placeholder': '輸入標題（可選）', 'notice_content': '內容', 'notice_new_announcement': '新增公告', 'notice_new_changelog': '新增日誌', 'notice_edit_item': '編輯條目', 'notice_no_title': '無標題',
     'login_hint': '預設帳號：admin / admin123 | user / user123',
@@ -1405,6 +1432,7 @@ const I18N = {
   },
   'en': {
     'app_name': 'SparkMinds Lab', 'mobile_back': 'Back to list', 'app_subtitle': 'Lab IoT Monitoring Platform',
+    'mtab_lab': 'Lab', 'mtab_inventory': 'Stock', 'mtab_messages': 'Chat', 'mtab_me': 'Me', 'mtab_admin': 'Admin', 'mtab_more': 'Tap again to open the side menu',
     'username': 'Username', 'password': 'Password', 'login': 'Log In',
     'login_tagline': 'Lab <span>Smart</span> Monitoring', 'login_desc': 'Real-time environmental data monitoring, consumable inventory management, cross-device data sync — making lab management more efficient.', 'login_feature1': 'Real-time environmental monitoring', 'login_feature2': 'Cross-device inventory sync', 'login_feature3': 'Multi-user collaboration & messaging', 'login_welcome': 'Welcome back', 'login_subtitle': 'Log in to continue', 'notice_announcement': 'Announcements', 'notice_changelog': 'Changelog', 'notice_empty': 'No content', 'notice_edit': 'Edit', 'notice_save': 'Save', 'notice_cancel': 'Cancel', 'notice_saved': 'Saved', 'notice_save_failed': 'Save failed', 'notice_edit_announcement': 'Edit Announcement', 'notice_edit_changelog': 'Edit Changelog', 'notice_updated': 'Updated', 'notice_add': 'Add', 'notice_delete': 'Delete', 'notice_confirm_delete': 'Delete this item?', 'notice_title': 'Title', 'notice_title_placeholder': 'Enter title (optional)', 'notice_content': 'Content', 'notice_new_announcement': 'New Announcement', 'notice_new_changelog': 'New Changelog', 'notice_edit_item': 'Edit Item', 'notice_no_title': 'Untitled',
     'login_hint': 'Default: admin / admin123 | user / user123',
@@ -1640,9 +1668,10 @@ function applyI18n() {
     const loginLbl = document.getElementById('loginLangLabel');
     if (loginLbl) loginLbl.textContent = ({'zh-CN':'简中','zh-TW':'繁中','en':'EN'})[currentLang];
     // Update document title
-    document.title = t('app_name') + ' [v2.6.5]';
+    document.title = t('app_name') + ' [v2.6.6]';
     // Re-render sidebar for language update (if in main app)
     if (typeof window.__renderSidebar === 'function') window.__renderSidebar();
+    if (typeof window.__renderMobileTabBar === 'function') window.__renderMobileTabBar(); // v2.6.6 底部导航跟随语言重绘
   }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
@@ -1721,7 +1750,7 @@ function applyI18n() {
     <div class="trae-topbar-left">
       <!-- v2.5.1 侧边栏折叠 -->
       <button class="trae-icon-btn" id="sidebarToggleBtn" data-i18n-title="sidebar_collapse" title="收起 / 展开侧边栏" style="padding:4px 8px;flex-shrink:0">☰</button>
-      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.5<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
+      <span class="trae-brand"><img src="sparkminds-logo.png" alt="SparkMinds Lab" style="width:auto;height:24px;flex-shrink:0"><span class="trae-brand-ver" id="brandVersion" title="查看更新日志" data-i18n-title="changelog_view">v2.6.6<span class="cl-new-dot" id="changelogNewDot" style="display:none"></span></span></span>
       <button class="trae-cat active" data-cat="lab" data-i18n="nav_lab">实验室监控</button>
       <button class="trae-cat" data-cat="inventory" data-i18n="nav_inventory">库存管理</button>
       <button class="trae-cat" data-cat="user" data-i18n="nav_user_center">用户中心</button>
@@ -2372,7 +2401,7 @@ function applyI18n() {
     <div class="term-box" data-i18n-title="settings_about">
       <div style="font-size:13px;font-weight:600;margin-bottom:12px" data-i18n="settings_about">关于</div>
       <div style="font-size:12px;color:var(--fg-light);line-height:1.8">
-        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.5</span></div>
+        <div>SparkMinds Lab <span style="color:var(--accent);font-weight:600">v2.6.6</span></div>
         <div data-i18n="settings_about_desc">实验室物联网监控平台</div>
         <div style="margin-top:8px;color:var(--muted)">© 2026 SparkMinds Lab</div>
       </div>
@@ -3257,6 +3286,7 @@ function applyI18n() {
   async function enterApp() {
     $('#loginScreen').classList.remove('active');
     $('#mainScreen').classList.add('active');
+    buildMobileTabBar(); // v2.6.6 进入主界面后按角色生成底部导航（管理员多一个「管理」）
     if (currentUser.role === 'admin') document.body.classList.add('is-admin');
     // 管理员不需要"我的申请"按钮（管理员有直接操作权限），直接从 DOM 移除
     const myReqBtn = $('#myReqBtn');
@@ -3423,6 +3453,7 @@ function applyI18n() {
 
   function switchPanel(p) {
     currentPanel = p;
+    updateMobileTabsActive(); // v2.6.6 同步手机底部导航高亮
     $$('.trae-sidebar-item').forEach(b => b.classList.remove('active'));
     $$('.panel').forEach(pa => pa.classList.remove('active'));
     const item = document.querySelector(`.trae-sidebar-item[data-panel="${p}"]`);
@@ -3451,6 +3482,9 @@ function applyI18n() {
 
   function switchCategory(cat) {
     currentCat = cat;
+    updateMobileTabsActive(); // v2.6.6 同步手机底部导航高亮
+    // v2.6.6 进入管理后台时立刻取一次待审批数（侧栏徽标元素此时才存在）
+    if (cat === 'admin' && currentUser && currentUser.role === 'admin' && typeof updateReqBadge === 'function') updateReqBadge();
     $$('.trae-cat').forEach(b => b.classList.toggle('active', b.dataset.cat === cat)); // v2.6.5 同步顶栏与抽屉分类高亮
     renderSidebar();
     // Auto-select first item in category（进入管理后台时优先落在「审批」，未决事项先处理）
@@ -4895,6 +4929,7 @@ function applyI18n() {
       if (count > 0) { sidebarBadge.textContent = count; sidebarBadge.style.display = 'inline-block'; }
       else { sidebarBadge.style.display = 'none'; }
     }
+    updateMobileTabsActive(); // v2.6.6 同步底部「管理」未读数
   }
 
   function startPolling() {
@@ -5350,6 +5385,7 @@ function applyI18n() {
     const text = r.count > 99 ? '99+' : r.count;
     if (badge) { if (show) { badge.textContent = text; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; } }
     if (sidebarBadge) { if (show) { sidebarBadge.textContent = text; sidebarBadge.style.display = 'inline-block'; } else { sidebarBadge.style.display = 'none'; } }
+    updateMobileTabsActive(); // v2.6.6 同步底部「消息」未读数
     // 检查未读广播消息并显示横幅
     await checkBroadcastBanner();
   }
@@ -6472,7 +6508,7 @@ tr:hover{background:#f5f5ff}
       html += '</tbody></table>';
     }
 
-    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.5 · Generated by TRAE</div></body></html>`;
+    html += `<div style="text-align:center;color:#ccc;font-size:11px;margin-top:30px">SparkMinds Lab v2.6.6 · Generated by TRAE</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -7805,7 +7841,7 @@ tr:hover{background:#f5f5ff}
         <div class="cl-head">
           <div>
             <h3>📜 <span>${v25Esc(t('changelog_title'))}</span></h3>
-            <div class="cl-sub">SparkMinds Lab v2.6.5 · ${list.length}</div>
+            <div class="cl-sub">SparkMinds Lab v2.6.6 · ${list.length}</div>
           </div>
           <button class="cl-close" title="Close">✕</button>
         </div>
@@ -8001,6 +8037,76 @@ tr:hover{background:#f5f5ff}
     if (window.matchMedia('(max-width:768px)').matches) { toggleMobileDrawer(); return; }
     applySidebarCollapse(document.documentElement.getAttribute('data-sidebar') !== 'collapsed');
   }
+  /* ---- v2.6.6 手机端底部导航栏 ---- */
+  const MOBILE_TABS = [
+    { id: 'lab',       cat: 'lab',       panel: 'dashboard', icon: '🏠', key: 'mtab_lab' },
+    { id: 'inventory', cat: 'inventory', panel: 'print3d',   icon: '📦', key: 'mtab_inventory' },
+    { id: 'messages',  cat: 'user',      panel: 'messages',  icon: '💬', key: 'mtab_messages', badge: 'msgBadge' },
+    { id: 'me',        cat: 'user',      panel: 'profile',   icon: '👤', key: 'mtab_me' },
+    { id: 'admin',     cat: 'admin',     panel: 'approval',  icon: '🛡️', key: 'mtab_admin', badge: 'reqBadge', adminOnly: true }
+  ];
+  function mobileTabs() {
+    return MOBILE_TABS.filter(x => !x.adminOnly || (currentUser && currentUser.role === 'admin'));
+  }
+  function isMobileTabActive(conf) {
+    if (conf.id === 'messages') return currentPanel === 'messages';
+    if (conf.id === 'me') return currentCat === 'user' && currentPanel !== 'messages';
+    return currentCat === conf.cat;
+  }
+  function buildMobileTabBar() {
+    const host = $('#mainScreen');
+    if (!host) return;
+    let bar = $('#mTabBar');
+    if (!bar) {
+      bar = document.createElement('nav');
+      bar.id = 'mTabBar';
+      bar.className = 'm-tabbar';
+      bar.setAttribute('aria-label', 'mobile tab bar');
+      host.appendChild(bar);
+    }
+    bar.innerHTML = mobileTabs().map(x => `
+      <button class="mtab" type="button" data-tab="${x.id}" title="${t('mtab_more')}">
+        <span class="mtab-icon">${x.icon}</span>
+        <span class="mtab-label">${t(x.key)}</span>
+        ${x.badge ? `<span class="mtab-badge" data-badge-src="${x.badge}">0</span>` : ''}
+      </button>`).join('');
+    bar.querySelectorAll('.mtab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const conf = MOBILE_TABS.find(x => x.id === btn.dataset.tab);
+        if (!conf) return;
+        // 已在当前页：再点一次展开侧边菜单，方便切换同类下的其他页面
+        if (isMobileTabActive(conf)) { toggleMobileDrawer(); return; }
+        closeMobileDrawer();
+        switchCategory(conf.cat);
+        switchPanel(conf.panel);
+        updateMobileTabsActive();
+      });
+    });
+    updateMobileTabsActive();
+  }
+  function updateMobileTabsActive() {
+    const bar = $('#mTabBar');
+    if (!bar) return;
+    mobileTabs().forEach(conf => {
+      const btn = bar.querySelector(`.mtab[data-tab="${conf.id}"]`);
+      if (!btn) return;
+      btn.classList.toggle('active', !!isMobileTabActive(conf));
+      const badge = btn.querySelector('.mtab-badge');
+      if (!badge || !conf.badge) return;
+      // 顶栏与侧栏两处徽标都可能是数据源（顶栏不一定渲染，侧栏只在对应分类下渲染）
+      let n = 0, shown = false;
+      [conf.badge, 'sidebar_' + conf.badge].forEach(id => {
+        const src = document.getElementById(id);
+        if (!src) return;
+        const v = parseInt(src.textContent, 10) || 0;
+        if (src.style.display !== 'none' && v > 0) { shown = true; n = Math.max(n, v); }
+      });
+      badge.textContent = shown ? (n > 99 ? '99+' : String(n)) : '0';
+      badge.style.display = shown ? 'inline-block' : 'none';
+    });
+  }
+  window.__renderMobileTabBar = buildMobileTabBar;
+
   /* ---- v2.6.5 手机端适配：抽屉 / 返回按钮 / 克隆分类 ---- */
   function toggleMobileDrawer(force) {
     const open = typeof force === 'boolean' ? force : !document.documentElement.classList.contains('m-drawer-open');
@@ -8107,6 +8213,7 @@ tr:hover{background:#f5f5ff}
   initThemeMode();
   initSidebarCollapse();
   initMobileUI(); // v2.6.5 手机端
+  buildMobileTabBar(); // v2.6.6 手机端底部导航栏
   initMotion();
   // v2.6.5 主题样式
   initThemeStyles();
@@ -9143,7 +9250,7 @@ tr:hover{background:#f5f5ff}
       '      /  |  \\\n' +
       '     /   |   \\\n' +
       '    ✦    ✦    ✦\n' +
-      '\n  🔬 SparkMinds Lab v2.6.5\n' +
+      '\n  🔬 SparkMinds Lab v2.6.6\n' +
       '  💡 你找到了开发者留下的秘密\n' +
       '  🥚 试试: ↑↑↓↓←→←→BA / 点击Logo 7次 / 输入 spark / 双击版本号\n' +
       '\n'
@@ -9198,7 +9305,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.2', 'Mobile Layout: Drawer Nav + Chat View', '09-25', 'mobile'],
           ['v2.6.3', 'Lab Monitor: Card Grid', '09-25', 'design'],
           ['v2.6.4', 'Lab: Floor Plan on Desktop, Cards on Mobile', '09-25', 'mobile'],
-          ['v2.6.5', 'Lab Monitor: Clearer Metric Hierarchy', '09-25', 'design']
+          ['v2.6.5', 'Lab Monitor: Clearer Metric Hierarchy', '09-25', 'design'],
+          ['v2.6.6', 'Mobile: Bottom Tab Bar Navigation', '09-27', 'mobile']
         ]
       } : lang === 'zh-TW' ? {
         title: '關於 SparkMinds Lab',
@@ -9220,7 +9328,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.2', '手機版面：抽屜導航 + 聊天視圖', '09-25', 'mobile'],
           ['v2.6.3', '實驗室監控：全螢幕卡片流', '09-25', 'design'],
           ['v2.6.4', '實驗室：電腦平板保留平面圖，手機用卡片', '09-25', 'mobile'],
-          ['v2.6.5', '實驗室監控：主次指標分層更易讀', '09-25', 'design']
+          ['v2.6.5', '實驗室監控：主次指標分層更易讀', '09-25', 'design'],
+          ['v2.6.6', '手機端：底部導航欄', '09-27', 'mobile']
         ]
       } : {
         title: '关于 SparkMinds Lab',
@@ -9242,7 +9351,8 @@ tr:hover{background:#f5f5ff}
           ['v2.6.2', '手机版面：抽屉导航 + 聊天视图', '09-25', 'mobile'],
           ['v2.6.3', '实验室监控：全屏卡片流', '09-25', 'design'],
           ['v2.6.4', '实验室：电脑平板保留平面图，手机用卡片', '09-25', 'mobile'],
-          ['v2.6.5', '实验室监控：主次指标分层更易读', '09-25', 'design']
+          ['v2.6.5', '实验室监控：主次指标分层更易读', '09-25', 'design'],
+          ['v2.6.6', '手机端：底部导航栏', '09-27', 'mobile']
         ]
       };
       const badges = { 'origin': '🌱', 'cloud': '☁️', 'design': '🎨', 'glass': '🪟', 'shield': '🛡️', 'chat': '💬', 'spark': '✨', 'command': '⌘', 'mobile': '📱' };
